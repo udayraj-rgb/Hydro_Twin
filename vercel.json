@@ -1,0 +1,10 @@
+{
+  "buildCommand": "cd hydrotwin_project/frontend && npm install && npm run build",
+  "outputDirectory": "hydrotwin_project/frontend/build",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

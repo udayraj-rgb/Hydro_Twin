@@ -5,8 +5,8 @@ import TerminalConsole from './components/TerminalConsole';
 import ConsumerView from './components/ConsumerView';
 import FleetPortal from './components/FleetPortal';
 
-const BACKEND_WS_URL = 'ws://localhost:8000/ws/telemetry';
-const BACKEND_API_URL = 'http://localhost:8000/api/update_sensors';
+const BACKEND_WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/telemetry';
+const BACKEND_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/update_sensors';
 
 function App() {
   const [activeTab, setActiveTab] = useState('hil');

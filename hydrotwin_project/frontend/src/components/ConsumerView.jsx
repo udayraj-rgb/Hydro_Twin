@@ -281,20 +281,27 @@ function ConsumerView({ telemetry = null }) {
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
           <div className="space-y-1.5">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-1 shadow-sm shrink-0 overflow-hidden">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-1.5 shadow-md shrink-0 overflow-hidden">
                 <img
                   src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
                   alt="HydroTwin Logo"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain filter drop-shadow-sm"
                 />
               </div>
               <div className="space-y-0.5">
                 <h2 className="text-xl sm:text-2xl font-black text-[#2A3525] tracking-tight flex flex-wrap items-center gap-2">
                   <span>HydroTwin–PHM</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#384828] bg-[#EAEFE5] px-2.5 py-0.5 rounded-full border border-[#BACAB3]">
-                    Atomberg Intellon
-                  </span>
+                  <div className="flex items-center space-x-1.5 bg-[#EAEFE5] px-2.5 py-1 rounded-full border border-[#BACAB3]">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#384828]">
+                      Powered by
+                    </span>
+                    <img
+                      src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
+                      alt="Atomberg"
+                      className="h-3.5 w-auto object-contain"
+                    />
+                  </div>
                 </h2>
               </div>
             </div>

@@ -186,11 +186,11 @@ function FleetPortal({ telemetry = null }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-[#E3E9DE] gap-2">
           <div>
             <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2.5">
-              <div className="w-6 h-6 rounded-lg bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden">
+              <div className="w-8 h-8 rounded-xl bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-1 shadow-sm shrink-0 overflow-hidden">
                 <img
                   src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
                   alt="HydroTwin Logo"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain filter drop-shadow-sm"
                 />
               </div>
               <span>Regional Connected Purifier Diagnostics Grid</span>

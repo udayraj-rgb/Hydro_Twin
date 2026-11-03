@@ -273,23 +273,30 @@ function App() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             
             {/* Brand Logo & Context */}
-            <div className="flex items-center space-x-3.5">
+            <div className="flex items-center space-x-4 sm:space-x-5">
               <div className="relative group cursor-pointer flex-shrink-0">
-                <div className="w-12 h-12 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center shadow-md shadow-[#1F2D19]/25 p-1 overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-[#6C8360]">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-[#1F2D19] border-2 border-[#384828]/70 flex items-center justify-center shadow-xl shadow-[#1F2D19]/30 p-1.5 sm:p-2 overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-[#6C8360]">
                   <img
                     src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
                     alt="HydroTwin-PHM Official Logo"
-                    className="w-full h-full object-contain filter drop-shadow"
+                    className="w-full h-full object-contain filter drop-shadow-md"
                   />
                 </div>
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#1F2D19] leading-tight">
+              <div className="space-y-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#1F2D19] leading-none">
                   HydroTwin–PHM
                 </h1>
-                <p className="text-xs font-bold text-[#576C4D] tracking-wide mt-0.5">
-                  Powered by Atomberg
-                </p>
+                <div className="flex items-center space-x-2 pt-0.5">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#576C4D]">
+                    Powered by
+                  </span>
+                  <img
+                    src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
+                    alt="Atomberg"
+                    className="h-5 sm:h-6 w-auto object-contain hover:opacity-95 transition-opacity"
+                  />
+                </div>
               </div>
             </div>
 
@@ -384,7 +391,7 @@ function App() {
           <div className="max-w-[1300px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Left: Product Logo & Brand statement */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 p-1.5 shadow-md flex items-center justify-center shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 p-2 shadow-md flex items-center justify-center shrink-0">
                 <img
                   src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
                   alt="HydroTwin-PHM Official Logo"
@@ -392,11 +399,18 @@ function App() {
                 />
               </div>
               <div className="space-y-1">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
                   <span className="text-base font-black text-[#1F2D19] tracking-tight">HydroTwin–PHM</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8F2E3] text-[#384828] border border-[#BACAB3]">
-                    Powered by Atomberg
-                  </span>
+                  <div className="flex items-center space-x-1.5 bg-white px-2 py-0.5 rounded-full border border-[#BACAB3] shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#576C4D]">
+                      Powered by
+                    </span>
+                    <img
+                      src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
+                      alt="Atomberg"
+                      className="h-3.5 w-auto object-contain"
+                    />
+                  </div>
                 </div>
                 <p className="text-xs text-[#576C4D] max-w-md">
                   Autonomous Digital Twin & Prognostic Health Management for Smart Water Purifiers. AtomQuest 2026 Innovation Challenge (Track 2).

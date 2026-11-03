@@ -121,7 +121,7 @@ function ConsumerVideoShowcase({ telemetry = null }) {
 
           {/* Top-Left Floating Brand Pill */}
           <div className="absolute top-4 left-4 sm:top-5 sm:left-6 z-20 flex items-center space-x-2.5 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#DCE4D6] shadow-md pointer-events-auto">
-            <div className="w-5 h-5 rounded-full bg-[#1F2D19] overflow-hidden flex items-center justify-center border border-[#384828]/50 shrink-0 shadow-sm">
+            <div className="w-7 h-7 rounded-full bg-[#1F2D19] overflow-hidden flex items-center justify-center border border-[#384828]/50 shrink-0 shadow-sm p-0.5">
               <img
                 src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
                 alt="HydroTwin Logo"
@@ -129,9 +129,12 @@ function ConsumerVideoShowcase({ telemetry = null }) {
               />
             </div>
             <span className="text-xs font-black text-[#2A3525]">HydroTwin–PHM</span>
-            <span className="text-[10px] text-[#54684A] font-semibold hidden sm:inline">
-              • Atomberg Intellon
-            </span>
+            <span className="text-gray-300">•</span>
+            <img
+              src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
+              alt="Atomberg"
+              className="h-3.5 w-auto object-contain"
+            />
           </div>
 
           {/* Top-Right Controls: Mute/Unmute Button & Purity Metric */}

@@ -259,125 +259,249 @@ function App() {
   }, [connected, sensorInputs.mode, sensorInputs.active_scenario, sensorInputs.flow_lpm, sensorInputs.pump_current, sensorInputs.inlet_tds]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9F5] text-[#2A3525] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#8FA385] p-2 sm:p-5 lg:p-7 flex flex-col font-sans selection:bg-[#384828] selection:text-white">
       {/* ----------------------------------------------------------------- */}
-      {/* Top Editorial Bar */}
+      {/* Outer Curved Canvas (Matching the reference aesthetic) */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-[#849C77] text-white text-[11px] font-medium tracking-widest text-center py-1.5 px-4 uppercase border-b border-[#738A66]">
-        AtomQuest 2026 • Track 2: Smart Water Purifier • Autonomous Digital Twin & PHM
-      </div>
+      <div className="max-w-[1400px] w-full mx-auto bg-[#FAFCF7] rounded-[24px] sm:rounded-[32px] shadow-2xl border border-white/70 overflow-hidden flex flex-col flex-1">
+        
+        {/* Top Slim Announcement Banner */}
+        <div className="bg-[#384828] text-[#E4F0DE] text-[11px] font-medium tracking-widest text-center py-2 px-4 uppercase border-b border-[#2C3B1F] flex items-center justify-center space-x-2">
+          <span>🌿</span>
+          <span>AtomQuest 2026 • Track 2: Smart Water Purifier • Autonomous Digital Twin & PHM</span>
+        </div>
 
-      {/* ----------------------------------------------------------------- */}
-      {/* Navigation Header */}
-      {/* ----------------------------------------------------------------- */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-[#E3E8DF] px-6 py-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          
-          {/* Brand & Team Context */}
-          <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[#849C77] border border-[#6E8562] flex items-center justify-center shadow-md shadow-[#849C77]/25 text-white">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
+        {/* ----------------------------------------------------------------- */}
+        {/* Navigation Header */}
+        {/* ----------------------------------------------------------------- */}
+        <header className="sticky top-0 z-50 bg-[#FAFCF7]/95 backdrop-blur border-b border-[#E1ECD9] px-6 sm:px-8 py-4 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            
+            {/* Brand Logo & Context */}
+            <div className="flex items-center space-x-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#384828] border border-[#2D3B1F] flex items-center justify-center shadow-md shadow-[#384828]/25 text-white">
+                <svg className="w-6 h-6 text-[#C7E48F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-black tracking-tight text-[#1F2D19]">HydroTwin-PHM</h1>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#E8F2E3] text-[#384828] border border-[#BACAB3]">
+                    Virtual HIL Twin
+                  </span>
+                  <span className="inline-flex items-center space-x-1.5 text-[10px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-[#E8F2E3] text-[#2F3D21] border border-[#8FA385]/50">
+                    <span className="w-2 h-2 rounded-full bg-[#4E7A3D] animate-pulse"></span>
+                    <span>Live 1 Hz</span>
+                  </span>
+                </div>
+                <p className="text-xs text-[#576C4D] font-medium mt-0.5">
+                  Team Atomizers • School of Computing Science and Engineering (SCOPE), VIT Bhopal
+                </p>
+              </div>
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-[#2A3525]">HydroTwin-PHM</h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]">
-                  Virtual HIL Twin
+
+            {/* 3 Tab Navigation Buttons */}
+            <div className="flex items-center space-x-1.5 bg-[#EDF4EA] p-1.5 rounded-2xl border border-[#D5E4CC] self-start lg:self-center shadow-inner">
+              <button
+                onClick={() => setActiveTab('hil')}
+                className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'hil'
+                    ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
+                    : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
+                }`}
+              >
+                <span>🛠️</span>
+                <span>Virtual HIL Testbed</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('consumer')}
+                className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'consumer'
+                    ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
+                    : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
+                }`}
+              >
+                <span>📱</span>
+                <span>Consumer App</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('fleet')}
+                className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                  activeTab === 'fleet'
+                    ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
+                    : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
+                }`}
+              >
+                <span>🏢</span>
+                <span>Fleet OEM Portal</span>
+              </button>
+            </div>
+
+            {/* Live Stream Status Pill */}
+            <div className="flex items-center space-x-3 self-end lg:self-center">
+              <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-xl border border-[#D5E4CC] bg-white text-[#2F3D21] text-xs font-semibold shadow-sm">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-[#B9D874]"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#4E7A3D]"></span>
                 </span>
-                <span className="inline-flex items-center space-x-1.5 text-[10px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-[#EAEFE5] text-[#2A3525] border border-[#849C77]/50">
-                  <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-pulse"></span>
-                  <span>Live Stream Active</span>
+                <span>{connected ? 'FastAPI Stream (1 Hz)' : 'Browser Physics (1 Hz)'}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Signature Brand Hero Section (Referenced directly from uploaded image) */}
+        {/* ----------------------------------------------------------------- */}
+        <section className="px-6 sm:px-10 pt-8 pb-6 border-b border-[#E1ECD9] bg-gradient-to-b from-[#FAFCF7] via-[#F4F9F0] to-[#FAFCF7] relative overflow-hidden">
+          {/* Subtle floating leaf background motifs */}
+          <div className="absolute top-4 right-1/4 w-32 h-32 bg-[#CDE5C4]/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-2 left-10 w-44 h-44 bg-[#B7D7AB]/15 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
+            
+            {/* Left: Headline, Subtitle, and Deep Olive CTA */}
+            <div className="space-y-4 max-w-xl">
+              <div className="flex items-center space-x-1.5">
+                <span className="text-[#96BF48] font-black text-sm tracking-widest">▶▶</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#576C4D]">
+                  Smart Water IoT Twin
                 </span>
               </div>
-              <p className="text-xs text-[#6C7E66] font-medium mt-0.5">
-                Team Atomizers • School of Computing Science and Engineering (SCOPE), VIT Bhopal
+
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#1F2D19] leading-[1.12]">
+                A smart water twin that helps you live.
+              </h2>
+
+              <p className="text-sm sm:text-base text-[#576C4D] leading-relaxed">
+                Atomberg smart water purifier powered by ESP32 FreeRTOS. Physics-informed Darcy-Hermia algorithms predict filter degradation, cavitation, and membrane scaling in real-time.
               </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                  onClick={() => setActiveTab('hil')}
+                  className="bg-[#384828] hover:bg-[#2C3B1F] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#384828]/25 flex items-center space-x-2"
+                >
+                  <span>💧</span>
+                  <span>Explore Live Telemetry</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('consumer')}
+                  className="bg-white hover:bg-[#EDF4EA] border border-[#D5E4CC] text-[#2F3D21] px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center space-x-2"
+                >
+                  <span>📦</span>
+                  <span>Auto-Replenishment Status</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Circular Organic Vignette (Matching the bottle in circle from reference image) */}
+            <div className="relative flex items-center justify-center shrink-0">
+              {/* Outer Organic Circular Halo */}
+              <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-gradient-to-tr from-[#B5D7A9]/60 via-[#CCE5C3]/45 to-[#EFF6EB]/20 border-2 border-[#B4D8A6]/70 shadow-xl flex flex-col items-center justify-center p-6 text-center relative">
+                
+                {/* Floating Leaf / Water Droplet Badge */}
+                <div className="absolute -top-3 -right-2 bg-white px-3 py-1 rounded-full border border-[#D5E4CC] shadow-md flex items-center space-x-1.5 text-[11px] font-bold text-[#2F3D21]">
+                  <span>🌿</span>
+                  <span>100% Pure & Safe</span>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="text-3xl">🚰</div>
+                  <div className="text-xs uppercase tracking-wider font-bold text-[#576C4D]">Permeate Purity</div>
+                  <div className="text-4xl font-black font-mono text-[#1F2D19] tracking-tight">
+                    {Math.round(telemetry?.sensors?.outlet_tds ?? telemetry?.physics?.outlet_tds ?? 42)}
+                    <span className="text-xs text-[#576C4D] font-normal ml-1">ppm</span>
+                  </div>
+                  <div className="text-[11px] font-semibold text-[#384828] bg-white/70 backdrop-blur px-2.5 py-0.5 rounded-full border border-[#D5E4CC] inline-block">
+                    {Number(telemetry?.physics?.salt_rejection ?? 95.2).toFixed(1)}% Rejection
+                  </div>
+                </div>
+
+                <div className="absolute -bottom-2.5 bg-[#384828] text-white px-3.5 py-0.5 rounded-full text-[10px] font-bold shadow-md">
+                  Alkaline Balanced (pH 7.8)
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Showcase Row ("Decoupled Filtration for you") */}
+          <div className="mt-8 pt-6 border-t border-[#E1ECD9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#576C4D]">Filtration Pipeline</span>
+              <h3 className="text-base font-extrabold text-[#1F2D19]">Recovery & Health for you</h3>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Product Card 1 */}
+              <div className="flex items-center space-x-3 bg-white px-4 py-2.5 rounded-2xl border border-[#D5E4CC] shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#B5D7A9]/60 to-[#E8F2E3] flex items-center justify-center text-lg shadow-inner">
+                  💧
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-[#1F2D19]">Pre-Sediment Stage</div>
+                  <div className="text-[11px] text-[#576C4D] font-mono">750 mL/m • {telemetry?.prognostics?.sediment_health ?? 83.2}% Health</div>
+                </div>
+              </div>
+
+              {/* Product Card 2 */}
+              <div className="flex items-center space-x-3 bg-white px-4 py-2.5 rounded-2xl border border-[#D5E4CC] shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#B5D7A9]/60 to-[#E8F2E3] flex items-center justify-center text-lg shadow-inner">
+                  🔬
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-[#1F2D19]">RO Membrane Core</div>
+                  <div className="text-[11px] text-[#576C4D] font-mono">650 mL/m • {telemetry?.prognostics?.ro_health ?? 98.6}% Health</div>
+                </div>
+              </div>
+
+              {/* Circular Action Button */}
+              <button
+                onClick={() => setActiveTab('consumer')}
+                className="w-9 h-9 rounded-full bg-[#384828] text-white flex items-center justify-center hover:bg-[#2C3B1F] shadow-sm text-sm transition-transform hover:scale-105"
+                title="View Filter Details"
+              >
+                ➔
+              </button>
             </div>
           </div>
+        </section>
 
-          {/* 3 Tab Navigation Buttons */}
-          <div className="flex items-center space-x-1.5 bg-[#F4F6F0] p-1.5 rounded-xl border border-[#DCE4D6] self-start lg:self-center shadow-inner">
-            <button
-              onClick={() => setActiveTab('hil')}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1.5 ${
-                activeTab === 'hil'
-                  ? 'bg-[#6C8360] text-white shadow-sm shadow-[#6C8360]/30 font-bold'
-                  : 'text-[#54684A] hover:text-[#2A3525] hover:bg-[#EAEFE5]'
-              }`}
-            >
-              <span>🛠️</span>
-              <span>Virtual HIL Testbed</span>
-            </button>
+        {/* ----------------------------------------------------------------- */}
+        {/* Main Content Area */}
+        {/* ----------------------------------------------------------------- */}
+        <main className="flex-1 w-full p-6 sm:p-8 space-y-6">
+          {activeTab === 'hil' && (
+            <div id="hil-container" className="space-y-6 animate-fadeIn">
+              {/* Component 1: ESP32 Edge Virtual HIL Control Panel */}
+              <VirtualHILPanel
+                sensorInputs={sensorInputs}
+                onUpdate={updateSensors}
+                telemetry={telemetry}
+              />
 
-            <button
-              onClick={() => setActiveTab('consumer')}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1.5 ${
-                activeTab === 'consumer'
-                  ? 'bg-[#6C8360] text-white shadow-sm shadow-[#6C8360]/30 font-bold'
-                  : 'text-[#54684A] hover:text-[#2A3525] hover:bg-[#EAEFE5]'
-              }`}
-            >
-              <span>📱</span>
-              <span>Consumer App</span>
-            </button>
+              {/* Component 2: Real-time Darcy-Hermia Telemetry Line Charts */}
+              <TelemetryCharts telemetry={telemetry} />
 
-            <button
-              onClick={() => setActiveTab('fleet')}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-1.5 ${
-                activeTab === 'fleet'
-                  ? 'bg-[#6C8360] text-white shadow-sm shadow-[#6C8360]/30 font-bold'
-                  : 'text-[#54684A] hover:text-[#2A3525] hover:bg-[#EAEFE5]'
-              }`}
-            >
-              <span>🏢</span>
-              <span>Fleet OEM Portal</span>
-            </button>
-          </div>
-
-          {/* Live Stream Status Pill */}
-          <div className="flex items-center space-x-3 self-end lg:self-center">
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-[#DCE4D6] bg-white text-[#3E4D37] text-xs font-semibold shadow-sm">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-[#849C77]"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#6C8360]"></span>
-              </span>
-              <span>{connected ? 'FastAPI Backend (1 Hz)' : 'Browser Physics Engine (1 Hz)'}</span>
+              {/* Component 3: Live SQLite & MQTT Terminal Console */}
+              <TerminalConsole telemetry={telemetry} />
             </div>
-          </div>
-        </div>
-      </header>
+          )}
 
-      {/* ----------------------------------------------------------------- */}
-      {/* Main Content Area */}
-      {/* ----------------------------------------------------------------- */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-        {activeTab === 'hil' && (
-          <div id="hil-container" className="space-y-6 animate-fadeIn">
-            {/* Component 1: ESP32 Edge Virtual HIL Control Panel */}
-            <VirtualHILPanel
-              sensorInputs={sensorInputs}
-              onUpdate={updateSensors}
-              telemetry={telemetry}
-            />
+          {activeTab === 'consumer' && (
+            <ConsumerView telemetry={telemetry} />
+          )}
 
-            {/* Component 2: Real-time Darcy-Hermia Telemetry Line Charts */}
-            <TelemetryCharts telemetry={telemetry} />
-
-            {/* Component 3: Live SQLite & MQTT Terminal Console */}
-            <TerminalConsole telemetry={telemetry} />
-          </div>
-        )}
-
-        {activeTab === 'consumer' && (
-          <ConsumerView telemetry={telemetry} />
-        )}
-
-        {activeTab === 'fleet' && (
-          <FleetPortal telemetry={telemetry} />
-        )}
-      </main>
+          {activeTab === 'fleet' && (
+            <FleetPortal telemetry={telemetry} />
+          )}
+        </main>
+      </div>
     </div>
   );
 }

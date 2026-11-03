@@ -4,6 +4,7 @@ import TelemetryCharts from './components/TelemetryCharts';
 import TerminalConsole from './components/TerminalConsole';
 import ConsumerView from './components/ConsumerView';
 import FleetPortal from './components/FleetPortal';
+import ConsumerVideoShowcase from './components/ConsumerVideoShowcase';
 
 const BACKEND_WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/telemetry';
 const BACKEND_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/update_sensors';
@@ -354,123 +355,11 @@ function App() {
         </header>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Signature Brand Hero Section (Referenced directly from uploaded image) */}
+        {/* Continuous Brand Video Showcase for Consumer Dashboard */}
         {/* ----------------------------------------------------------------- */}
-        <section className="px-6 sm:px-10 pt-8 pb-6 border-b border-[#E1ECD9] bg-gradient-to-b from-[#FAFCF7] via-[#F4F9F0] to-[#FAFCF7] relative overflow-hidden">
-          {/* Subtle floating leaf background motifs */}
-          <div className="absolute top-4 right-1/4 w-32 h-32 bg-[#CDE5C4]/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-2 left-10 w-44 h-44 bg-[#B7D7AB]/15 rounded-full blur-2xl pointer-events-none"></div>
-
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-            
-            {/* Left: Headline, Subtitle, and Deep Olive CTA */}
-            <div className="space-y-4 max-w-xl">
-              <div className="flex items-center space-x-1.5">
-                <span className="text-[#96BF48] font-black text-sm tracking-widest">▶▶</span>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#576C4D]">
-                  Smart Water IoT Twin
-                </span>
-              </div>
-
-              <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#1F2D19] leading-[1.12]">
-                A smart water twin that helps you live.
-              </h2>
-
-              <p className="text-sm sm:text-base text-[#576C4D] leading-relaxed">
-                Atomberg smart water purifier powered by ESP32 FreeRTOS. Physics-informed Darcy-Hermia algorithms predict filter degradation, cavitation, and membrane scaling in real-time.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  onClick={() => setActiveTab('hil')}
-                  className="bg-[#384828] hover:bg-[#2C3B1F] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-[#384828]/25 flex items-center space-x-2"
-                >
-                  <span>💧</span>
-                  <span>Explore Live Telemetry</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('consumer')}
-                  className="bg-white hover:bg-[#EDF4EA] border border-[#D5E4CC] text-[#2F3D21] px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center space-x-2"
-                >
-                  <span>📦</span>
-                  <span>Auto-Replenishment Status</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Right: Circular Organic Vignette (Matching the bottle in circle from reference image) */}
-            <div className="relative flex items-center justify-center shrink-0">
-              {/* Outer Organic Circular Halo */}
-              <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-gradient-to-tr from-[#B5D7A9]/60 via-[#CCE5C3]/45 to-[#EFF6EB]/20 border-2 border-[#B4D8A6]/70 shadow-xl flex flex-col items-center justify-center p-6 text-center relative">
-                
-                {/* Floating Leaf / Water Droplet Badge */}
-                <div className="absolute -top-3 -right-2 bg-white px-3 py-1 rounded-full border border-[#D5E4CC] shadow-md flex items-center space-x-1.5 text-[11px] font-bold text-[#2F3D21]">
-                  <span>🌿</span>
-                  <span>100% Pure & Safe</span>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="text-3xl">🚰</div>
-                  <div className="text-xs uppercase tracking-wider font-bold text-[#576C4D]">Permeate Purity</div>
-                  <div className="text-4xl font-black font-mono text-[#1F2D19] tracking-tight">
-                    {Math.round(telemetry?.sensors?.outlet_tds ?? telemetry?.physics?.outlet_tds ?? 42)}
-                    <span className="text-xs text-[#576C4D] font-normal ml-1">ppm</span>
-                  </div>
-                  <div className="text-[11px] font-semibold text-[#384828] bg-white/70 backdrop-blur px-2.5 py-0.5 rounded-full border border-[#D5E4CC] inline-block">
-                    {Number(telemetry?.physics?.salt_rejection ?? 95.2).toFixed(1)}% Rejection
-                  </div>
-                </div>
-
-                <div className="absolute -bottom-2.5 bg-[#384828] text-white px-3.5 py-0.5 rounded-full text-[10px] font-bold shadow-md">
-                  Alkaline Balanced (pH 7.8)
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Bottom Showcase Row ("Decoupled Filtration for you") */}
-          <div className="mt-8 pt-6 border-t border-[#E1ECD9] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#576C4D]">Filtration Pipeline</span>
-              <h3 className="text-base font-extrabold text-[#1F2D19]">Recovery & Health for you</h3>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Product Card 1 */}
-              <div className="flex items-center space-x-3 bg-white px-4 py-2.5 rounded-2xl border border-[#D5E4CC] shadow-sm">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#B5D7A9]/60 to-[#E8F2E3] flex items-center justify-center text-lg shadow-inner">
-                  💧
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-[#1F2D19]">Pre-Sediment Stage</div>
-                  <div className="text-[11px] text-[#576C4D] font-mono">750 mL/m • {telemetry?.prognostics?.sediment_health ?? 83.2}% Health</div>
-                </div>
-              </div>
-
-              {/* Product Card 2 */}
-              <div className="flex items-center space-x-3 bg-white px-4 py-2.5 rounded-2xl border border-[#D5E4CC] shadow-sm">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#B5D7A9]/60 to-[#E8F2E3] flex items-center justify-center text-lg shadow-inner">
-                  🔬
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-[#1F2D19]">RO Membrane Core</div>
-                  <div className="text-[11px] text-[#576C4D] font-mono">650 mL/m • {telemetry?.prognostics?.ro_health ?? 98.6}% Health</div>
-                </div>
-              </div>
-
-              {/* Circular Action Button */}
-              <button
-                onClick={() => setActiveTab('consumer')}
-                className="w-9 h-9 rounded-full bg-[#384828] text-white flex items-center justify-center hover:bg-[#2C3B1F] shadow-sm text-sm transition-transform hover:scale-105"
-                title="View Filter Details"
-              >
-                ➔
-              </button>
-            </div>
-          </div>
-        </section>
+        {activeTab === 'consumer' && (
+          <ConsumerVideoShowcase telemetry={telemetry} />
+        )}
 
         {/* ----------------------------------------------------------------- */}
         {/* Main Content Area */}

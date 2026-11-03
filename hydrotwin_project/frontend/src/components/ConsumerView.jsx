@@ -1,32 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PredictiveHealthIntelligence from './PredictiveHealthIntelligence';
-import InteractivePurifierIllustration from './InteractivePurifierIllustration';
 
 const BACKEND_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
 
 /**
- * ConsumerView: Cinematic Atomberg Intellon Purifier Dashboard & Simulator
- * Features an ambient background showcase video, real-time floating telemetry HUD,
- * 4-mode purifier controller, diagnostics modal, and embedded predictive intelligence.
+ * ConsumerView: Interactive Atomberg Intellon Purifier Simulator
+ * Designed for AtomQuest 2026 (Track 2: Water Purifier).
+ * Styled in an elegant White and Olive palette matching the brand reference image.
  */
 function ConsumerView({ telemetry = null }) {
-  // ---------------------------------------------------------------------------
-  // Video & Ambient Playback States
-  // ---------------------------------------------------------------------------
-  const videoRef = useRef(null);
-  const cinemaVideoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
-  const [showCinemaModal, setShowCinemaModal] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-
   // ---------------------------------------------------------------------------
   // Interactive Simulator Local States
   // ---------------------------------------------------------------------------
   const [selectedMode, setSelectedMode] = useState('ADAPTIVE');
   const [sourceWater, setSourceWater] = useState('BOREWELL');
   const [targetTds, setTargetTds] = useState(75);
-
+  
   // Dynamic AutoClean Flush State
   const [isFlushing, setIsFlushing] = useState(false);
   const [flushCountdown, setFlushCountdown] = useState(0);
@@ -49,16 +38,7 @@ function ConsumerView({ telemetry = null }) {
   const inletTds = Number(telemetry?.sensors?.inlet_tds ?? telemetry?.inlet_tds ?? 850);
   const outletTds = Number(telemetry?.sensors?.outlet_tds ?? telemetry?.physics?.outlet_tds ?? telemetry?.outlet_tds ?? 42);
   const saltRejection = Number(telemetry?.physics?.salt_rejection ?? telemetry?.salt_rejection ?? 95.2).toFixed(1);
-  const rulDays = Number(telemetry?.prognostics?.rul_days ?? telemetry?.rul_days ?? 18);
-
-  // Projected replacement calendar date
-  const projectedDate = new Date();
-  projectedDate.setDate(projectedDate.getDate() + rulDays);
-  const formattedProjectedDate = projectedDate.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
+  const isFlushActive = Boolean(telemetry?.actuators?.flush_solenoid ?? isFlushing);
 
   // Sync flush state with backend telemetry if backend triggers it autonomously
   useEffect(() => {
@@ -84,27 +64,6 @@ function ConsumerView({ telemetry = null }) {
     notificationTimeoutRef.current = setTimeout(() => {
       setActionNotification(null);
     }, 4500);
-  };
-
-  // ---------------------------------------------------------------------------
-  // Ambient Video Controls
-  // ---------------------------------------------------------------------------
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      videoRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    const nextMuted = !isMuted;
-    videoRef.current.muted = nextMuted;
-    setIsMuted(nextMuted);
   };
 
   // ---------------------------------------------------------------------------
@@ -134,6 +93,7 @@ function ConsumerView({ telemetry = null }) {
       return data;
     } catch (err) {
       console.warn('[HydroTwin ConsumerView] API call fallback:', err.message);
+      // Graceful fallback for offline / mock testing
       return {
         message: `Command simulated: ${payload.mode} (${payload.source_water})`,
         applied_setpoints: payload
@@ -149,19 +109,21 @@ function ConsumerView({ telemetry = null }) {
 
     setIsFlushing(true);
     setFlushCountdown(5);
-    setFlushFeedback('High-velocity crossflow shear initiated. Reducing cake resistance (-18%)...');
-    notify('🌊 AutoClean Micro-Flush active: dynamic washdown cycle running for 5s', 'success');
+    setFlushFeedback('High-velocity crossflow shear initiated. Washing away cake resistance (-18%)...');
+    notify('🌊 AutoClean Micro-Flush initiated: high-shear crossflow washdown running for 5 seconds.', 'success');
 
+    // Send command to backend
     await sendConsumerCommand({ manual_flush: true });
 
+    // 5-second dynamic countdown
     if (flushTimerRef.current) clearInterval(flushTimerRef.current);
     flushTimerRef.current = setInterval(() => {
       setFlushCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(flushTimerRef.current);
           setIsFlushing(false);
-          setFlushFeedback('Dynamic washdown completed. Normal filtration restored.');
-          notify('✨ AutoClean Complete: Membrane cake layer cleared.', 'success');
+          setFlushFeedback('Dynamic washdown completed. Nominal filtration recovered.');
+          notify('✨ AutoClean Complete: Membrane surface restored to optimal baseline.', 'success');
           return 0;
         }
         return prev - 1;
@@ -184,10 +146,11 @@ function ConsumerView({ telemetry = null }) {
       }
     } catch (err) {
       console.warn('[HydroTwin Diagnostics] Using simulated diagnostic response:', err.message);
+      // Fallback structured diagnostic report
       setDiagnosticReport({
         timestamp: new Date().toISOString(),
         device_id: 'ATOM-WP-2026-0042',
-        overall_health_score: 93.4,
+        overall_health_score: 91.5,
         system_status: 'NOMINAL',
         diagnostics: {
           booster_pump: {
@@ -220,7 +183,7 @@ function ConsumerView({ telemetry = null }) {
           ro_health: 98.6,
           alkaliser_health: 83.3,
           failing_stage: 'NONE',
-          rul_days: rulDays,
+          rul_days: 34,
           auto_dispatch: false
         }
       });
@@ -269,43 +232,43 @@ function ConsumerView({ telemetry = null }) {
     if (tds < 60) {
       return {
         label: 'Crisp & Light',
-        tag: 'Ultra-Pure Mountain Crisp',
-        desc: 'Mountain glacier feel with ultra-low sodium, light mouthfeel, perfect for specialty teas.',
-        badgeColor: 'bg-cyan-950/80 text-cyan-300 border-cyan-800'
+        tag: 'Ultra-Pure Alpine',
+        desc: 'Mountain glacier feel with ultra-low sodium, light mouthfeel, perfect for fine teas.',
+        badgeColor: 'bg-[#EAEFE5] text-[#3E4D37] border-[#BACAB3]'
       };
     }
     if (tds <= 110) {
       return {
         label: 'Balanced & Sweet',
-        tag: 'Optimal Daily Hydration',
+        tag: 'Optimal Hydration',
         desc: 'Naturally sweet and smooth palate with balanced calcium & magnesium electrolytes.',
-        badgeColor: 'bg-emerald-950/80 text-emerald-300 border-emerald-800'
+        badgeColor: 'bg-[#E2EDE0] text-[#2A3525] border-[#9BB28E]'
       };
     }
     return {
       label: 'Rich Mineral Feel',
-      tag: 'Alkaline Electrolyte Infusion',
+      tag: 'Alkaline Infused',
       desc: 'Enhanced mineral body, gentle alkalinity (pH ~8.0), rich in essential trace elements.',
-      badgeColor: 'bg-amber-950/80 text-amber-300 border-amber-800'
+      badgeColor: 'bg-[#FAF5EB] text-[#826947] border-[#DFD3BE]'
     };
   };
 
   const currentTaste = getTasteProfile(targetTds);
 
   return (
-    <div id="consumer-view" className="max-w-6xl mx-auto space-y-8 animate-fadeIn pb-16 text-slate-100">
+    <div id="consumer-view" className="max-w-5xl mx-auto space-y-7 animate-fadeIn pb-12">
 
       {/* ----------------------------------------------------------------- */}
       {/* Toast Notification Alert Banner */}
       {/* ----------------------------------------------------------------- */}
       {actionNotification && (
         <div className="fixed bottom-6 right-6 z-50 animate-bounce-subtle">
-          <div className="bg-slate-900/95 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-cyan-500/40 backdrop-blur-md flex items-center space-x-3 text-sm">
+          <div className="bg-[#2A3525] text-white px-5 py-3.5 rounded-2xl shadow-xl border border-[#54684A] flex items-center space-x-3 text-sm">
             <span className="text-lg">💧</span>
-            <span className="font-medium text-slate-100">{actionNotification.message}</span>
+            <span className="font-medium text-white/95">{actionNotification.message}</span>
             <button
               onClick={() => setActionNotification(null)}
-              className="text-slate-400 hover:text-white text-xs ml-2 font-bold"
+              className="text-white/60 hover:text-white text-xs ml-2 font-bold"
             >
               ✕
             </button>
@@ -314,228 +277,179 @@ function ConsumerView({ telemetry = null }) {
       )}
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 1: CINEMATIC AMBIENT VIDEO HERO BANNER                    */}
+      {/* SECTION 1: TOP LIVE STATUS BANNER */}
       {/* ----------------------------------------------------------------- */}
-      <section className="relative rounded-3xl overflow-hidden border border-slate-800/80 bg-slate-950 shadow-2xl min-h-[460px] sm:min-h-[500px] lg:min-h-[540px] flex items-center">
-        
-        {/* Background Atmospheric Video with Graceful Fallback */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-          <video
-            ref={videoRef}
-            src="/assets/atomberg_purifier_showcase.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            onLoadedData={() => setVideoLoaded(true)}
-            className={`object-cover w-full h-full transition-opacity duration-1000 ${
-              videoLoaded ? 'opacity-85 scale-100' : 'opacity-40 scale-105 blur-sm'
-            }`}
-          />
-        </div>
+      <div className="bg-white border border-[#DCE4D6] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 relative overflow-hidden">
+        {/* Subtle decorative background glow */}
+        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-64 h-64 bg-[#EAEFE5]/60 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* Multi-Layered Cinematic Vignette & Edge Blend (Zero Harsh Borders) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent pointer-events-none z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-slate-950/80 pointer-events-none z-10" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-slate-950/20 to-slate-950 pointer-events-none z-10" />
-
-        {/* Top-Right Ambient Playback Controls */}
-        <div className="absolute top-5 right-5 z-30 flex items-center space-x-2.5">
-          {/* Play / Pause Toggle Button */}
-          <button
-            onClick={togglePlay}
-            className="p-2.5 rounded-full bg-slate-900/70 hover:bg-slate-800/90 backdrop-blur-md border border-white/10 text-white shadow-lg transition-all active:scale-95 group"
-            title={isPlaying ? 'Pause Ambient Showcase' : 'Play Ambient Showcase'}
-          >
-            {isPlaying ? (
-              <svg className="w-4 h-4 fill-current text-slate-300 group-hover:text-cyan-400" viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4 fill-current text-slate-300 group-hover:text-emerald-400" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
-          </button>
-
-          {/* Mute / Unmute Toggle Button */}
-          <button
-            onClick={toggleMute}
-            className="p-2.5 rounded-full bg-slate-900/70 hover:bg-slate-800/90 backdrop-blur-md border border-white/10 text-white shadow-lg transition-all active:scale-95 group"
-            title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
-          >
-            {isMuted ? (
-              <svg className="w-4 h-4 fill-current text-slate-300 group-hover:text-cyan-400" viewBox="0 0 24 24">
-                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4 fill-current text-emerald-400" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-              </svg>
-            )}
-          </button>
-
-          {/* Cinema View / Expand Modal Button */}
-          <button
-            onClick={() => setShowCinemaModal(true)}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-full bg-cyan-950/80 hover:bg-cyan-900/90 backdrop-blur-md border border-cyan-500/40 text-cyan-200 text-xs font-semibold shadow-lg transition-all active:scale-95"
-            title="Expand to Full Cinema View"
-          >
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-            </svg>
-            <span className="hidden sm:inline">Cinema View</span>
-          </button>
-        </div>
-
-        {/* --------------------------------------------------------------- */}
-        {/* Floating Telemetry & Control HUD (Rendered Over the Video)     */}
-        {/* --------------------------------------------------------------- */}
-        <div className="relative z-20 w-full p-6 sm:p-10 lg:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-          
-          {/* Left Overlay: Brand Badge, Title & Real-time Metrics Chip */}
-          <div className="max-w-xl space-y-4">
-            
-            {/* Glowing Pulse Badge */}
-            <div className="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-lg shadow-emerald-950/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Atomberg Intellon Connected Ecosystem</span>
-              <span className="text-[10px] text-slate-400 border-l border-slate-700 pl-2 font-mono">v2.4-HIL</span>
-            </div>
-
-            {/* Heading */}
-            <div className="space-y-1">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-md">
-                Pure & Mineral-Balanced Water
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-lg drop-shadow">
-                Real-time physics-informed purification dynamically harmonizing BLDC booster motor torque, crossflow recovery flux, and alkaline mineral remineralization.
-              </p>
-            </div>
-
-            {/* Real-time Metrics Chip Floating Over Water Stream */}
-            <div className="inline-flex flex-wrap items-center gap-3 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 p-3 sm:p-4 rounded-2xl shadow-xl">
-              
-              {/* Tap TDS */}
-              <div className="flex items-center space-x-2">
-                <span className="w-7 h-7 rounded-lg bg-amber-950/80 border border-amber-600/40 flex items-center justify-center text-xs">
-                  🚰
-                </span>
-                <div>
-                  <span className="text-[10px] text-slate-400 block font-mono uppercase tracking-wider">Tap Feed</span>
-                  <span className="text-sm font-bold font-mono text-amber-300">{Math.round(inletTds)} ppm</span>
-                </div>
-              </div>
-
-              {/* Directional Flow Arrow */}
-              <div className="text-cyan-400 font-bold text-sm px-1 animate-pulse">
-                ➔
-              </div>
-
-              {/* Pure Output TDS */}
-              <div className="flex items-center space-x-2">
-                <span className="w-7 h-7 rounded-lg bg-emerald-950/80 border border-emerald-600/40 flex items-center justify-center text-xs">
-                  ✨
-                </span>
-                <div>
-                  <span className="text-[10px] text-slate-400 block font-mono uppercase tracking-wider">Pure Permeate</span>
-                  <span className="text-sm font-bold font-mono text-emerald-300">{Math.round(outletTds)} ppm</span>
-                </div>
-              </div>
-
-              {/* Salt Rejection Ratio */}
-              <div className="border-l border-slate-700 pl-3">
-                <span className="text-[10px] text-slate-400 block font-mono uppercase tracking-wider">Salt Rejection (η)</span>
-                <span className="text-sm font-bold font-mono text-cyan-300">{saltRejection}%</span>
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* Right Overlay: Quick Actions Pill & Safe Drinking Days Card */}
-          <div className="flex flex-col sm:flex-row lg:flex-col gap-4 self-start lg:self-center">
-            
-            {/* Real-Time Safe Drinking Days Countdown Card */}
-            <div className="bg-slate-900/85 backdrop-blur-md border border-slate-700/80 p-5 rounded-2xl shadow-xl space-y-2 min-w-[240px]">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
-                Predictive Membrane Lifespan
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+          {/* Header & Identity */}
+          <div className="space-y-1.5">
+            <div className="flex items-center space-x-2.5">
+              <span className="w-8 h-8 rounded-full bg-[#EAEFE5] border border-[#BACAB3] flex items-center justify-center text-lg">
+                🌿
               </span>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white">
-                  {rulDays}
+              <h2 className="text-xl sm:text-2xl font-black text-[#2A3525] tracking-tight">
+                Atomberg Intellon Water Purifier
+              </h2>
+            </div>
+            <p className="text-xs text-[#6C7E66] flex flex-wrap items-center gap-2">
+              <span>Device #ATOM-WP-2026-0042</span>
+              <span>•</span>
+              <span>Smart IoT Grid v2.4-HIL</span>
+              <span>•</span>
+              <span className="inline-flex items-center space-x-1 font-semibold text-[#3E4D37]">
+                <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-pulse"></span>
+                <span>Live Connected</span>
+              </span>
+            </p>
+          </div>
+
+          {/* Action Buttons: AutoClean Flush & Run Diagnostics */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* ✨ AutoClean Flush Button */}
+            <button
+              id="autoclean-flush-btn"
+              onClick={handleAutoCleanFlush}
+              disabled={isFlushing}
+              className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all duration-300 flex items-center space-x-2 shadow-sm ${
+                isFlushing
+                  ? 'bg-[#6C8360] text-white ring-2 ring-[#849C77] animate-pulse cursor-wait'
+                  : 'bg-[#EAEFE5] text-[#2A3525] hover:bg-[#DDE5D6] border border-[#BACAB3] active:scale-95'
+              }`}
+            >
+              <span>{isFlushing ? '🌊' : '✨'}</span>
+              <span>
+                {isFlushing ? `AutoCleaning... (${flushCountdown}s)` : 'AutoClean Flush'}
+              </span>
+            </button>
+
+            {/* 🩺 Run Diagnostics Button */}
+            <button
+              id="run-diagnostics-btn"
+              onClick={handleRunDiagnostics}
+              disabled={isDiagnosing}
+              className="px-4 py-2.5 rounded-full text-xs font-bold bg-[#384828] text-white hover:bg-[#2C3B1F] border border-[#1F2D19] transition-all duration-200 active:scale-95 flex items-center space-x-2 shadow-sm"
+            >
+              <span>{isDiagnosing ? '⏳' : '🩺'}</span>
+              <span>{isDiagnosing ? 'Scanning...' : 'Run Diagnostics'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Dynamic Water Purity & TDS Contrast Gauge */}
+        {/* ----------------------------------------------------------------- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          
+          {/* Tile 1: Salt Rejection Purity Score */}
+          <div className="bg-[#FAFBF8] border border-[#DCE4D6] rounded-2xl p-4 sm:p-5 flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#EAEFE5] border border-[#BACAB3] flex items-center justify-center text-2xl shrink-0">
+              💎
+            </div>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#6C7E66]">
+                Membrane Rejection Purity
+              </div>
+              <div className="flex items-baseline space-x-1.5 mt-0.5">
+                <span className="text-2xl sm:text-3xl font-black font-mono text-[#2A3525]">
+                  {saltRejection}%
                 </span>
-                <span className="text-sm font-bold text-cyan-400 font-mono">
-                  Days Remaining
+                <span className="text-xs font-bold text-[#54684A]">
+                  TFC Efficiency
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-mono">
-                (±5 Day Accuracy | Est: {formattedProjectedDate})
-              </p>
+              <div className="text-[11px] text-[#6C7E66] mt-0.5">
+                Blocks heavy metals, arsenic & fluorides
+              </div>
             </div>
+          </div>
 
-            {/* Quick-action Glassmorphism Pill Buttons */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* ✨ AutoClean Micro-Flush */}
-              <button
-                id="hero-autoclean-btn"
-                onClick={handleAutoCleanFlush}
-                disabled={isFlushing}
-                className={`flex-1 sm:flex-none px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg backdrop-blur-md ${
-                  isFlushing
-                    ? 'bg-cyan-600 text-white ring-2 ring-cyan-400 animate-pulse cursor-wait'
-                    : 'bg-cyan-950/70 hover:bg-cyan-900/90 border border-cyan-500/40 text-cyan-200 active:scale-95 hover:shadow-cyan-500/20'
-                }`}
-              >
-                <span>{isFlushing ? '🌊' : '✨'}</span>
-                <span>{isFlushing ? `Flushing (${flushCountdown}s)` : 'AutoClean Flush'}</span>
-              </button>
-
-              {/* 🩺 Run System Diagnostics */}
-              <button
-                id="hero-diagnostics-btn"
-                onClick={handleRunDiagnostics}
-                disabled={isDiagnosing}
-                className="flex-1 sm:flex-none px-4 py-3 rounded-2xl text-xs font-bold bg-slate-900/80 hover:bg-slate-800/90 border border-emerald-500/40 text-emerald-300 transition-all duration-200 active:scale-95 shadow-lg backdrop-blur-md hover:shadow-emerald-500/20 flex items-center justify-center space-x-2"
-              >
-                <span>{isDiagnosing ? '⏳' : '🩺'}</span>
-                <span>{isDiagnosing ? 'Scanning...' : 'Run Diagnostics'}</span>
-              </button>
+          {/* Tile 2: Inlet Tap TDS */}
+          <div className="bg-[#FAFBF8] border border-[#DCE4D6] rounded-2xl p-4 sm:p-5 flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#FAF5EB] border border-[#DFD3BE] flex items-center justify-center text-2xl shrink-0">
+              🚰
             </div>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-[#826947]">
+                Inlet Feed Tap TDS
+              </div>
+              <div className="flex items-baseline space-x-1 mt-0.5">
+                <span className="text-2xl sm:text-3xl font-black font-mono text-[#2A3525]">
+                  {Math.round(inletTds)}
+                </span>
+                <span className="text-xs font-bold text-[#6C7E66]">ppm</span>
+              </div>
+              <div className="text-[11px] text-[#6C7E66] mt-0.5">
+                Source: {sourceWater} profile
+              </div>
+            </div>
+          </div>
 
+          {/* Tile 3: Purified Drinkable Output TDS */}
+          <div className="bg-[#849C77] text-white border border-[#6E8562] rounded-2xl p-4 sm:p-5 flex items-center space-x-4 shadow-sm relative overflow-hidden">
+            <div className="absolute right-0 top-0 -mr-6 -mt-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+            <div className="w-12 h-12 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center text-2xl shrink-0">
+              ✨
+            </div>
+            <div className="relative z-10">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-white/80">
+                Purified Permeate Output
+              </div>
+              <div className="flex items-baseline space-x-1 mt-0.5">
+                <span className="text-2xl sm:text-3xl font-black font-mono text-white">
+                  {Math.round(outletTds)}
+                </span>
+                <span className="text-xs font-bold text-white/80">ppm</span>
+              </div>
+              <div className="text-[11px] text-white/90 mt-0.5 font-medium">
+                Alkaline Balanced (pH ~7.8)
+              </div>
+            </div>
           </div>
 
         </div>
 
-        {/* Dynamic Flush Progress Bar Banner (Triggered during AutoClean) */}
+        {/* Dynamic Flush Progress Indicator (Visible when AutoClean is Active) */}
         {isFlushing && (
-          <div className="absolute bottom-0 left-0 right-0 z-30 bg-cyan-950/90 border-t border-cyan-500/40 backdrop-blur-md px-6 py-2.5 flex items-center justify-between text-xs text-cyan-200">
-            <span className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              <span className="font-semibold">{flushFeedback}</span>
-            </span>
-            <span className="font-mono text-cyan-300 font-bold">{flushCountdown}s remaining</span>
+          <div className="bg-[#EAEFE5] border border-[#BACAB3] p-4 rounded-2xl space-y-2 animate-pulse">
+            <div className="flex items-center justify-between text-xs font-bold text-[#2A3525]">
+              <span className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#6C8360] animate-ping"></span>
+                <span>Active AutoClean Cycle: High-Velocity Flush Solenoid Energized</span>
+              </span>
+              <span className="font-mono text-[#3E4D37]">{flushCountdown}s remaining</span>
+            </div>
+            <div className="w-full bg-white h-2 rounded-full overflow-hidden border border-[#BACAB3]">
+              <div
+                className="bg-[#6C8360] h-full transition-all duration-1000 ease-linear rounded-full"
+                style={{ width: `${((5 - flushCountdown) / 5) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-[11px] text-[#54684A]">
+              {flushFeedback}
+            </p>
           </div>
         )}
-
-      </section>
+      </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 2: 4-MODE INTELLON PURIFIER CONTROLLER                     */}
+      {/* SECTION 2: INTERACTIVE PURIFICATION MODE SELECTOR */}
       {/* ----------------------------------------------------------------- */}
-      <section className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+      <div className="bg-white border border-[#DCE4D6] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E3E9DE] gap-2">
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center space-x-2">
+            <h3 className="text-lg font-bold text-[#2A3525] flex items-center space-x-2">
               <span>⚙️</span>
               <span>Intellon Smart Purification Modes</span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            </h3>
+            <p className="text-xs text-[#6C7E66] mt-0.5">
               Select an intelligent hydraulic operation mode to adapt motor torque, recovery ratio, and mineral infusion.
             </p>
           </div>
-          <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-semibold self-start sm:self-center">
+          <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3] font-semibold self-start sm:self-center">
             Active: {selectedMode}
           </span>
         </div>
@@ -549,27 +463,27 @@ function ConsumerView({ telemetry = null }) {
             onClick={() => handleModeChange('ADAPTIVE')}
             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 ${
               selectedMode === 'ADAPTIVE'
-                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/80 shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-950'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-md shadow-[#849C77]/15'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
             }`}
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-2xl">🌿</span>
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                  selectedMode === 'ADAPTIVE' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  selectedMode === 'ADAPTIVE' ? 'bg-[#384828] text-white' : 'bg-[#EAEFE5] text-[#54684A]'
                 }`}>
                   Smart Eco
                 </span>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Adaptive Flow</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <h4 className="text-sm font-bold text-[#2A3525]">Adaptive Flow</h4>
+                <p className="text-xs text-[#6C7E66] mt-1 leading-relaxed">
                   Auto-adapts to changing tap TDS to optimize water recovery & minimize waste.
                 </p>
               </div>
             </div>
-            <div className="text-[11px] font-mono font-semibold text-cyan-300 pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-mono font-semibold text-[#54684A] pt-2 border-t border-[#DCE4D6]/60">
               Q: 1.20-1.40 L/min | Auto-Tune
             </div>
           </div>
@@ -580,27 +494,27 @@ function ConsumerView({ telemetry = null }) {
             onClick={() => handleModeChange('RO_UV')}
             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 ${
               selectedMode === 'RO_UV'
-                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/80 shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-950'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-md shadow-[#849C77]/15'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
             }`}
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-2xl">🛡️</span>
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                  selectedMode === 'RO_UV' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  selectedMode === 'RO_UV' ? 'bg-[#384828] text-white' : 'bg-[#EAEFE5] text-[#54684A]'
                 }`}>
                   Max Safety
                 </span>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Full RO+UV</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <h4 className="text-sm font-bold text-[#2A3525]">Full RO+UV</h4>
+                <p className="text-xs text-[#6C7E66] mt-1 leading-relaxed">
                   Maximum rejection barrier for heavy metals, high salinity borewell water & microbes.
                 </p>
               </div>
             </div>
-            <div className="text-[11px] font-mono font-semibold text-cyan-300 pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-mono font-semibold text-[#54684A] pt-2 border-t border-[#DCE4D6]/60">
               Rejection: 95%+ | 0.95 A Head
             </div>
           </div>
@@ -611,27 +525,27 @@ function ConsumerView({ telemetry = null }) {
             onClick={() => handleModeChange('TASTETUNE')}
             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 ${
               selectedMode === 'TASTETUNE'
-                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/80 shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-950'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-md shadow-[#849C77]/15'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
             }`}
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-2xl">🎯</span>
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                  selectedMode === 'TASTETUNE' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  selectedMode === 'TASTETUNE' ? 'bg-[#384828] text-white' : 'bg-[#EAEFE5] text-[#54684A]'
                 }`}>
                   Gourmet
                 </span>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">TasteTune™</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <h4 className="text-sm font-bold text-[#2A3525]">TasteTune™</h4>
+                <p className="text-xs text-[#6C7E66] mt-1 leading-relaxed">
                   Customizes taste by dialing preferred output mineral TDS to your exact palate.
                 </p>
               </div>
             </div>
-            <div className="text-[11px] font-mono font-semibold text-cyan-300 pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-mono font-semibold text-[#54684A] pt-2 border-t border-[#DCE4D6]/60">
               Dial: 30 - 150 ppm TDS
             </div>
           </div>
@@ -642,27 +556,27 @@ function ConsumerView({ telemetry = null }) {
             onClick={() => handleModeChange('VACAY')}
             className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 ${
               selectedMode === 'VACAY'
-                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/80 shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-950'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-md shadow-[#849C77]/15'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
             }`}
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-2xl">✈️</span>
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                  selectedMode === 'VACAY' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  selectedMode === 'VACAY' ? 'bg-[#384828] text-white' : 'bg-[#EAEFE5] text-[#54684A]'
                 }`}>
                   Anti-Stagnant
                 </span>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">VacayMode</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <h4 className="text-sm font-bold text-[#2A3525]">VacayMode</h4>
+                <p className="text-xs text-[#6C7E66] mt-1 leading-relaxed">
                   Low intermittent auto-cleansing when away to prevent stagnant odor and bio-film.
                 </p>
               </div>
             </div>
-            <div className="text-[11px] font-mono font-semibold text-cyan-300 pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-mono font-semibold text-[#54684A] pt-2 border-t border-[#DCE4D6]/60">
               Idle: 0.20 L/min | 0.35 A Low
             </div>
           </div>
@@ -670,33 +584,33 @@ function ConsumerView({ telemetry = null }) {
         </div>
 
         {/* ----------------------------------------------------------------- */}
-        {/* TasteTune™ Interactive Slider (Renders when TASTETUNE is active)   */}
+        {/* TasteTune™ Interactive Slider (Renders when TASTETUNE is active) */}
         {/* ----------------------------------------------------------------- */}
         {selectedMode === 'TASTETUNE' && (
-          <div className="p-6 bg-slate-950/90 border border-slate-800 rounded-2xl space-y-5 animate-fadeIn">
+          <div className="p-6 bg-[#FAFBF8] border border-[#BACAB3] rounded-2xl space-y-5 animate-fadeIn">
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="text-lg">🎯</span>
-                  <h3 className="text-sm font-bold text-white">
+                  <h4 className="text-sm font-bold text-[#2A3525]">
                     TasteTune™ Mineral Dial Selector
-                  </h3>
+                  </h4>
                   <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${currentTaste.badgeColor}`}>
                     {currentTaste.label}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[#6C7E66] mt-1">
                   {currentTaste.desc}
                 </p>
               </div>
 
               {/* Readout Badge */}
-              <div className="flex items-baseline space-x-1.5 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 shadow-sm self-start sm:self-center">
-                <span className="text-2xl font-black font-mono text-cyan-300">
+              <div className="flex items-baseline space-x-1.5 bg-white px-4 py-2 rounded-xl border border-[#DCE4D6] shadow-sm self-start sm:self-center">
+                <span className="text-2xl font-black font-mono text-[#2A3525]">
                   {targetTds}
                 </span>
-                <span className="text-xs font-bold text-slate-400">ppm target</span>
+                <span className="text-xs font-bold text-[#6C7E66]">ppm target</span>
               </div>
             </div>
 
@@ -710,19 +624,19 @@ function ConsumerView({ telemetry = null }) {
                 step="1"
                 value={targetTds}
                 onChange={handleTasteTuneChange}
-                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 focus:outline-none"
+                className="w-full h-2.5 bg-[#DCE4D6] rounded-lg appearance-none cursor-pointer accent-[#6C8360] focus:outline-none"
               />
-              <div className="flex justify-between text-[11px] font-mono text-slate-400">
+              <div className="flex justify-between text-[11px] font-mono text-[#6C7E66]">
                 <span>30 ppm (Ultra Crisp)</span>
-                <span className="font-bold text-white">75 ppm (Balanced Mineral)</span>
+                <span className="font-bold text-[#2A3525]">75 ppm (Balanced Mineral)</span>
                 <span>150 ppm (Rich Mineral)</span>
               </div>
             </div>
 
             {/* Profile Guidance Callout */}
-            <div className="flex items-center space-x-3 text-xs bg-slate-900/70 p-3 rounded-xl border border-slate-800">
+            <div className="flex items-center space-x-3 text-xs bg-white p-3 rounded-xl border border-[#DCE4D6]">
               <span className="text-lg">💡</span>
-              <span className="text-slate-300">
+              <span className="text-[#3E4D37]">
                 <strong>Taste Intelligence:</strong> Adjusting permeate mineral content regulates motor torque and post-carbon mineralization blend ratio dynamically.
               </span>
             </div>
@@ -730,139 +644,177 @@ function ConsumerView({ telemetry = null }) {
           </div>
         )}
 
-        {/* ----------------------------------------------------------------- */}
-        {/* Tap Water Source Selector Presets                                 */}
-        {/* ----------------------------------------------------------------- */}
-        <div className="pt-4 border-t border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+      </div>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* SECTION 3: TAP WATER SOURCE SELECTOR */}
+      {/* ----------------------------------------------------------------- */}
+      <div className="bg-white border border-[#DCE4D6] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E3E9DE] gap-2">
+          <div>
+            <h3 className="text-lg font-bold text-[#2A3525] flex items-center space-x-2">
               <span>🚰</span>
-              <span>Tap Water Source Presets</span>
-            </span>
-            <span className="text-[11px] font-mono text-slate-400">
-              Current: <strong className="text-cyan-300">{sourceWater}</strong>
-            </span>
+              <span>Tap Water Source Environment</span>
+            </h3>
+            <p className="text-xs text-[#6C7E66] mt-0.5">
+              Simulate feed water supplies to test how the purifier's pump and membrane handle variable mineral loads.
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button
-              onClick={() => handleSourceChange('MUNICIPAL')}
-              className={`p-3.5 rounded-xl border text-left transition-all ${
-                sourceWater === 'MUNICIPAL'
-                  ? 'bg-slate-800/90 border-cyan-400 ring-1 ring-cyan-400 text-white'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs">🏛️ Municipal Supply</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-cyan-300">320 ppm</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">Treated river water, low pump stress (0.72 A).</p>
-            </button>
-
-            <button
-              onClick={() => handleSourceChange('BOREWELL')}
-              className={`p-3.5 rounded-xl border text-left transition-all ${
-                sourceWater === 'BOREWELL'
-                  ? 'bg-slate-800/90 border-cyan-400 ring-1 ring-cyan-400 text-white'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs">🏞️ Borewell Groundwater</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-cyan-300">920 ppm</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">Deep aquifer mineral hardness (0.85 A).</p>
-            </button>
-
-            <button
-              onClick={() => handleSourceChange('TANKER')}
-              className={`p-3.5 rounded-xl border text-left transition-all ${
-                sourceWater === 'TANKER'
-                  ? 'bg-slate-800/90 border-cyan-400 ring-1 ring-cyan-400 text-white'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs">🚚 Hard Tanker Water</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-amber-300">1550 ppm</span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-1">Severe scaling risk, high head (0.98 A).</p>
-            </button>
-          </div>
+          <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-[#FAF5EB] text-[#826947] border border-[#DFD3BE] font-semibold self-start sm:self-center">
+            Current: {sourceWater}
+          </span>
         </div>
 
-      </section>
+        {/* 3 Source Presets */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Preset 1: Municipal Supply */}
+          <div
+            id="source-municipal-btn"
+            onClick={() => handleSourceChange('MUNICIPAL')}
+            className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer space-y-3 ${
+              sourceWater === 'MUNICIPAL'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-sm'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🏛️</span>
+              <span className="text-xs font-mono font-bold text-[#3E4D37] bg-white px-2.5 py-1 rounded-full border border-[#DCE4D6]">
+                320 ppm TDS
+              </span>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#2A3525]">Municipal Supply</h4>
+              <p className="text-xs text-[#6C7E66] mt-1">
+                Treated surface water with low dissolved hardness. Low stress on booster pump (0.72 A).
+              </p>
+            </div>
+            <div className="text-[11px] font-mono text-[#54684A] font-semibold pt-1">
+              Base Flow: 1.40 L/min
+            </div>
+          </div>
+
+          {/* Preset 2: Borewell Groundwater */}
+          <div
+            id="source-borewell-btn"
+            onClick={() => handleSourceChange('BOREWELL')}
+            className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer space-y-3 ${
+              sourceWater === 'BOREWELL'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-sm'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🏞️</span>
+              <span className="text-xs font-mono font-bold text-[#3E4D37] bg-white px-2.5 py-1 rounded-full border border-[#DCE4D6]">
+                920 ppm TDS
+              </span>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#2A3525]">Borewell Groundwater</h4>
+              <p className="text-xs text-[#6C7E66] mt-1">
+                Sub-terranean deep aquifer water rich in calcium & magnesium carbonates. Normal load (0.85 A).
+              </p>
+            </div>
+            <div className="text-[11px] font-mono text-[#54684A] font-semibold pt-1">
+              Base Flow: 1.20 L/min
+            </div>
+          </div>
+
+          {/* Preset 3: Hard Tanker Water */}
+          <div
+            id="source-tanker-btn"
+            onClick={() => handleSourceChange('TANKER')}
+            className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer space-y-3 ${
+              sourceWater === 'TANKER'
+                ? 'bg-[#F2F6EF] border-[#6C8360] ring-2 ring-[#849C77] shadow-sm'
+                : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] hover:bg-white'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-2xl">🚚</span>
+              <span className="text-xs font-mono font-bold text-[#826947] bg-[#FAF5EB] px-2.5 py-1 rounded-full border border-[#DFD3BE]">
+                1550 ppm TDS
+              </span>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#2A3525]">Hard Tanker Water</h4>
+              <p className="text-xs text-[#6C7E66] mt-1">
+                Heavy dissolved salts with severe mineral scaling potential. High pump pressure (0.98 A).
+              </p>
+            </div>
+            <div className="text-[11px] font-mono text-[#54684A] font-semibold pt-1">
+              Base Flow: 1.05 L/min
+            </div>
+          </div>
+
+        </div>
+
+      </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 3: PREDICTIVE HEALTH INTELLIGENCE & RUL DEGRADATION PANEL  */}
+      {/* SECTION 5: PREDICTIVE HEALTH & STAGE MONITORING */}
       {/* ----------------------------------------------------------------- */}
-      <section>
+      <div className="space-y-6">
+        {/* ML Prognostics & RUL Card */}
         <PredictiveHealthIntelligence
           telemetry={telemetry}
-          mode="hil"
+          mode="consumer"
         />
-      </section>
+      </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 4: INTERACTIVE PURIFIER TECHNICAL ILLUSTRATION            */}
-      {/* ----------------------------------------------------------------- */}
-      <section>
-        <InteractivePurifierIllustration
-          telemetry={telemetry}
-          mode="hil"
-        />
-      </section>
-
-      {/* ----------------------------------------------------------------- */}
-      {/* DIAGNOSTIC SCAN REPORT MODAL                                      */}
+      {/* SECTION 4: DIAGNOSTIC SCAN REPORT MODAL */}
       {/* ----------------------------------------------------------------- */}
       {showDiagnosticModal && diagnosticReport && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto text-slate-100">
+        <div className="fixed inset-0 z-50 bg-[#1F2D19]/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+          
+          <div className="bg-white border border-[#BACAB3] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             
             {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-slate-800">
+            <div className="flex items-start justify-between pb-4 border-b border-[#E3E9DE]">
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">🩺</span>
-                  <h3 className="text-xl font-black text-white">
+                  <h3 className="text-xl font-black text-[#2A3525]">
                     Intellon Hardware Diagnostic Report
                   </h3>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[#6C7E66] mt-1">
                   Device: {diagnosticReport.device_id || 'ATOM-WP-2026-0042'} | Timestamp: {new Date(diagnosticReport.timestamp).toLocaleTimeString()}
                 </p>
               </div>
 
               <button
                 onClick={() => setShowDiagnosticModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 flex items-center justify-center font-bold text-sm transition-all"
+                className="w-8 h-8 rounded-full bg-[#EAEFE5] text-[#2A3525] hover:bg-[#DCE4D6] flex items-center justify-center font-bold text-sm transition-all"
               >
                 ✕
               </button>
             </div>
 
             {/* Overall System Health Scorecard */}
-            <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="bg-[#FAFBF8] border border-[#BACAB3] p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#6C7E66]">
                   Overall System Health Index
                 </span>
                 <div className="flex items-baseline space-x-2 mt-1">
-                  <span className="text-4xl font-black font-mono text-cyan-400">
+                  <span className="text-4xl font-black font-mono text-[#2A3525]">
                     {diagnosticReport.overall_health_score ?? 92.0}
                   </span>
-                  <span className="text-sm font-bold text-slate-400">/ 100</span>
+                  <span className="text-sm font-bold text-[#54684A]">/ 100</span>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Status: <strong className="text-emerald-400">{diagnosticReport.system_status || 'NOMINAL'}</strong>
+                <p className="text-xs text-[#6C7E66] mt-0.5">
+                  Status: <strong className="text-[#3E4D37]">{diagnosticReport.system_status || 'NOMINAL'}</strong>
                 </p>
               </div>
 
-              <div className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-center self-start sm:self-center">
-                <div className="text-[10px] uppercase font-bold text-slate-400">Evaluation Result</div>
-                <div className="text-sm font-bold text-white mt-0.5">
+              <div className="px-4 py-2 rounded-xl bg-[#EAEFE5] border border-[#BACAB3] text-center self-start sm:self-center">
+                <div className="text-[10px] uppercase font-bold text-[#6C7E66]">Evaluation Result</div>
+                <div className="text-sm font-bold text-[#2A3525] mt-0.5">
                   {diagnosticReport.overall_health_score >= 80 ? '✅ All Systems Nominal' : '⚠️ Maintenance Advised'}
                 </div>
               </div>
@@ -873,71 +825,71 @@ function ConsumerView({ telemetry = null }) {
               
               {/* Category 1: Booster Pump Integrity */}
               {diagnosticReport.diagnostics?.booster_pump && (
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div className="bg-[#FAFBF8] border border-[#DCE4D6] p-4 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                    <h4 className="text-xs font-bold text-[#2A3525] uppercase tracking-wider flex items-center space-x-1.5">
                       <span>⚡</span>
                       <span>Booster Pump Integrity</span>
                     </h4>
                     <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full ${
                       diagnosticReport.diagnostics.booster_pump.status === 'NOMINAL'
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                        : 'bg-rose-950 text-rose-300 border border-rose-800'
+                        ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                        : 'bg-rose-100 text-rose-800 border border-rose-300'
                     }`}>
                       {diagnosticReport.diagnostics.booster_pump.status}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs font-mono bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                  <div className="grid grid-cols-3 gap-2 text-xs font-mono bg-white p-2.5 rounded-lg border border-[#E3E9DE]">
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Current Draw:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.booster_pump.current_draw_amps} A</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Current Draw:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.booster_pump.current_draw_amps} A</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Flow Rate:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.booster_pump.flow_rate_lpm} L/min</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Flow Rate:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.booster_pump.flow_rate_lpm} L/min</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Delivery Head:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.booster_pump.delivery_pressure_bar} bar</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Delivery Head:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.booster_pump.delivery_pressure_bar} bar</strong>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] text-[#6C7E66] leading-relaxed">
                     {diagnosticReport.diagnostics.booster_pump.details}
                   </p>
                 </div>
               )}
 
-              {/* Category 2: RO Membrane Core & Fouling */}
+              {/* Category 2: RO Membrane Core & Fouling Level */}
               {diagnosticReport.diagnostics?.ro_membrane && (
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div className="bg-[#FAFBF8] border border-[#DCE4D6] p-4 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                    <h4 className="text-xs font-bold text-[#2A3525] uppercase tracking-wider flex items-center space-x-1.5">
                       <span>🌀</span>
                       <span>RO Membrane Fouling & Scaling</span>
                     </h4>
-                    <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800">
+                    <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]">
                       {diagnosticReport.diagnostics.ro_membrane.fouling_level}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs font-mono bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                  <div className="grid grid-cols-3 gap-2 text-xs font-mono bg-white p-2.5 rounded-lg border border-[#E3E9DE]">
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Cake Res. R_cake:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.ro_membrane.cake_resistance} kPa·s/L</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Cake Res. R_cake:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.ro_membrane.cake_resistance} kPa·s/L</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Salt Rejection:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.ro_membrane.salt_rejection_pct}%</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Salt Rejection:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.ro_membrane.salt_rejection_pct}%</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Washdown State:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.ro_membrane.washdown_active ? 'Flushing' : 'Nominal'}</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Washdown State:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.ro_membrane.washdown_active ? 'Flushing' : 'Nominal'}</strong>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] text-[#6C7E66] leading-relaxed">
                     {diagnosticReport.diagnostics.ro_membrane.details}
                   </p>
                 </div>
@@ -945,29 +897,29 @@ function ConsumerView({ telemetry = null }) {
 
               {/* Category 3: Alkaline Remineralizer */}
               {diagnosticReport.diagnostics?.alkaline_remineralizer && (
-                <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-2">
+                <div className="bg-[#FAFBF8] border border-[#DCE4D6] p-4 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                    <h4 className="text-xs font-bold text-[#2A3525] uppercase tracking-wider flex items-center space-x-1.5">
                       <span>🌱</span>
                       <span>Alkaline Remineralizer Balance</span>
                     </h4>
-                    <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+                    <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]">
                       {diagnosticReport.diagnostics.alkaline_remineralizer.status}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-white p-2.5 rounded-lg border border-[#E3E9DE]">
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Mineral Elution:</span>
-                      <strong className="text-white">+{diagnosticReport.diagnostics.alkaline_remineralizer.delta_mineral_ppm} ppm</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Mineral Elution:</span>
+                      <strong className="text-[#2A3525]">+{diagnosticReport.diagnostics.alkaline_remineralizer.delta_mineral_ppm} ppm</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Cartridge Health:</span>
-                      <strong className="text-white">{diagnosticReport.diagnostics.alkaline_remineralizer.alkaliser_health_pct}%</strong>
+                      <span className="text-[#6C7E66] block text-[10px]">Cartridge Health:</span>
+                      <strong className="text-[#2A3525]">{diagnosticReport.diagnostics.alkaline_remineralizer.alkaliser_health_pct}%</strong>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] text-[#6C7E66] leading-relaxed">
                     {diagnosticReport.diagnostics.alkaline_remineralizer.details}
                   </p>
                 </div>
@@ -976,64 +928,22 @@ function ConsumerView({ telemetry = null }) {
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#E3E9DE]">
               <button
                 onClick={handleRunDiagnostics}
                 disabled={isDiagnosing}
-                className="px-4 py-2 rounded-full text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-600 transition-all"
+                className="px-4 py-2 rounded-full text-xs font-bold bg-[#EAEFE5] text-[#2A3525] hover:bg-[#DCE4D6] border border-[#BACAB3] transition-all"
               >
                 🔄 Re-scan Hardware
               </button>
               <button
                 onClick={() => setShowDiagnosticModal(false)}
-                className="px-5 py-2 rounded-full text-xs font-bold bg-cyan-600 text-white hover:bg-cyan-500 transition-all"
+                className="px-5 py-2 rounded-full text-xs font-bold bg-[#384828] text-white hover:bg-[#2C3B1F] transition-all"
               >
                 Done
               </button>
             </div>
 
-          </div>
-        </div>
-      )}
-
-      {/* ----------------------------------------------------------------- */}
-      {/* CINEMA VIEW / EXPAND MODAL OVERLAY                                */}
-      {/* ----------------------------------------------------------------- */}
-      {showCinemaModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-8 animate-fadeIn">
-          
-          {/* Cinema Header */}
-          <div className="w-full max-w-5xl flex items-center justify-between pb-4 text-white">
-            <div className="flex items-center space-x-3">
-              <span className="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
-              <h2 className="text-lg font-bold tracking-tight">
-                Atomberg Intellon Purifier • 4K Cinematic Showcase
-              </h2>
-            </div>
-            <button
-              onClick={() => setShowCinemaModal(false)}
-              className="px-4 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-all"
-            >
-              ✕ Close Cinema
-            </button>
-          </div>
-
-          {/* High-Resolution Video Player */}
-          <div className="w-full max-w-5xl aspect-video bg-black rounded-3xl overflow-hidden border border-slate-800 shadow-2xl relative">
-            <video
-              ref={cinemaVideoRef}
-              src="/assets/atomberg_purifier_showcase.mp4"
-              autoPlay
-              controls
-              loop
-              playsInline
-              className="w-full h-full object-contain"
-            />
-          </div>
-
-          <div className="w-full max-w-5xl pt-3 flex items-center justify-between text-xs text-slate-400">
-            <span>Atmospheric Product Render • High-Fidelity Audio Active</span>
-            <span className="font-mono">HydroTwin-PHM Industrial Digital Twin v2.4</span>
           </div>
 
         </div>

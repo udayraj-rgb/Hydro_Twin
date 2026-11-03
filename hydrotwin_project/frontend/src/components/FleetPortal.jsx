@@ -185,10 +185,14 @@ function FleetPortal({ telemetry = null }) {
       <div className="bg-white border border-[#DCE4D6] rounded-2xl p-6 sm:p-7 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-[#E3E9DE] gap-2">
           <div>
-            <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2">
-              <svg className="w-4 h-4 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+            <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2.5">
+              <div className="w-6 h-6 rounded-lg bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden">
+                <img
+                  src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                  alt="HydroTwin Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
               <span>Regional Connected Purifier Diagnostics Grid</span>
             </h3>
             <p className="text-xs text-[#6C7E66] mt-0.5">

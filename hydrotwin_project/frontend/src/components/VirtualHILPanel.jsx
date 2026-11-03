@@ -58,6 +58,20 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
         
         {/* Left: Mode Toggle Switch & Indicator */}
         <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center space-x-2.5 mr-1">
+            <div className="w-8 h-8 rounded-xl bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden">
+              <img
+                src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                alt="HydroTwin Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="hidden sm:block">
+              <span className="text-xs font-bold text-[#1F2D19] block leading-tight">HydroTwin–PHM</span>
+              <span className="text-[10px] text-[#54684A] font-mono leading-none">Edge HIL Twin</span>
+            </div>
+          </div>
+
           <div className="flex items-center bg-[#F4F6F0] p-1 rounded-xl border border-[#DCE4D6] shadow-inner">
             <button
               onClick={() => onUpdate({ mode: 'AUTONOMOUS', active_scenario: 'NONE' })}

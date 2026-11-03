@@ -58,11 +58,14 @@ function TerminalConsole({ telemetry = null }) {
       {/* ----------------------------------------------------------------- */}
       <div className="bg-[#F4F6F0] px-4 py-2.5 border-b border-[#DCE4D6] flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          {/* Olive-themed terminal dots */}
-          <span className="w-2.5 h-2.5 rounded-full bg-[#6C8360] inline-block"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#849C77] inline-block"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#BACAB3] inline-block"></span>
-          <span className="text-xs font-mono font-bold text-[#3E4D37] ml-2">
+          <div className="w-5 h-5 rounded-md bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden">
+            <img
+              src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+              alt="HydroTwin Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <span className="text-xs font-mono font-bold text-[#3E4D37] ml-1">
             SQLite / MQTT Virtual Serial Console (/dev/ttyUSB0)
           </span>
         </div>

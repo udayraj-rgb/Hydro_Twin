@@ -120,11 +120,17 @@ function ConsumerVideoShowcase({ telemetry = null }) {
           />
 
           {/* Top-Left Floating Brand Pill */}
-          <div className="absolute top-4 left-4 sm:top-5 sm:left-6 z-20 flex items-center space-x-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#DCE4D6] shadow-md pointer-events-auto">
-            <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-ping"></span>
-            <span className="text-xs font-black text-[#2A3525]">Atomberg Intellon</span>
+          <div className="absolute top-4 left-4 sm:top-5 sm:left-6 z-20 flex items-center space-x-2.5 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#DCE4D6] shadow-md pointer-events-auto">
+            <div className="w-5 h-5 rounded-full bg-[#1F2D19] overflow-hidden flex items-center justify-center border border-[#384828]/50 shrink-0 shadow-sm">
+              <img
+                src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                alt="HydroTwin Logo"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="text-xs font-black text-[#2A3525]">HydroTwin–PHM</span>
             <span className="text-[10px] text-[#54684A] font-semibold hidden sm:inline">
-              Smart IoT Water Purifier
+              • Atomberg Intellon
             </span>
           </div>
 
@@ -183,8 +189,12 @@ function ConsumerVideoShowcase({ telemetry = null }) {
             </div>
 
             <div className="flex items-center space-x-3 self-start sm:self-end bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/30 text-white shadow-lg shrink-0">
-              <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center font-bold text-sm">
-                H₂O
+              <div className="w-9 h-9 rounded-full bg-[#1F2D19] border border-white/40 overflow-hidden flex items-center justify-center shadow-md p-0.5 shrink-0">
+                <img
+                  src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                  alt="HydroTwin Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <div className="text-[10px] text-white/80 font-bold uppercase tracking-wider">Filtered Purity</div>

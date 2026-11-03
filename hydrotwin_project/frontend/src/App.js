@@ -282,14 +282,20 @@ function App() {
             
             {/* Brand Logo & Context */}
             <div className="flex items-center space-x-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-[#384828] border border-[#2D3B1F] flex items-center justify-center shadow-md shadow-[#384828]/25 text-white">
-                <svg className="w-6 h-6 text-[#C7E48F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
+              <div className="relative group cursor-pointer flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center shadow-md shadow-[#1F2D19]/25 p-1 overflow-hidden transition-all duration-300 group-hover:scale-105 group-hover:border-[#6C8360]">
+                  <img
+                    src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                    alt="HydroTwin-PHM Official Logo"
+                    className="w-full h-full object-contain filter drop-shadow"
+                  />
+                </div>
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-black tracking-tight text-[#1F2D19]">HydroTwin-PHM</h1>
+                  <h1 className="text-xl font-black tracking-tight text-[#1F2D19] flex items-center gap-1.5">
+                    <span>HydroTwin–PHM</span>
+                  </h1>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#E8F2E3] text-[#384828] border border-[#BACAB3]">
                     Virtual HIL Twin
                   </span>
@@ -298,8 +304,12 @@ function App() {
                     <span>Live 1 Hz</span>
                   </span>
                 </div>
-                <p className="text-xs text-[#576C4D] font-medium mt-0.5">
-                  Team Atomizers • School of Computing Science and Engineering (SCOPE), VIT Bhopal
+                <p className="text-xs text-[#576C4D] font-medium mt-0.5 flex flex-wrap items-center gap-x-1.5">
+                  <span>Team Atomizers • SCOPE, VIT Bhopal</span>
+                  <span className="text-[#849C77]">•</span>
+                  <span className="font-bold text-[#2A3525] bg-[#EAEFE5] px-1.5 py-0.5 rounded text-[10px] border border-[#BACAB3]">
+                    Powered by Atomberg
+                  </span>
                 </p>
               </div>
             </div>
@@ -398,6 +408,52 @@ function App() {
             <FleetPortal telemetry={telemetry} />
           )}
         </main>
+
+        {/* ----------------------------------------------------------------- */}
+        {/* Corporate Product Brand Footer */}
+        {/* ----------------------------------------------------------------- */}
+        <footer className="mt-auto border-t border-[#E1ECD9] bg-[#F4F8F1] px-6 sm:px-10 py-6 sm:py-8">
+          <div className="max-w-[1300px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Left: Product Logo & Brand statement */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-[#1F2D19] border border-[#384828]/60 p-1.5 shadow-md flex items-center justify-center shrink-0">
+                <img
+                  src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                  alt="HydroTwin-PHM Official Logo"
+                  className="w-full h-full object-contain filter drop-shadow"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <span className="text-base font-black text-[#1F2D19] tracking-tight">HydroTwin–PHM</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8F2E3] text-[#384828] border border-[#BACAB3]">
+                    Powered by Atomberg
+                  </span>
+                </div>
+                <p className="text-xs text-[#576C4D] max-w-md">
+                  Autonomous Digital Twin & Prognostic Health Management for Smart Water Purifiers. AtomQuest 2026 Innovation Challenge (Track 2).
+                </p>
+                <p className="text-[11px] text-[#7A8E70] font-mono">
+                  Team Atomizers • School of Computing Science and Engineering (SCOPE), VIT Bhopal
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Full Product Brand Badge */}
+            <div className="flex flex-col items-center md:items-end gap-2 shrink-0">
+              <div className="relative group overflow-hidden rounded-2xl border border-[#BACAB3] shadow-sm bg-[#1F2D19] max-w-[220px]">
+                <img
+                  src={`${process.env.PUBLIC_URL}/assets/hydrotwin_logo_badge.png`}
+                  alt="HydroTwin-PHM Powered by Atomberg"
+                  className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <span className="text-[10px] text-[#6C7E66] font-mono">
+                Hardware-in-the-Loop • Darcy-Hermia Decoupling Engine
+              </span>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

@@ -190,10 +190,14 @@ function TelemetryCharts({ telemetry = null }) {
       {/* Header and Live Readout Badges */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-[#E3E9DE] gap-3">
         <div>
-          <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2">
-            <svg className="w-4 h-4 text-[#849C77]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
+          <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2.5">
+            <div className="w-5 h-5 rounded-md bg-[#1F2D19] border border-[#384828]/60 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden">
+              <img
+                src={`${process.env.PUBLIC_URL}/assets/hydrotwin_emblem.png`}
+                alt="HydroTwin"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <span>Darcy-Hermia Multi-Stage Hydraulic Decoupling Engine</span>
           </h3>
           <p className="text-xs text-[#6C7E66] mt-0.5">

@@ -24,6 +24,14 @@ class TestHydroTwinAPI(unittest.TestCase):
         main.database.init_db()
         cls.client = TestClient(main.app)
 
+    def setUp(self):
+        main.simulator.flush_countdown = 0
+        main.simulator.is_flushing = False
+        main.simulator.accumulated_scale = 0.0
+        main.simulator.mode = "MANUAL"
+        main.simulator.active_scenario = "NONE"
+        main.current_sensors.outlet_tds = None
+
     def test_root_endpoint(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
@@ -146,6 +154,108 @@ class TestHydroTwinAPI(unittest.TestCase):
         telemetry = response.json()
         self.assertIn("telemetry", telemetry)
         self.assertGreater(len(telemetry["telemetry"]), 0)
+
+    def test_consumer_control_municipal_adaptive(self):
+        payload = {
+            "source_water": "MUNICIPAL",
+            "mode": "ADAPTIVE",
+            "manual_flush": False
+        }
+        response = self.client.post("/api/consumer/control", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("applied_setpoints", data)
+        self.assertEqual(data["applied_setpoints"]["source_water"], "MUNICIPAL")
+        self.assertEqual(data["applied_setpoints"]["inlet_tds"], 320.0)
+        self.assertEqual(data["applied_setpoints"]["flow_lpm"], 1.40)
+        self.assertEqual(data["applied_setpoints"]["pump_current"], 0.72)
+
+    def test_consumer_control_borewell_ro_uv(self):
+        payload = {
+            "source_water": "BOREWELL",
+            "mode": "RO_UV",
+            "manual_flush": False
+        }
+        response = self.client.post("/api/consumer/control", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["applied_setpoints"]["source_water"], "BOREWELL")
+        self.assertEqual(data["applied_setpoints"]["inlet_tds"], 920.0)
+        self.assertEqual(data["applied_setpoints"]["flow_lpm"], 1.10)
+        self.assertEqual(data["applied_setpoints"]["pump_current"], 0.95)
+
+    def test_consumer_control_tastetune(self):
+        payload = {
+            "source_water": "BOREWELL",
+            "mode": "TASTETUNE",
+            "target_tds": 85.0,
+            "manual_flush": False
+        }
+        response = self.client.post("/api/consumer/control", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["applied_setpoints"]["target_tds"], 85.0)
+        state = data["latest_state"]
+        self.assertEqual(state["sensors"]["outlet_tds"], 85.0)
+
+    def test_consumer_control_vacay(self):
+        payload = {
+            "source_water": "TANKER",
+            "mode": "VACAY",
+            "manual_flush": False
+        }
+        response = self.client.post("/api/consumer/control", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["applied_setpoints"]["flow_lpm"], 0.20)
+        self.assertEqual(data["applied_setpoints"]["pump_current"], 0.35)
+
+    def test_consumer_control_manual_flush(self):
+        payload = {
+            "source_water": "BOREWELL",
+            "mode": "ADAPTIVE",
+            "manual_flush": True
+        }
+        response = self.client.post("/api/consumer/control", json=payload)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["applied_setpoints"]["flush_active"])
+        state = data["latest_state"]
+        self.assertTrue(state["actuators"]["flush_solenoid"])
+
+    def test_consumer_control_validation_errors(self):
+        # Invalid source_water
+        resp1 = self.client.post("/api/consumer/control", json={"source_water": "RIVER", "mode": "ADAPTIVE"})
+        self.assertEqual(resp1.status_code, 400)
+
+        # Invalid mode
+        resp2 = self.client.post("/api/consumer/control", json={"source_water": "BOREWELL", "mode": "TURBO"})
+        self.assertEqual(resp2.status_code, 400)
+
+        # target_tds out of range (< 30)
+        resp3 = self.client.post("/api/consumer/control", json={"mode": "TASTETUNE", "target_tds": 15.0})
+        self.assertEqual(resp3.status_code, 422)
+
+    def test_consumer_diagnostics_endpoint(self):
+        response = self.client.get("/api/consumer/diagnostics")
+        self.assertEqual(response.status_code, 200)
+        diag = response.json()
+        self.assertIn("timestamp", diag)
+        self.assertIn("device_id", diag)
+        self.assertIn("overall_health_score", diag)
+        self.assertIn("system_status", diag)
+        self.assertIn("diagnostics", diag)
+
+        components = diag["diagnostics"]
+        self.assertIn("booster_pump", components)
+        self.assertIn("ro_membrane", components)
+        self.assertIn("alkaline_remineralizer", components)
+        self.assertIn("filtration_stages", components)
+
+        self.assertIn(components["booster_pump"]["status"], {"NOMINAL", "SAFETY_TRIP_CAVITATION", "SAFETY_TRIP_OVERCURRENT_STALL"})
+        self.assertIn(components["ro_membrane"]["fouling_level"], {"OPTIMAL", "MODERATE_FOULING", "CRITICAL_SCALING"})
+        self.assertIn(components["alkaline_remineralizer"]["status"], {"OPTIMAL_MINERALIZATION", "ACCEPTABLE", "DEPLETED"})
+        self.assertIsInstance(diag["overall_health_score"], (int, float))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import VirtualHILPanel from './components/VirtualHILPanel';
-import PredictiveHealthIntelligence from './components/PredictiveHealthIntelligence';
 import TelemetryCharts from './components/TelemetryCharts';
 import TerminalConsole from './components/TerminalConsole';
 import ConsumerView from './components/ConsumerView';
@@ -486,10 +485,7 @@ function App() {
                 telemetry={telemetry}
               />
 
-              {/* Component 2: Predictive Health Intelligence & D2C Logistics Dispatch */}
-              <PredictiveHealthIntelligence telemetry={telemetry} mode="hil" />
-
-              {/* Component 3: Real-time Darcy-Hermia Telemetry Line Charts */}
+              {/* Component 2: Real-time Darcy-Hermia Telemetry Line Charts */}
               <TelemetryCharts telemetry={telemetry} />
 
               {/* Component 3: Live SQLite & MQTT Terminal Console */}

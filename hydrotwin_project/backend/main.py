@@ -46,6 +46,27 @@ class ModeUpdateRequest(BaseModel):
     active_scenario: Optional[str] = Field(default="NONE", description="'NONE' | 'MUNICIPAL_CUTOFF' | 'HARDNESS_SPIKE' | 'PUMP_STALL'")
 
 
+class ConsumerCommand(BaseModel):
+    mode: str = Field(
+        default="ADAPTIVE",
+        description="Operation mode: 'ADAPTIVE' | 'RO_UV' | 'TASTETUNE' | 'VACAY'"
+    )
+    target_tds: float = Field(
+        default=75.0,
+        ge=30.0,
+        le=150.0,
+        description="Target mineralized TDS for TasteTune mode (30 to 150 ppm)"
+    )
+    manual_flush: bool = Field(
+        default=False,
+        description="Trigger dynamic micro-flush washdown cycle (-18% R_cake)"
+    )
+    source_water: str = Field(
+        default="BOREWELL",
+        description="Water source preset: 'MUNICIPAL' | 'BOREWELL' | 'TANKER'"
+    )
+
+
 class SensorUpdateResponse(BaseModel):
     message: str
     current_sensors: SensorInput
@@ -348,6 +369,8 @@ def get_root():
         },
         "endpoints": {
             "update_sensors": "POST /api/update_sensors",
+            "consumer_control": "POST /api/consumer/control",
+            "consumer_diagnostics": "GET /api/consumer/diagnostics",
             "set_mode": "POST /api/mode",
             "trigger_scenario": "POST /api/scenario/{scenario_name}",
             "recent_telemetry": "GET /api/telemetry/recent",
@@ -443,6 +466,239 @@ async def trigger_named_scenario(scenario_name: str):
         "message": f"Scenario {scenario_name} initiated",
         "simulation": new_state.get("simulation", {}),
         "latest_state": new_state
+    }
+
+
+@app.post("/api/consumer/control")
+async def control_consumer(payload: ConsumerCommand):
+    """
+    Interactive purifier controls and consumer simulator actions:
+    1. Water Source Presets:
+       - 'MUNICIPAL': sets inlet_tds = 320.0, base flow = 1.40 L/min, pump_current = 0.72 A.
+       - 'BOREWELL': sets inlet_tds = 920.0, base flow = 1.20 L/min, pump_current = 0.85 A.
+       - 'TANKER': sets inlet_tds = 1550.0, base flow = 1.05 L/min, pump_current = 0.98 A.
+    2. Operation Modes:
+       - 'ADAPTIVE': Recalculates dynamically based on inlet TDS to preserve water and balance mineral retention.
+       - 'RO_UV': Maximizes rejection for heavy dissolved solids (sets flow = 1.10 L/min, pump_current = 0.95 A).
+       - 'TASTETUNE': Adjusts mineral passage to match target_tds (30-150 ppm), dynamically modulating pump current and recovery flux.
+       - 'VACAY': Enters vacation idle mode (low intermittent flow = 0.20 L/min, current = 0.35 A) to prevent membrane bio-fouling and stagnant odor.
+    3. Manual AutoClean Trigger:
+       - If manual_flush is True, activate the dynamic micro-flush state, reducing cake resistance (R_cake) by 18% over a simulated washdown cycle.
+    """
+    source = payload.source_water.upper().strip()
+    mode = payload.mode.upper().strip()
+
+    # 1. Evaluate Source Water Preset
+    if source == "MUNICIPAL":
+        inlet_tds = 320.0
+        base_flow = 1.40
+        base_current = 0.72
+    elif source == "BOREWELL":
+        inlet_tds = 920.0
+        base_flow = 1.20
+        base_current = 0.85
+    elif source == "TANKER":
+        inlet_tds = 1550.0
+        base_flow = 1.05
+        base_current = 0.98
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid source_water '{payload.source_water}'. Must be 'MUNICIPAL', 'BOREWELL', or 'TANKER'."
+        )
+
+    # 2. Evaluate Operation Mode
+    outlet_tds: Optional[float] = None
+
+    if mode == "RO_UV":
+        # Maximizes rejection for heavy dissolved solids
+        flow_lpm = 1.10
+        pump_current = 0.95
+        outlet_tds = None  # Full RO rejection inferred
+    elif mode == "TASTETUNE":
+        # Matches requested target TDS (30 - 150 ppm)
+        target = float(payload.target_tds)
+        outlet_tds = round(target, 1)
+        # Modulate pump current and recovery flux: lower pressure/higher mineral passage
+        flow_lpm = round(max(0.90, min(1.35, base_flow - 0.05)), 2)
+        pump_current = round(max(0.68, min(1.00, base_current + (100.0 - target) * 0.001)), 2)
+    elif mode == "VACAY":
+        # Vacation idle mode: prevents stagnation and membrane bio-fouling
+        flow_lpm = 0.20
+        pump_current = 0.35
+        outlet_tds = None
+    elif mode == "ADAPTIVE":
+        # Recalculates dynamically based on inlet TDS
+        if inlet_tds < 500.0:
+            flow_lpm = 1.40
+            pump_current = 0.72
+        elif inlet_tds <= 1200.0:
+            flow_lpm = 1.20
+            pump_current = 0.85
+        else:
+            flow_lpm = 1.05
+            pump_current = 0.98
+        outlet_tds = None
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid mode '{payload.mode}'. Must be 'ADAPTIVE', 'RO_UV', 'TASTETUNE', or 'VACAY'."
+        )
+
+    # 3. Handle Manual AutoClean Trigger
+    if payload.manual_flush:
+        simulator.flush_countdown = 5
+        simulator.is_flushing = True
+        simulator.accumulated_scale = max(0.0, simulator.accumulated_scale * 0.88)
+
+    # 4. Synchronize into simulator and current_sensors
+    global current_sensors
+    async with current_sensors_lock:
+        simulator.set_mode("MANUAL")
+        simulator.set_manual_setpoints(
+            inlet_tds=inlet_tds,
+            flow_lpm=flow_lpm,
+            pump_current=pump_current
+        )
+        current_sensors.inlet_tds = inlet_tds
+        current_sensors.flow_lpm = flow_lpm
+        current_sensors.pump_current = pump_current
+        current_sensors.outlet_tds = outlet_tds
+        current_sensors.mode = "MANUAL"
+        current_sensors.active_scenario = "NONE"
+
+    # 5. Execute tick immediately to broadcast via WebSocket and persist in DB
+    new_state = await execute_pipeline_tick()
+
+    cmd_dict = payload.model_dump() if hasattr(payload, "model_dump") else payload.dict()
+    return {
+        "message": f"Consumer command applied: Source={source}, Mode={mode}, ManualFlush={payload.manual_flush}",
+        "command": cmd_dict,
+        "applied_setpoints": {
+            "source_water": source,
+            "operation_mode": mode,
+            "inlet_tds": inlet_tds,
+            "flow_lpm": flow_lpm,
+            "pump_current": pump_current,
+            "target_tds": payload.target_tds if mode == "TASTETUNE" else None,
+            "flush_active": new_state.get("actuators", {}).get("flush_solenoid", False)
+        },
+        "latest_state": new_state
+    }
+
+
+@app.get("/api/consumer/diagnostics")
+async def get_consumer_diagnostics():
+    """
+    Evaluates current hardware parameters:
+    - Booster pump status (checking for cavitation <0.15A or overcurrent stall >1.80A)
+    - Membrane fouling level (comparing R_cake against baseline 0.35 kPa*s/L)
+    - Alkaline remineralizer elution balance (Delta_TDS_mineral)
+    - Overall system health score (0-100 scale)
+    Returns structured diagnostic report with timestamps and component statuses.
+    """
+    # Ensure fresh telemetry packet
+    state = latest_packet
+    if not state:
+        state = await execute_pipeline_tick()
+
+    sensors = state.get("sensors", {})
+    physics = state.get("physics", {})
+    actuators = state.get("actuators", {})
+    prog = state.get("prognostics", {})
+
+    pump_current = sensors.get("pump_current", 0.85)
+    flow_lpm = sensors.get("flow_lpm", 1.20)
+    inlet_tds = sensors.get("inlet_tds", 850.0)
+    outlet_tds = sensors.get("outlet_tds", 42.0)
+
+    delta_p = physics.get("delta_p", 1.11)
+    r_cake = physics.get("r_cake", 0.18)
+    r_sediment = physics.get("r_sediment", 0.60)
+    salt_rejection = physics.get("salt_rejection", 95.2)
+    delta_mineral = physics.get("delta_mineral", 28.0)
+    washdown_factor = state.get("simulation", {}).get("washdown_factor", 1.0)
+    flush_active = actuators.get("flush_solenoid", False)
+
+    # 1. Booster Pump Diagnostic
+    if pump_current < 0.15:
+        pump_status = "SAFETY_TRIP_CAVITATION"
+        pump_desc = "Dry-Run Cavitation detected (<0.15A). Suction line starved, pump relay tripped to prevent impeller damage."
+    elif pump_current > 1.80:
+        pump_status = "SAFETY_TRIP_OVERCURRENT_STALL"
+        pump_desc = "Motor Armature Overcurrent Stall detected (>1.80A). Relay tripped to prevent thermal winding burnout."
+    else:
+        pump_status = "NOMINAL"
+        pump_desc = "Booster pump armature current draw is within safe operating envelope (0.15A - 1.80A)."
+
+    # 2. Membrane Fouling Level Diagnostic
+    clean_baseline = 0.35
+    if r_cake < 0.80:
+        fouling_status = "OPTIMAL"
+        fouling_desc = "Membrane surface cake resistance is low and within nominal clean baseline."
+    elif r_cake < 1.40:
+        fouling_status = "MODERATE_FOULING"
+        fouling_desc = "Surface mineral cake accumulation detected. Dynamic anti-scaling washdown recommended."
+    else:
+        fouling_status = "CRITICAL_SCALING"
+        fouling_desc = "Severe concentration polarization and cake fouling. High crystallization risk."
+
+    # 3. Alkaline Remineralizer Elution Balance
+    if delta_mineral >= 20.0:
+        mineral_status = "OPTIMAL_MINERALIZATION"
+        mineral_desc = f"Active Ca2+/Mg2+ mineral elution (+{delta_mineral:.1f} ppm) providing balanced pH ~7.8."
+    elif delta_mineral >= 10.0:
+        mineral_status = "ACCEPTABLE"
+        mineral_desc = f"Moderate mineral elution (+{delta_mineral:.1f} ppm)."
+    else:
+        mineral_status = "DEPLETED"
+        mineral_desc = "Mineral elution cartridge depleted. Water lacks sufficient natural alkaline buffering."
+
+    # 4. Overall System Health Score
+    limiting_health = prog.get("limiting_health", 83.2)
+    overall_health_score = round(float(limiting_health), 1)
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    return {
+        "timestamp": now_iso,
+        "device_id": state.get("device_id", "ATOM-WP-2026-0042"),
+        "overall_health_score": overall_health_score,
+        "system_status": state.get("status", "NOMINAL"),
+        "diagnostics": {
+            "booster_pump": {
+                "status": pump_status,
+                "current_draw_amps": round(pump_current, 2),
+                "flow_rate_lpm": round(flow_lpm, 2),
+                "delivery_pressure_bar": round(delta_p, 2),
+                "relay_closed": actuators.get("relay_pump", True),
+                "details": pump_desc
+            },
+            "ro_membrane": {
+                "fouling_level": fouling_status,
+                "cake_resistance": round(r_cake, 3),
+                "baseline_resistance": clean_baseline,
+                "salt_rejection_pct": round(salt_rejection, 2),
+                "washdown_active": flush_active,
+                "washdown_factor": washdown_factor,
+                "details": fouling_desc
+            },
+            "alkaline_remineralizer": {
+                "status": mineral_status,
+                "delta_mineral_ppm": round(delta_mineral, 1),
+                "alkaliser_health_pct": round(prog.get("alkaliser_health", 83.3), 1),
+                "details": mineral_desc
+            },
+            "filtration_stages": {
+                "sediment_health": round(prog.get("sediment_health", 83.2), 1),
+                "carbon_health": round(prog.get("carbon_health", 84.0), 1),
+                "ro_health": round(prog.get("ro_health", 98.6), 1),
+                "alkaliser_health": round(prog.get("alkaliser_health", 83.3), 1),
+                "failing_stage": prog.get("failing_stage", "NONE"),
+                "predicted_rul_days": prog.get("rul_days", 18),
+                "auto_dispatch": prog.get("auto_dispatch", False)
+            }
+        }
     }
 
 

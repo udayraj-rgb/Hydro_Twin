@@ -29,8 +29,8 @@ const MAX_POINTS = 15;
 /**
  * TelemetryCharts: Visualizes real-time Darcy-Hermia multi-stage hydraulic decoupling.
  * Rolling 15-point historical window tracking:
- * - Pre-Sediment Vacuum Resistance (R_sediment - Amber)
- * - RO Surface Cake Layer Resistance (R_cake - Cyan)
+ * - Pre-Sediment Vacuum Resistance (R_sediment - Earthy Amber/Bronze)
+ * - RO Surface Cake Layer Resistance (R_cake - Dusty Olive)
  */
 function TelemetryCharts({ telemetry = null }) {
   // Initialize rolling window buffers
@@ -80,24 +80,24 @@ function TelemetryCharts({ telemetry = null }) {
       {
         label: 'Pre-Sediment Vacuum Resistance (R_sediment)',
         data: history.rSed,
-        borderColor: '#f59e0b', // Amber-500
-        backgroundColor: 'rgba(245, 158, 11, 0.12)',
+        borderColor: '#9E7836', // Warm Earthy Bronze / Amber
+        backgroundColor: 'rgba(158, 120, 54, 0.08)',
         borderWidth: 2.5,
         pointRadius: 2.5,
         pointHoverRadius: 5,
-        pointBackgroundColor: '#f59e0b',
+        pointBackgroundColor: '#9E7836',
         tension: 0.35,
         fill: true
       },
       {
         label: 'RO Surface Cake Layer Resistance (R_cake)',
         data: history.rCake,
-        borderColor: '#06b6d4', // Cyan-500
-        backgroundColor: 'rgba(6, 182, 212, 0.12)',
+        borderColor: '#6C8360', // Core Dusty Olive
+        backgroundColor: 'rgba(108, 131, 96, 0.12)',
         borderWidth: 2.5,
         pointRadius: 2.5,
         pointHoverRadius: 5,
-        pointBackgroundColor: '#06b6d4',
+        pointBackgroundColor: '#6C8360',
         tension: 0.35,
         fill: true
       }
@@ -118,11 +118,11 @@ function TelemetryCharts({ telemetry = null }) {
       legend: {
         position: 'top',
         labels: {
-          color: '#cbd5e1', // Slate-300
+          color: '#2A3525',
           font: {
             size: 11,
             weight: '600',
-            family: 'ui-sans-serif, system-ui, sans-serif'
+            family: '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif'
           },
           usePointStyle: true,
           boxWidth: 8,
@@ -130,10 +130,10 @@ function TelemetryCharts({ telemetry = null }) {
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#f8fafc',
-        bodyColor: '#e2e8f0',
-        borderColor: '#334155',
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        titleColor: '#2A3525',
+        bodyColor: '#54684A',
+        borderColor: '#BACAB3',
         borderWidth: 1,
         padding: 10,
         boxPadding: 4,
@@ -143,11 +143,11 @@ function TelemetryCharts({ telemetry = null }) {
     scales: {
       x: {
         grid: {
-          color: '#1e293b', // Slate-800
+          color: '#EAEFE5',
           drawBorder: false
         },
         ticks: {
-          color: '#64748b', // Slate-500
+          color: '#788870',
           font: {
             size: 10,
             family: 'ui-monospace, SFMono-Regular, monospace'
@@ -156,11 +156,11 @@ function TelemetryCharts({ telemetry = null }) {
       },
       y: {
         grid: {
-          color: '#1e293b',
+          color: '#EAEFE5',
           drawBorder: false
         },
         ticks: {
-          color: '#94a3b8',
+          color: '#788870',
           font: {
             size: 10,
             family: 'ui-monospace, SFMono-Regular, monospace'
@@ -170,7 +170,7 @@ function TelemetryCharts({ telemetry = null }) {
         title: {
           display: true,
           text: 'Hydraulic Resistance (kPa·s/L)',
-          color: '#64748b',
+          color: '#54684A',
           font: {
             size: 11,
             weight: 'bold'
@@ -186,28 +186,28 @@ function TelemetryCharts({ telemetry = null }) {
   const currentCake = history.rCake[history.rCake.length - 1];
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
+    <div className="bg-white border border-[#DCE4D6] rounded-2xl p-6 sm:p-7 shadow-sm space-y-4">
       {/* Header and Live Readout Badges */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-[#E3E9DE] gap-3">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center space-x-2">
-            <span className="text-amber-400">📈</span>
+          <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2">
+            <span className="text-[#849C77]">📈</span>
             <span>Darcy-Hermia Multi-Stage Hydraulic Decoupling Engine</span>
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[#6C7E66] mt-0.5">
             Rolling 15-second decoupling curves isolating pre-sediment clogging vs. RO cake nucleation.
           </p>
         </div>
 
         {/* Instantaneous KPI Readouts */}
         <div className="flex items-center space-x-2 font-mono text-xs">
-          <div className="px-3 py-1 bg-amber-950/60 border border-amber-800/80 rounded-lg text-amber-300">
-            <span className="text-[10px] text-amber-400/80 uppercase mr-1">R_sed:</span>
+          <div className="px-3 py-1 bg-[#FAF5EB] border border-[#DFD3BE] rounded-lg text-[#826947]">
+            <span className="text-[10px] text-[#826947]/80 uppercase mr-1">R_sed:</span>
             <span className="font-bold">{Number(currentSed).toFixed(2)}</span>
           </div>
 
-          <div className="px-3 py-1 bg-cyan-950/60 border border-cyan-800/80 rounded-lg text-cyan-300">
-            <span className="text-[10px] text-cyan-400/80 uppercase mr-1">R_cake:</span>
+          <div className="px-3 py-1 bg-[#EAEFE5] border border-[#BACAB3] rounded-lg text-[#3E4D37]">
+            <span className="text-[10px] text-[#54684A] uppercase mr-1">R_cake:</span>
             <span className="font-bold">{Number(currentCake).toFixed(2)}</span>
           </div>
         </div>

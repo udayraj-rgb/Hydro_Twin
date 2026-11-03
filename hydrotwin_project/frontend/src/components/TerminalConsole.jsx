@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 /**
  * TerminalConsole: Live MQTT & SQLite Ingestion Serial Emulator
  * Appends incoming telemetry frames with timestamps, device ID, resistances,
- * and status flags. Features auto-scroll, stream pause/resume, and buffer clearing.
+ * and status flags in an authentic deep forest olive terminal.
  */
 function TerminalConsole({ telemetry = null }) {
   const [logs, setLogs] = useState(() => [
@@ -36,7 +36,6 @@ function TerminalConsole({ telemetry = null }) {
 
     setLogs((prev) => {
       const next = [...prev, logLine];
-      // Keep maximum 100 historical log lines to prevent DOM bloat
       return next.length > 100 ? next.slice(-100) : next;
     });
   }, [telemetry, isPaused]);
@@ -53,32 +52,32 @@ function TerminalConsole({ telemetry = null }) {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="bg-white border border-[#DCE4D6] rounded-2xl overflow-hidden shadow-sm">
       {/* ----------------------------------------------------------------- */}
       {/* Terminal Header Bar */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-slate-950 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-[#F4F6F0] px-4 py-2.5 border-b border-[#DCE4D6] flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          {/* Mac/Linux terminal dots */}
-          <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block"></span>
-          <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
-          <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
-          <span className="text-xs font-mono font-bold text-slate-300 ml-2">
+          {/* Olive-themed terminal dots */}
+          <span className="w-2.5 h-2.5 rounded-full bg-[#6C8360] inline-block"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#849C77] inline-block"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#BACAB3] inline-block"></span>
+          <span className="text-xs font-mono font-bold text-[#3E4D37] ml-2">
             SQLite / MQTT Virtual Serial Console (/dev/ttyUSB0)
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
+          <span className="text-[11px] font-mono text-[#6C7E66] hidden sm:inline">
             {logs.length} packet(s)
           </span>
 
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded transition-all ${
+            className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-all border ${
               isPaused
-                ? 'bg-amber-950 text-amber-300 border border-amber-800'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-[#FAF5EB] text-[#826947] border-[#DFD3BE]'
+                : 'bg-white text-[#3E4D37] border-[#DCE4D6] hover:bg-[#EAEFE5]'
             }`}
           >
             {isPaused ? '▶ Resume' : '⏸ Pause'}
@@ -86,7 +85,7 @@ function TerminalConsole({ telemetry = null }) {
 
           <button
             onClick={handleClear}
-            className="px-2.5 py-1 text-[11px] font-mono font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all"
+            className="px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] text-[#3E4D37] transition-all"
           >
             Clear
           </button>
@@ -94,35 +93,31 @@ function TerminalConsole({ telemetry = null }) {
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Terminal Output Area */}
+      {/* Terminal Output Area: Deep Forest Night Olive */}
       {/* ----------------------------------------------------------------- */}
       <div
         ref={scrollRef}
-        className="bg-black/95 p-4 font-mono text-xs text-emerald-400 h-48 sm:h-56 overflow-y-auto space-y-1 selection:bg-emerald-500 selection:text-black"
+        className="bg-[#1C2419] p-4 font-mono text-xs text-[#B8D7B0] h-48 overflow-y-auto space-y-1 selection:bg-[#6C8360] selection:text-white"
       >
         {logs.map((log, index) => {
           const isError = log.includes('TRIP') || log.includes('CRITICAL');
           const isFlush = log.includes('FLUSH');
-          const isSys = log.includes('[SYSTEM]');
-
-          let colorClass = 'text-emerald-400';
-          if (isError) colorClass = 'text-rose-400 font-bold';
-          else if (isFlush) colorClass = 'text-cyan-300 font-semibold';
-          else if (isSys) colorClass = 'text-slate-400';
 
           return (
-            <div key={index} className={`leading-relaxed break-all ${colorClass}`}>
-              <span className="text-slate-600 mr-1.5 select-none">&gt;</span>
+            <div
+              key={index}
+              className={`leading-relaxed whitespace-pre-wrap font-mono ${
+                isError
+                  ? 'text-rose-400 font-bold bg-rose-950/40 px-1 py-0.5 rounded'
+                  : isFlush
+                  ? 'text-teal-300 font-semibold'
+                  : 'text-[#B8D7B0]'
+              }`}
+            >
               {log}
             </div>
           );
         })}
-
-        {/* Pulsing Command Prompt Cursor */}
-        <div className="flex items-center text-emerald-500 pt-1">
-          <span className="text-slate-600 mr-1.5">&gt;</span>
-          <span className="w-2 h-4 bg-emerald-500 animate-pulse inline-block"></span>
-        </div>
       </div>
     </div>
   );

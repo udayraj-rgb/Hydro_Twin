@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PredictiveHealthIntelligence from './PredictiveHealthIntelligence';
-import InteractivePurifierIllustration from './InteractivePurifierIllustration';
 
 const BACKEND_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
 
@@ -756,22 +755,14 @@ function ConsumerView({ telemetry = null }) {
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 5: PREDICTIVE HEALTH & STAGE MONITORING EMBEDS */}
+      {/* SECTION 5: PREDICTIVE HEALTH & STAGE MONITORING */}
       {/* ----------------------------------------------------------------- */}
       <div className="space-y-6">
-        
         {/* ML Prognostics & RUL Card */}
         <PredictiveHealthIntelligence
           telemetry={telemetry}
           mode="consumer"
         />
-
-        {/* 5-Stage Interactive Purifier Illustration */}
-        <InteractivePurifierIllustration
-          telemetry={telemetry}
-          mode="consumer"
-        />
-
       </div>
 
       {/* ----------------------------------------------------------------- */}

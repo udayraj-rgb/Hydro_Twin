@@ -4,20 +4,17 @@ import React from 'react';
  * PredictiveHealthIntelligence
  * 
  * Machine Learning Remaining Useful Life (RUL) & Prognostics Intelligence Center.
- * Features:
- * 1. RUL counter badge with Weibull + XGBoost Survival Regressor tag
- * 2. Automated D2C Replenishment Logistics Alert (State & Mode-Adaptive)
- * 3. 4-Card Multi-Stage Degradation Grid with dynamic physical loading progress bars:
- *    - Pre-Filter Suction Choke (R_sediment vacuum load)
- *    - Membrane Cake Scaling (R_cake boundary layer deposition)
- *    - Osmotic Salt Barrier (Salt rejection η %)
- *    - Fouling Rate Slope (Hermia cake-blocking dR/dt acceleration)
+ * Supports mode-adaptive styling:
+ * - 'consumer': Clean White & Olive brand theme matching Atomberg design language.
+ * - 'hil' / 'fleet': High-contrast dark instrument styling for embedded engineering.
  * 
  * Props:
  * - telemetry: Real-time digital twin telemetry packet from WebSocket
  * - mode: 'hil' | 'consumer' | 'fleet' (Defaults to 'hil')
  */
 function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
+  const isConsumer = mode === 'consumer';
+
   // ---------------------------------------------------------------------------
   // Prognostics & Physical Telemetry Extraction with Industrial Fallbacks
   // ---------------------------------------------------------------------------
@@ -58,112 +55,227 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
   const slopeLoadPct = Math.min(Math.max((drDt / 0.0350) * 100, 0), 100);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-6 relative overflow-hidden">
-      
+    <div
+      className={
+        isConsumer
+          ? 'bg-white border border-[#DCE4D6] rounded-3xl p-6 sm:p-7 shadow-sm space-y-6'
+          : 'bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-6 relative overflow-hidden'
+      }
+    >
       {/* ----------------------------------------------------------------- */}
       {/* Header with RUL Counter Badge */}
       {/* ----------------------------------------------------------------- */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-800 gap-4">
-        
+      <div
+        className={`flex flex-col lg:flex-row lg:items-center justify-between pb-5 gap-4 ${
+          isConsumer ? 'border-b border-[#E3E9DE]' : 'border-b border-slate-800'
+        }`}
+      >
         {/* Left: Model Tag & Title */}
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-bold text-white tracking-tight flex items-center space-x-2">
-              <span className="text-emerald-400">🧠</span>
+            <h3
+              className={`text-base font-bold tracking-tight flex items-center space-x-2 ${
+                isConsumer ? 'text-[#2A3525]' : 'text-white'
+              }`}
+            >
+              <span>{isConsumer ? '🌿' : '🧠'}</span>
               <span>Predictive Health & Remaining Useful Life (PHM)</span>
             </h3>
-            <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800/80">
+            <span
+              className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+                isConsumer
+                  ? 'bg-[#EAEFE5] text-[#3E4D37] border-[#BACAB3]'
+                  : 'bg-cyan-950 text-cyan-300 border-cyan-800/80'
+              }`}
+            >
               Weibull + XGBoost Survival Regressor (±5 Day Precision)
             </span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className={`text-xs ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
             Coupled machine learning survival analysis trained on multi-stage hydraulic degradation trajectories.
           </p>
         </div>
 
         {/* Right: Prominent RUL Counter Badge */}
-        <div className="flex items-center space-x-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 shadow-inner self-start lg:self-center">
+        <div
+          className={`flex items-center space-x-3 px-4 py-2 rounded-xl border shadow-inner self-start lg:self-center ${
+            isConsumer
+              ? 'bg-[#FAFBF8] border-[#BACAB3]'
+              : 'bg-slate-950 border-slate-800'
+          }`}
+        >
           <div className="text-right">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+            <div
+              className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
+                isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'
+              }`}
+            >
               Forecasted Window
             </div>
-            <div className="text-xs font-mono text-emerald-400 font-bold">
+            <div
+              className={`text-xs font-mono font-bold ${
+                isConsumer ? 'text-[#54684A]' : 'text-emerald-400'
+              }`}
+            >
               Est. Swap: {formattedProjectedDate}
             </div>
           </div>
-          <div className="h-8 w-px bg-slate-800"></div>
+          <div className={`h-8 w-px ${isConsumer ? 'bg-[#DCE4D6]' : 'bg-slate-800'}`}></div>
           <div className="flex items-baseline space-x-1.5">
-            <span className="text-3xl font-black font-mono tracking-tight text-white">
+            <span
+              className={`text-3xl font-black font-mono tracking-tight ${
+                isConsumer ? 'text-[#2A3525]' : 'text-white'
+              }`}
+            >
               {rulDays}
             </span>
-            <span className="text-xs font-bold text-cyan-400 font-mono">
+            <span
+              className={`text-xs font-bold font-mono ${
+                isConsumer ? 'text-[#54684A]' : 'text-cyan-400'
+              }`}
+            >
               DAYS RUL
             </span>
           </div>
         </div>
-
       </div>
 
       {/* ----------------------------------------------------------------- */}
       {/* Automated D2C Replenishment Logistics Alert Banner */}
       {/* ----------------------------------------------------------------- */}
       {autoDispatch || rulDays <= 14 ? (
-        <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/70 border border-emerald-600/70 shadow-xl shadow-emerald-950/40 space-y-3 animate-pulse-subtle">
+        <div
+          className={`p-4 sm:p-5 rounded-2xl border space-y-3 animate-pulse-subtle ${
+            isConsumer
+              ? 'bg-[#EAEFE5] border-[#BACAB3] shadow-sm'
+              : 'bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/70 border-emerald-600/70 shadow-xl shadow-emerald-950/40'
+          }`}
+        >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-900/90 border border-emerald-500/60 flex items-center justify-center text-xl shadow-md shadow-emerald-950/50">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md ${
+                  isConsumer
+                    ? 'bg-white border border-[#BACAB3] text-[#2A3525]'
+                    : 'bg-emerald-900/90 border border-emerald-500/60 shadow-emerald-950/50'
+                }`}
+              >
                 📦
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h4 className="text-sm font-bold text-emerald-300 tracking-wide">
+                  <h4
+                    className={`text-sm font-bold tracking-wide ${
+                      isConsumer ? 'text-[#2A3525]' : 'text-emerald-300'
+                    }`}
+                  >
                     Automated Doorstep Replenishment Active
                   </h4>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-900 text-emerald-200 border border-emerald-600">
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                      isConsumer
+                        ? 'bg-[#384828] text-white border-[#1F2D19]'
+                        : 'bg-emerald-900 text-emerald-200 border-emerald-600'
+                    }`}
+                  >
                     Auto-Dispatch Triggered
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  {mode === 'consumer'
+                <p className={`text-xs mt-0.5 ${isConsumer ? 'text-[#54684A]' : 'text-slate-300'}`}>
+                  {isConsumer
                     ? 'Custom replacement cartridge dispatched via Atomberg D2C Logistics. Delivery in 3 business days.'
                     : `ERP Reorder Triggered for Device #ATOM-WP-2026-0042. Consignment hub: Central Logistics Hub (Bottleneck: ${failingStage}).`}
                 </p>
               </div>
             </div>
 
-            <div className="text-xs font-mono font-bold text-emerald-300 bg-emerald-950/80 px-3 py-1.5 rounded-lg border border-emerald-700/80 shrink-0 self-start sm:self-center">
+            <div
+              className={`text-xs font-mono font-bold px-3 py-1.5 rounded-lg border shrink-0 self-start sm:self-center ${
+                isConsumer
+                  ? 'bg-white text-[#2A3525] border-[#BACAB3]'
+                  : 'text-emerald-300 bg-emerald-950/80 border-emerald-700/80'
+              }`}
+            >
               Target: 3 Business Days
             </div>
           </div>
 
           {/* Logistics Progress Pipeline */}
-          <div className="bg-slate-950/90 p-3 rounded-lg border border-emerald-900/50 space-y-1.5">
-            <div className="flex justify-between text-[10px] font-mono text-emerald-400">
+          <div
+            className={`p-3 rounded-xl border space-y-1.5 ${
+              isConsumer
+                ? 'bg-white border-[#BACAB3]/60'
+                : 'bg-slate-950/90 border-emerald-900/50'
+            }`}
+          >
+            <div
+              className={`flex justify-between text-[10px] font-mono ${
+                isConsumer ? 'text-[#3E4D37]' : 'text-emerald-400'
+              }`}
+            >
               <span>1. AI Wear Trigger (RUL ≤ 14d)</span>
-              <span className="font-bold text-emerald-300">2. Dispatched (In Transit)</span>
-              <span className="text-slate-500">3. Doorstep Delivery</span>
+              <span className={`font-bold ${isConsumer ? 'text-[#2A3525]' : 'text-emerald-300'}`}>
+                2. Dispatched (In Transit)
+              </span>
+              <span className={isConsumer ? 'text-[#788870]' : 'text-slate-500'}>
+                3. Doorstep Delivery
+              </span>
             </div>
-            <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-              <div className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full w-2/3 transition-all duration-1000"></div>
+            <div
+              className={`w-full h-2 rounded-full overflow-hidden border ${
+                isConsumer
+                  ? 'bg-[#EAEFE5] border-[#BACAB3]'
+                  : 'bg-slate-900 border-slate-800'
+              }`}
+            >
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  isConsumer
+                    ? 'bg-[#6C8360] w-2/3'
+                    : 'bg-gradient-to-r from-teal-500 to-emerald-400 w-2/3'
+                }`}
+              ></div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-4 text-slate-400">
+        <div
+          className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
+            isConsumer
+              ? 'bg-[#FAFBF8] border-[#DCE4D6] text-[#54684A]'
+              : 'bg-slate-950 border-slate-800 text-slate-400'
+          }`}
+        >
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg text-slate-400">
+            <div
+              className={`w-9 h-9 rounded-xl border flex items-center justify-center text-lg ${
+                isConsumer
+                  ? 'bg-white border-[#DCE4D6] text-[#54684A] shadow-sm'
+                  : 'bg-slate-900 border-slate-800 text-slate-400'
+              }`}
+            >
               🛡️
             </div>
             <div>
-              <div className="text-xs font-semibold text-slate-300">
+              <div
+                className={`text-xs font-semibold ${
+                  isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                }`}
+              >
                 Replenishment Logistics on Standby
               </div>
-              <div className="text-[11px] text-slate-400">
+              <div className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
                 All 4 filtration stages operating safely within nominal degradation boundaries. Automated doorstep delivery initiates automatically when RUL reaches ≤ 14 days.
               </div>
             </div>
           </div>
-          <span className="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 shrink-0 hidden sm:inline">
+          <span
+            className={`text-[10px] font-mono px-2.5 py-1 rounded border shrink-0 hidden sm:inline ${
+              isConsumer
+                ? 'bg-[#EAEFE5] text-[#3E4D37] border-[#BACAB3]'
+                : 'bg-slate-900 border-slate-800 text-slate-400'
+            }`}
+          >
             Status: Standby
           </span>
         </div>
@@ -174,53 +286,95 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
       {/* ----------------------------------------------------------------- */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+          <span
+            className={`text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5 ${
+              isConsumer ? 'text-[#54684A]' : 'text-slate-400'
+            }`}
+          >
             <span>📊</span>
             <span>Multi-Stage Hydraulic Degradation Matrix</span>
           </span>
-          <span className="text-[10px] font-mono text-slate-400">
+          <span className={`text-[10px] font-mono ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
             Continuous Darcy-Hermia Estimators
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
           {/* Card 1: Pre-Filter Suction Choke */}
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-md space-y-3 flex flex-col justify-between">
+          <div
+            className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
+              isConsumer
+                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                : 'bg-slate-950 border-slate-800 shadow-md'
+            }`}
+          >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300 flex items-center space-x-1.5">
+                <span
+                  className={`font-semibold flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  }`}
+                >
                   <span>🚰</span>
                   <span>Pre-Filter Choke</span>
                 </span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-                  sedimentLoadPct > 75 ? 'bg-rose-950 text-rose-300 border border-rose-800' :
-                  sedimentLoadPct > 40 ? 'bg-amber-950 text-amber-300 border border-amber-800' :
-                  'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                }`}>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    sedimentLoadPct > 75
+                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      : sedimentLoadPct > 40
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : isConsumer
+                      ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                      : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                  }`}
+                >
                   {sedimentLoadPct > 75 ? 'Critical' : sedimentLoadPct > 40 ? 'Loaded' : 'Nominal'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
                 Suction vacuum head resistance (silt & rust capture).
               </p>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
-                <span className="text-xl font-bold text-white tracking-tight">{rSediment.toFixed(2)}</span>
-                <span className="text-[11px] text-slate-400">kPa·s/L (Limit: 1.80)</span>
+                <span
+                  className={`text-xl font-bold tracking-tight ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-white'
+                  }`}
+                >
+                  {rSediment.toFixed(2)}
+                </span>
+                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                  kPa·s/L (Limit: 1.80)
+                </span>
               </div>
-              {/* Dynamic Loading Progress Bar */}
-              <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className={`w-full h-2 rounded-full overflow-hidden border ${
+                  isConsumer
+                    ? 'bg-[#EAEFE5] border-[#DCE4D6]'
+                    : 'bg-slate-900 border-slate-800'
+                }`}
+              >
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    sedimentLoadPct > 75 ? 'bg-rose-500' : sedimentLoadPct > 40 ? 'bg-amber-500' : 'bg-emerald-500'
+                    sedimentLoadPct > 75
+                      ? 'bg-rose-500'
+                      : sedimentLoadPct > 40
+                      ? 'bg-amber-500'
+                      : isConsumer
+                      ? 'bg-[#849C77]'
+                      : 'bg-emerald-500'
                   }`}
                   style={{ width: `${sedimentLoadPct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+              <div
+                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
+                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                }`}
+              >
                 <span>0.35 Clean</span>
                 <span>{Math.round(sedimentLoadPct)}% Load</span>
                 <span>1.80 Choke</span>
@@ -229,41 +383,80 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           </div>
 
           {/* Card 2: Membrane Cake Scaling */}
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-md space-y-3 flex flex-col justify-between">
+          <div
+            className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
+              isConsumer
+                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                : 'bg-slate-950 border-slate-800 shadow-md'
+            }`}
+          >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300 flex items-center space-x-1.5">
+                <span
+                  className={`font-semibold flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  }`}
+                >
                   <span>🌀</span>
                   <span>Membrane Cake Scaling</span>
                 </span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-                  cakeLoadPct > 70 ? 'bg-rose-950 text-rose-300 border border-rose-800' :
-                  cakeLoadPct > 40 ? 'bg-amber-950 text-amber-300 border border-amber-800' :
-                  'bg-cyan-950 text-cyan-300 border border-cyan-800'
-                }`}>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    cakeLoadPct > 70
+                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      : cakeLoadPct > 40
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : isConsumer
+                      ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                      : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
+                  }`}
+                >
                   {cakeLoadPct > 70 ? 'Fouled' : cakeLoadPct > 40 ? 'Scaling' : 'Clean'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
                 Boundary layer colloidal deposition on TFC surface.
               </p>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
-                <span className="text-xl font-bold text-cyan-400 tracking-tight">{rCake.toFixed(2)}</span>
-                <span className="text-[11px] text-slate-400">kPa·s/L (Limit: 1.40)</span>
+                <span
+                  className={`text-xl font-bold tracking-tight ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-cyan-400'
+                  }`}
+                >
+                  {rCake.toFixed(2)}
+                </span>
+                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                  kPa·s/L (Limit: 1.40)
+                </span>
               </div>
-              {/* Dynamic Scaling Progress Bar */}
-              <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className={`w-full h-2 rounded-full overflow-hidden border ${
+                  isConsumer
+                    ? 'bg-[#EAEFE5] border-[#DCE4D6]'
+                    : 'bg-slate-900 border-slate-800'
+                }`}
+              >
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    cakeLoadPct > 70 ? 'bg-rose-500' : cakeLoadPct > 40 ? 'bg-amber-500' : 'bg-cyan-500'
+                    cakeLoadPct > 70
+                      ? 'bg-rose-500'
+                      : cakeLoadPct > 40
+                      ? 'bg-amber-500'
+                      : isConsumer
+                      ? 'bg-[#6C8360]'
+                      : 'bg-cyan-500'
                   }`}
                   style={{ width: `${cakeLoadPct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+              <div
+                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
+                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                }`}
+              >
                 <span>0.05 Clean</span>
                 <span>{Math.round(cakeLoadPct)}% Scaled</span>
                 <span>1.40 Limit</span>
@@ -272,41 +465,80 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           </div>
 
           {/* Card 3: Osmotic Salt Barrier */}
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-md space-y-3 flex flex-col justify-between">
+          <div
+            className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
+              isConsumer
+                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                : 'bg-slate-950 border-slate-800 shadow-md'
+            }`}
+          >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300 flex items-center space-x-1.5">
+                <span
+                  className={`font-semibold flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  }`}
+                >
                   <span>💧</span>
                   <span>Osmotic Salt Barrier</span>
                 </span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-                  saltRejection >= 95.0 ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' :
-                  saltRejection >= 90.0 ? 'bg-amber-950 text-amber-300 border border-amber-800' :
-                  'bg-rose-950 text-rose-300 border border-rose-800 animate-pulse'
-                }`}>
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    saltRejection >= 95.0
+                      ? isConsumer
+                        ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                        : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                      : saltRejection >= 90.0
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      : 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse'
+                  }`}
+                >
                   {saltRejection >= 95.0 ? 'Optimal' : saltRejection >= 90.0 ? 'Permeable' : 'Breach'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
                 Mineral & heavy salt cross-flow rejection ratio (η).
               </p>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
-                <span className="text-xl font-bold text-emerald-400 tracking-tight">{saltRejection.toFixed(1)}%</span>
-                <span className="text-[11px] text-slate-400">{Math.round(inletTds)} → {Math.round(outletTds)} ppm</span>
+                <span
+                  className={`text-xl font-bold tracking-tight ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-emerald-400'
+                  }`}
+                >
+                  {saltRejection.toFixed(1)}%
+                </span>
+                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                  {Math.round(inletTds)} → {Math.round(outletTds)} ppm
+                </span>
               </div>
-              {/* Rejection Progress Bar */}
-              <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className={`w-full h-2 rounded-full overflow-hidden border ${
+                  isConsumer
+                    ? 'bg-[#EAEFE5] border-[#DCE4D6]'
+                    : 'bg-slate-900 border-slate-800'
+                }`}
+              >
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    saltRejection >= 95.0 ? 'bg-emerald-500' : saltRejection >= 90.0 ? 'bg-amber-500' : 'bg-rose-500'
+                    saltRejection >= 95.0
+                      ? isConsumer
+                        ? 'bg-[#6C8360]'
+                        : 'bg-emerald-500'
+                      : saltRejection >= 90.0
+                      ? 'bg-amber-500'
+                      : 'bg-rose-500'
                   }`}
                   style={{ width: `${rejectionPct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+              <div
+                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
+                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                }`}
+              >
                 <span>90% Cutoff</span>
                 <span>Target ≥ 95%</span>
                 <span>100% Ideal</span>
@@ -315,45 +547,80 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           </div>
 
           {/* Card 4: Fouling Rate Slope (dR/dt) */}
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-md space-y-3 flex flex-col justify-between">
+          <div
+            className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
+              isConsumer
+                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                : 'bg-slate-950 border-slate-800 shadow-md'
+            }`}
+          >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300 flex items-center space-x-1.5">
+                <span
+                  className={`font-semibold flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  }`}
+                >
                   <span>📈</span>
                   <span>Fouling Rate (dR/dt)</span>
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-purple-950 text-purple-300 border border-purple-800">
+                <span
+                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                    isConsumer
+                      ? 'bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]'
+                      : 'bg-purple-950 text-purple-300 border border-purple-800'
+                  }`}
+                >
                   Hermia Slope
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
                 Hermia cake pore-blocking acceleration per operating hour.
               </p>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
-                <span className="text-xl font-bold text-purple-400 tracking-tight">+{drDt.toFixed(4)}</span>
-                <span className="text-[11px] text-slate-400">kPa·s/(L·h)</span>
+                <span
+                  className={`text-xl font-bold tracking-tight ${
+                    isConsumer ? 'text-[#2A3525]' : 'text-purple-400'
+                  }`}
+                >
+                  +{drDt.toFixed(4)}
+                </span>
+                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                  kPa·s/(L·h)
+                </span>
               </div>
-              {/* Slope Acceleration Progress Bar */}
-              <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+              <div
+                className={`w-full h-2 rounded-full overflow-hidden border ${
+                  isConsumer
+                    ? 'bg-[#EAEFE5] border-[#DCE4D6]'
+                    : 'bg-slate-900 border-slate-800'
+                }`}
+              >
                 <div
-                  className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-500"
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    isConsumer
+                      ? 'bg-[#849C77]'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-500'
+                  }`}
                   style={{ width: `${slopeLoadPct}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+              <div
+                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
+                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                }`}
+              >
                 <span>0.0000 Base</span>
                 <span>Acceleration</span>
                 <span>0.0350 Max</span>
               </div>
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
   );
 }

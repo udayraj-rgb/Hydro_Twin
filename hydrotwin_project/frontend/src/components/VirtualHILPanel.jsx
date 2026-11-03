@@ -1,36 +1,45 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import HardwareActuatorLeds from './HardwareActuatorLeds';
+import InteractivePurifierIllustration from './InteractivePurifierIllustration';
 
 /**
  * VirtualHILPanel: Interactive Hardware-in-the-Loop Testbed & ESP32 Chassis
- * Styled in an elegant White and Olive palette matching the brand reference image.
+ * 
+ * Features:
+ * 1. Top: Autonomous Mode Switch ("AUTONOMOUS ACTIVE" vs "MANUAL OVERRIDE") & Virtual 24h Diurnal Clock
+ * 2. Below Clock: Formula-driven LED diodes for Booster Pump Relay, Dynamic Anti-Scaling Flush Solenoid, and Inlet Valve
+ * 3. Below LEDs: InteractivePurifierIllustration with 5-stage serial schematic and clickable Diagnostic Lens
+ * 4. Below Illustration: Interactive physical sliders for Inlet TDS, Permeate Flow Rate, and Booster Pump Current
+ * 5. Bottom: Automated stress-test scenario buttons and FreeRTOS deterministic firmware status banner
+ * 
+ * Props:
+ * - sensorInputs: { inlet_tds, flow_lpm, pump_current, mode, active_scenario }
+ * - onUpdate: (newInputs) => void
+ * - telemetry: Real-time digital twin telemetry packet from WebSocket
  */
 function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = null }) {
-  // Extract inputs
-  const inletTds = sensorInputs.inlet_tds ?? 850;
-  const flowLpm = sensorInputs.flow_lpm ?? 1.20;
-  const pumpCurrent = sensorInputs.pump_current ?? 0.85;
+  // State: selected stage for InteractivePurifierIllustration (default: 'ro')
+  const [selectedStage, setSelectedStage] = useState('ro');
+
+  // Physical inputs with safe defaults
+  const inletTds = Number(sensorInputs.inlet_tds ?? telemetry?.sensors?.inlet_tds ?? 850);
+  const flowLpm = Number(sensorInputs.flow_lpm ?? telemetry?.sensors?.flow_lpm ?? 1.20);
+  const pumpCurrent = Number(sensorInputs.pump_current ?? telemetry?.sensors?.pump_current ?? 0.85);
 
   // Active simulation mode
   const simMode = telemetry?.simulation?.mode || sensorInputs.mode || 'AUTONOMOUS';
   const isAutonomous = simMode === 'AUTONOMOUS';
 
-  // Actuators & Physics metrics from live telemetry
-  const deltaP = telemetry?.physics?.delta_p ?? Number((1.45 * pumpCurrent - 0.12).toFixed(2));
-  const rSediment = telemetry?.physics?.r_sediment ?? 0.60;
-  const rCake = telemetry?.physics?.r_cake ?? 1.12;
-  const saltRejection = telemetry?.physics?.salt_rejection ?? 95.2;
-  const outletTds = telemetry?.sensors?.outlet_tds ?? telemetry?.physics?.outlet_tds ?? 42.0;
+  // Status & Telemetry
   const statusText = telemetry?.status ?? 'NOMINAL';
-
   const isTrip = statusText.includes('SAFETY TRIP') || statusText.includes('CRITICAL');
   const isFlush = statusText.includes('FLUSH') || telemetry?.actuators?.flush_solenoid;
 
   // Diurnal clock state
   const diurnalTime = telemetry?.simulation?.diurnal_time || '07:45:00';
   const diurnalPhase = telemetry?.simulation?.diurnal_phase || 'Morning Peak (Breakfast & Water Dispensing)';
-  const accumulatedScale = telemetry?.simulation?.accumulated_scale ?? 0.0142;
-  const flushCountdown = telemetry?.simulation?.flush_countdown ?? 0;
+  const accumulatedScale = Number(telemetry?.simulation?.accumulated_scale ?? 0.0142);
+  const flushCountdown = Number(telemetry?.simulation?.flush_countdown ?? 0);
 
   // Calculate cumulative liters dispensed based on virtual clock time
   const simulatedLiters = useMemo(() => {
@@ -49,70 +58,74 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
   }, [diurnalTime]);
 
   return (
-    <div className="bg-white border border-[#DCE4D6] rounded-2xl p-6 sm:p-7 shadow-sm space-y-7 relative overflow-hidden">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl space-y-7 relative overflow-hidden">
       
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 1: Top Mode Selector & Diurnal Clock Banner */}
+      {/* 1. TOP: Autonomous Mode Switch & Virtual 24h Diurnal Clock */}
       {/* ----------------------------------------------------------------- */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-[#E3E9DE] gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-800 gap-4">
         
-        {/* Left: Mode Toggle Switch & Indicator */}
+        {/* Left: Mode Toggle Switch ("AUTONOMOUS ACTIVE" vs "MANUAL OVERRIDE") */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center bg-[#F4F6F0] p-1 rounded-xl border border-[#DCE4D6] shadow-inner">
+          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
             <button
               onClick={() => onUpdate({ mode: 'AUTONOMOUS', active_scenario: 'NONE' })}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-2 ${
                 isAutonomous
-                  ? 'bg-[#6C8360] text-white shadow-sm shadow-[#6C8360]/25'
-                  : 'text-[#54684A] hover:text-[#2A3525]'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${isAutonomous ? 'bg-white animate-pulse' : 'bg-[#9DB395]'}`}></span>
-              <span>🟢 Autonomous 24h Cycle</span>
+              <span className={`w-2 h-2 rounded-full ${isAutonomous ? 'bg-white animate-pulse' : 'bg-slate-500'}`}></span>
+              <span>🟢 AUTONOMOUS ACTIVE</span>
             </button>
 
             <button
               onClick={() => onUpdate({ mode: 'MANUAL', active_scenario: 'NONE' })}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-2 ${
                 !isAutonomous
-                  ? 'bg-[#826947] text-white shadow-sm shadow-[#826947]/25'
-                  : 'text-[#54684A] hover:text-[#2A3525]'
+                  ? 'bg-amber-600 text-white shadow-md shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <span>🛠️ Manual Override</span>
+              <span>🛠️ MANUAL OVERRIDE</span>
             </button>
           </div>
 
-          {isAutonomous && (
-            <div className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-mono font-semibold px-3 py-1 rounded-xl bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]">
-              <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-ping"></span>
-              <span>Self-Driving Simulation: Household Cycle Active</span>
+          {isAutonomous ? (
+            <div className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-mono font-semibold px-3 py-1 rounded-xl bg-emerald-950/70 text-emerald-300 border border-emerald-800/80">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span>Self-Driving Simulation: Indian Domestic Cycle</span>
+            </div>
+          ) : (
+            <div className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-mono font-semibold px-3 py-1 rounded-xl bg-amber-950/70 text-amber-300 border border-amber-800/80">
+              <span>⚠️ Manual Calibration: Drag sliders or trigger stress runs</span>
             </div>
           )}
         </div>
 
-        {/* Right: Virtual Diurnal Clock & Daily Dispense Gauge */}
+        {/* Right: Virtual 24h Diurnal Clock & Daily Dispense Widget */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="px-3.5 py-1.5 rounded-xl border border-[#DCE4D6] bg-[#F4F6F0] text-[#3E4D37] text-xs font-mono font-bold flex items-center space-x-2 shadow-sm">
+          <div className="px-3.5 py-1.5 rounded-xl border border-cyan-800/80 bg-cyan-950/40 text-cyan-300 text-xs font-mono font-bold flex items-center space-x-2 shadow-sm">
             <span>🕒</span>
-            <span className="text-sm tracking-wide text-[#2A3525]">{diurnalTime}</span>
-            <span className="hidden md:inline text-[11px] font-sans font-medium text-[#54684A] border-l border-[#DCE4D6] pl-2">
+            <span className="text-sm tracking-wide text-cyan-200">{diurnalTime}</span>
+            <span className="hidden md:inline text-[11px] font-sans font-normal text-cyan-400/90 border-l border-cyan-800/70 pl-2">
               {diurnalPhase}
             </span>
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl border border-[#DCE4D6] bg-[#F4F6F0] text-[#3E4D37] text-xs font-mono font-bold flex items-center space-x-1.5 shadow-sm">
+          <div className="px-3.5 py-1.5 rounded-xl border border-blue-800/80 bg-blue-950/40 text-blue-300 text-xs font-mono font-bold flex items-center space-x-1.5 shadow-sm">
             <span>💧</span>
-            <span className="text-[#2A3525]">{simulatedLiters} L</span>
-            <span className="text-[10px] text-[#6C7E66] font-sans font-normal">dispensed</span>
+            <span>{simulatedLiters} L</span>
+            <span className="text-[10px] text-blue-400/70 font-sans font-normal">dispensed</span>
           </div>
 
-          <div className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center space-x-2 transition-all shadow-sm ${
+          <div className={`px-3.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center space-x-2 transition-all shadow-md ${
             isTrip
-              ? 'bg-rose-50 border-rose-300 text-rose-800 animate-pulse'
+              ? 'bg-rose-950/90 border-rose-800 text-rose-300 animate-pulse'
               : isFlush
-              ? 'bg-[#E1EFEA] border-[#9CC7B8] text-[#1E5246] animate-pulse'
-              : 'bg-[#EAEFE5] border-[#BACAB3] text-[#3E4D37]'
+              ? 'bg-amber-950/90 border-amber-800 text-amber-300 animate-pulse'
+              : 'bg-emerald-950/80 border-emerald-800 text-emerald-300'
           }`}>
             <span className="text-sm">{isTrip ? '🛑' : isFlush ? '🌀' : '⚡'}</span>
             <span className="font-mono text-xs">{statusText}</span>
@@ -121,158 +134,41 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 2: Real-Time Hydraulic Telemetry Matrix (4 Olive Accent Tiles) */}
-      {/* Modeled directly after the 4 olive framed category tiles in reference image */}
+      {/* 2. BELOW CLOCK: Formula-Driven Dynamic Hardware LED Diodes */}
       {/* ----------------------------------------------------------------- */}
-      <div className="space-y-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs font-bold text-[#54684A] uppercase tracking-wider flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#849C77]"></span>
-            <span>Real-Time Hydraulic Telemetry Stream & Dynamic Physical States</span>
-          </div>
-          <div className="flex items-center space-x-2 text-[11px] font-mono">
-            <span className="text-[#6C7E66]">Scale Fouling:</span>
-            <span className="text-[#826947] font-bold">+{Number(accumulatedScale).toFixed(4)} kPa·s/L</span>
-            {flushCountdown > 0 && (
-              <span className="px-2 py-0.5 rounded bg-[#E1EFEA] border border-[#9CC7B8] text-[#1E5246] font-bold animate-pulse ml-2">
-                🌀 Descaling: {flushCountdown}s (-18% R_cake)
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* 4 Signature Olive Category Tiles with Fine Inner Framing */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          {/* Card 1: Feed Water Quality */}
-          <div className="bg-[#7D9173] text-white p-4 rounded-xl border border-[#6B7E62] shadow-sm relative overflow-hidden group">
-            <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
-              <div className="flex justify-between items-center text-xs text-white/90 font-medium">
-                <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>🚰</span>
-                  <span>Feed Water Quality</span>
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/20 text-white font-semibold">
-                  {inletTds > 1200 ? 'Hard Water' : 'Moderate'}
-                </span>
-              </div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-3xl font-extrabold font-mono tracking-tight text-white">{Math.round(inletTds)}</span>
-                <span className="text-xs text-white/80 font-mono">ppm TDS</span>
-              </div>
-              <div className="flex justify-between text-[11px] text-white/75 font-mono border-t border-white/20 pt-2">
-                <span>Temp: <strong>25.0 °C</strong></span>
-                <span>Viscosity: <strong>1.002 mPa·s</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: Booster Pump Core Dynamics */}
-          <div className="bg-[#6D8163] text-white p-4 rounded-xl border border-[#5C7053] shadow-sm relative overflow-hidden group">
-            <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
-              <div className="flex justify-between items-center text-xs text-white/90 font-medium">
-                <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>⚡</span>
-                  <span>Booster Pump Core</span>
-                </span>
-                <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
-                  pumpCurrent > 1.80 ? 'bg-rose-900/80 text-rose-100' :
-                  pumpCurrent < 0.15 ? 'bg-amber-900/80 text-amber-100' :
-                  'bg-white/20 text-white'
-                }`}>
-                  {pumpCurrent > 1.80 ? 'Overload' : pumpCurrent < 0.15 ? 'Cavitation' : 'Running'}
-                </span>
-              </div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-3xl font-extrabold font-mono tracking-tight text-white">{Number(pumpCurrent).toFixed(2)}</span>
-                <span className="text-xs text-white/80 font-mono">A / {deltaP.toFixed(2)} bar</span>
-              </div>
-              <div className="flex justify-between text-[11px] text-white/75 font-mono border-t border-white/20 pt-2">
-                <span>ΔP: <strong>{deltaP.toFixed(2)} bar</strong></span>
-                <span>Flow: <strong>{Number(flowLpm).toFixed(2)} L/m</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Decoupled Hydraulic Resistances */}
-          <div className="bg-[#869A7C] text-white p-4 rounded-xl border border-[#74876B] shadow-sm relative overflow-hidden group">
-            <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
-              <div className="flex justify-between items-center text-xs text-white/90 font-medium">
-                <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>🔬</span>
-                  <span>Hydraulic Impedance</span>
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/20 text-white font-semibold">
-                  Darcy-Hermia
-                </span>
-              </div>
-              <div className="flex items-baseline space-x-3">
-                <div>
-                  <span className="text-[10px] text-white/80 font-mono block">R_sediment</span>
-                  <span className="text-xl font-bold font-mono text-white">{Number(rSediment).toFixed(2)}</span>
-                </div>
-                <span className="text-white/40">|</span>
-                <div>
-                  <span className="text-[10px] text-white/80 font-mono block">R_cake (RO)</span>
-                  <span className="text-xl font-bold font-mono text-white">{Number(rCake).toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="flex justify-between text-[11px] text-white/75 font-mono border-t border-white/20 pt-2">
-                <span>Base: 0.35</span>
-                <span>Fouling: <strong>+{Number(accumulatedScale).toFixed(3)}</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: Permeate Purity & Salt Rejection */}
-          <div className="bg-[#5D7053] text-white p-4 rounded-xl border border-[#4C5E43] shadow-sm relative overflow-hidden group">
-            <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
-              <div className="flex justify-between items-center text-xs text-white/90 font-medium">
-                <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>💧</span>
-                  <span>Permeate Stream</span>
-                </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/20 text-white font-semibold">
-                  Pure & Safe
-                </span>
-              </div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-3xl font-extrabold font-mono tracking-tight text-white">{Math.round(outletTds)}</span>
-                <span className="text-xs text-white/80 font-mono">ppm / {saltRejection.toFixed(1)}% Rej</span>
-              </div>
-              <div className="flex justify-between text-[11px] text-white/75 font-mono border-t border-white/20 pt-2">
-                <span>Alkaline: <strong>+28 ppm Ca/Mg</strong></span>
-                <span>pH: <strong>7.8</strong></span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      <HardwareActuatorLeds
+        telemetry={telemetry}
+        sensorInputs={sensorInputs}
+      />
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 3: Formula-Driven Hardware Actuator LEDs Sub-System */}
+      {/* 3. BELOW LEDS: Interactive Technical Purifier Illustration */}
       {/* ----------------------------------------------------------------- */}
-      <HardwareActuatorLeds telemetry={telemetry} sensorInputs={sensorInputs} />
+      <InteractivePurifierIllustration
+        telemetry={telemetry}
+        selectedStage={selectedStage}
+        onSelectStage={setSelectedStage}
+        mode="hil"
+      />
 
       {/* ----------------------------------------------------------------- */}
-      {/* SECTION 4: Physical Input Transducers & Manual Stress Controls */}
+      {/* 4. BELOW ILLUSTRATION: Interactive Physical Sliders */}
       {/* ----------------------------------------------------------------- */}
       <div className="space-y-4 pt-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs font-bold text-[#54684A] uppercase tracking-wider flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#849C77]"></span>
-            <span>Physical Input Transducers & Edge Setpoints</span>
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+            <span>🎛️</span>
+            <span>Physical Input Transducers (Virtual Sensor Potentiometers)</span>
           </div>
 
-          <div className="text-[11px] font-mono">
+          <div className="text-[11px] font-mono text-slate-400">
             {isAutonomous ? (
-              <span className="text-[#54684A] font-semibold bg-[#EAEFE5] px-2.5 py-1 rounded-lg border border-[#BACAB3]">
-                🤖 Dynamic 24h Autonomous Household Simulation Active
+              <span className="text-emerald-400 font-semibold">
+                🤖 Sliders dynamically animated by 24h Autonomous Household Cycle
               </span>
             ) : (
-              <span className="text-[#826947] font-semibold bg-[#F9F5EB] px-2.5 py-1 rounded-lg border border-[#DFD3BE]">
-                🛠️ Manual Override Mode: Drag sliders or trigger edge presets
+              <span className="text-amber-400 font-semibold">
+                🛠️ Manual Override Mode: Drag sliders to inject physical setpoints
               </span>
             )}
           </div>
@@ -280,12 +176,14 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
 
         {/* 3 Physical Sliders */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Slider 1: Inlet Feed TDS */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-2">
+          {/* Slider 1: Inlet Feed TDS (100 - 2000 ppm) */}
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner space-y-2">
             <div className="flex justify-between items-center">
-              <label htmlFor="inlet-tds-slider" className="text-xs font-semibold text-[#2A3525]">Inlet Raw TDS</label>
-              <span className="text-sm font-bold font-mono text-[#2A3525] bg-white px-2 py-0.5 rounded border border-[#DCE4D6]">
-                {Math.round(inletTds)} <span className="text-[10px] text-[#788870] font-normal">ppm</span>
+              <label htmlFor="inlet-tds-slider" className="text-xs font-semibold text-slate-300">
+                Inlet Feed TDS
+              </label>
+              <span className="text-sm font-bold font-mono text-cyan-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                {Math.round(inletTds)} <span className="text-[10px] text-slate-500 font-normal">ppm</span>
               </span>
             </div>
             <input
@@ -298,21 +196,23 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
               onChange={(e) => {
                 onUpdate({ inlet_tds: parseFloat(e.target.value), mode: 'MANUAL', active_scenario: 'NONE' });
               }}
-              className="w-full h-2 bg-[#DCE4D6] rounded-lg appearance-none cursor-pointer accent-[#6C8360] focus:outline-none transition-all"
+              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500 focus:outline-none transition-all duration-300"
             />
-            <div className="flex justify-between text-[10px] text-[#788870] font-mono">
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
               <span>100 ppm</span>
               <span>1000 ppm</span>
               <span>2000 ppm</span>
             </div>
           </div>
 
-          {/* Slider 2: Feed Flow Rate */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-2">
+          {/* Slider 2: Permeate Flow Rate (0.0 - 2.5 L/min) */}
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner space-y-2">
             <div className="flex justify-between items-center">
-              <label htmlFor="flow-rate-slider" className="text-xs font-semibold text-[#2A3525]">Feed Flow Rate</label>
-              <span className="text-sm font-bold font-mono text-[#2A3525] bg-white px-2 py-0.5 rounded border border-[#DCE4D6]">
-                {Number(flowLpm).toFixed(2)} <span className="text-[10px] text-[#788870] font-normal">L/min</span>
+              <label htmlFor="flow-rate-slider" className="text-xs font-semibold text-slate-300">
+                Permeate Flow Rate
+              </label>
+              <span className="text-sm font-bold font-mono text-cyan-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                {flowLpm.toFixed(2)} <span className="text-[10px] text-slate-500 font-normal">L/min</span>
               </span>
             </div>
             <input
@@ -325,21 +225,23 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
               onChange={(e) => {
                 onUpdate({ flow_lpm: parseFloat(e.target.value), mode: 'MANUAL', active_scenario: 'NONE' });
               }}
-              className="w-full h-2 bg-[#DCE4D6] rounded-lg appearance-none cursor-pointer accent-[#6C8360] focus:outline-none transition-all"
+              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500 focus:outline-none transition-all duration-300"
             />
-            <div className="flex justify-between text-[10px] text-[#788870] font-mono">
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
               <span>0.00 L/m</span>
               <span>1.25 L/m</span>
               <span>2.50 L/m</span>
             </div>
           </div>
 
-          {/* Slider 3: Booster Pump Current */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-2">
+          {/* Slider 3: Booster Pump Motor Current (0.0 - 2.5 A) */}
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner space-y-2">
             <div className="flex justify-between items-center">
-              <label htmlFor="pump-current-slider" className="text-xs font-semibold text-[#2A3525]">Booster Pump Current</label>
-              <span className="text-sm font-bold font-mono text-[#2A3525] bg-white px-2 py-0.5 rounded border border-[#DCE4D6]">
-                {Number(pumpCurrent).toFixed(2)} <span className="text-[10px] text-[#788870] font-normal">A</span>
+              <label htmlFor="pump-current-slider" className="text-xs font-semibold text-slate-300">
+                Booster Pump Motor Current
+              </label>
+              <span className="text-sm font-bold font-mono text-cyan-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                {pumpCurrent.toFixed(2)} <span className="text-[10px] text-slate-500 font-normal">A</span>
               </span>
             </div>
             <input
@@ -352,123 +254,112 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
               onChange={(e) => {
                 onUpdate({ pump_current: parseFloat(e.target.value), mode: 'MANUAL', active_scenario: 'NONE' });
               }}
-              className="w-full h-2 bg-[#DCE4D6] rounded-lg appearance-none cursor-pointer accent-[#6C8360] focus:outline-none transition-all"
+              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500 focus:outline-none transition-all duration-300"
             />
-            <div className="flex justify-between text-[10px] text-[#788870] font-mono">
-              <span>0.08 A (Cavitation)</span>
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span className="text-amber-400">0.08 A (Cavitation)</span>
               <span>0.85 A</span>
-              <span>2.10 A (Stall)</span>
+              <span className="text-rose-400">2.10 A (Stall)</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Compact Quick Fault Injection & Stress Toolbar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+      {/* ----------------------------------------------------------------- */}
+      {/* 5. BOTTOM: Automated Stress-Test Buttons & FreeRTOS Status Banner */}
+      {/* ----------------------------------------------------------------- */}
+      <div className="space-y-4 pt-2">
+        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+          <span>⚡</span>
+          <span>Automated Stress-Test Scenarios & Edge Fault Injection</span>
+        </div>
+
+        {/* 4 Stress-Test Buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <button
-            onClick={() => onUpdate({ inlet_tds: 1650, mode: 'MANUAL', active_scenario: 'NONE' })}
-            className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
+            onClick={() => onUpdate({ inlet_tds: 1650, mode: 'MANUAL', active_scenario: 'HARDNESS_SPIKE' })}
+            className="px-4 py-3 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/60 rounded-xl text-xs font-bold text-slate-200 hover:text-amber-300 transition-all flex items-center justify-center space-x-2 shadow-sm group"
           >
             <span>🌊</span>
-            <span>Hard Water (1650 ppm)</span>
+            <span>Hardness Spike (1650 ppm)</span>
           </button>
 
           <button
-            onClick={() => onUpdate({ pump_current: 0.08, flow_lpm: 0.0, mode: 'MANUAL', active_scenario: 'NONE' })}
-            className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
+            onClick={() => onUpdate({ pump_current: 0.08, flow_lpm: 0.0, mode: 'MANUAL', active_scenario: 'CAVITATION' })}
+            className="px-4 py-3 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-rose-500/60 rounded-xl text-xs font-bold text-slate-200 hover:text-rose-300 transition-all flex items-center justify-center space-x-2 shadow-sm group"
           >
             <span>⚡</span>
-            <span>Dry Cavitation (0.08 A)</span>
+            <span>Cavitation Cutoff (0.08 A)</span>
           </button>
 
           <button
-            onClick={() => onUpdate({ pump_current: 2.10, mode: 'MANUAL', active_scenario: 'NONE' })}
-            className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
+            onClick={() => onUpdate({ pump_current: 2.15, flow_lpm: 0.05, mode: 'MANUAL', active_scenario: 'STALL' })}
+            className="px-4 py-3 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-rose-500/60 rounded-xl text-xs font-bold text-slate-200 hover:text-rose-300 transition-all flex items-center justify-center space-x-2 shadow-sm group"
           >
             <span>🛑</span>
-            <span>Locked Rotor (2.10 A)</span>
+            <span>Motor Jam Stall (2.15 A)</span>
           </button>
 
           <button
             onClick={() => onUpdate({ inlet_tds: 850, flow_lpm: 1.20, pump_current: 0.85, mode: 'AUTONOMOUS', active_scenario: 'NONE' })}
-            className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
+            className="px-4 py-3 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/60 rounded-xl text-xs font-bold text-slate-200 hover:text-emerald-300 transition-all flex items-center justify-center space-x-2 shadow-sm group"
           >
             <span>🔄</span>
-            <span>Reset Nominal</span>
+            <span>Resume Auto Cycle</span>
           </button>
         </div>
-      </div>
 
-      {/* ----------------------------------------------------------------- */}
-      {/* SECTION 5: Hardware Pinouts & Virtual Telemetry Diagnostic Sub-panel */}
-      {/* ----------------------------------------------------------------- */}
-      <div className="space-y-3 pt-2">
-        <div className="text-xs font-bold text-[#54684A] uppercase tracking-wider flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-[#849C77]"></span>
-          <span>ESP32-WROOM-32D Hardware Pinouts & ADC Transducer Diagnostic Telemetry</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* GPIO26: Pump Relay PWM */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#2A3525]">GPIO26 (Pump PWM)</span>
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                !isTrip ? 'bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]' : 'bg-rose-50 text-rose-700 border border-rose-200'
-              }`}>
-                {!isTrip ? 'CLOSED [3.3V]' : 'TRIPPED [0.0V]'}
+        {/* FreeRTOS Deterministic Firmware Status Banner */}
+        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-lg space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-800/80 gap-2">
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-xs font-bold font-mono uppercase tracking-wider text-slate-200">
+                FreeRTOS v10.4 Deterministic Firmware Interlock Banner
               </span>
             </div>
-            <div className="text-[11px] text-[#54684A] font-mono">
-              F: 20.0 kHz | Duty: <strong className="text-[#2A3525]">{!isTrip ? '88.5%' : '0.0%'}</strong>
+            <div className="text-[11px] font-mono text-slate-400">
+              Deterministic Jitter: <strong className="text-cyan-400">&lt; 2.4 ms</strong> | Edge Deadline: <strong className="text-emerald-400">&lt; 200 ms</strong>
             </div>
-            <div className="text-[10px] text-[#788870]">Solid-State MOSFET Driver</div>
           </div>
 
-          {/* GPIO27: Flush Solenoid Relay */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#2A3525]">GPIO27 (Flush Valve)</span>
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                isFlush ? 'bg-[#E1EFEA] text-[#1E5246] border border-[#9CC7B8] animate-pulse' : 'bg-[#F4F6F0] text-[#788870] border border-[#DCE4D6]'
-              }`}>
-                {isFlush ? 'ACTIVE [3.3V]' : 'IDLE [0.0V]'}
-              </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
+            {/* Field 1: Active Interlock Rule Status */}
+            <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase">Interlock Status</div>
+              <div className={`font-bold text-xs truncate ${isTrip ? 'text-rose-400' : 'text-emerald-400'}`}>
+                {statusText}
+              </div>
             </div>
-            <div className="text-[11px] text-[#54684A] font-mono">
-              Coil: <strong className={isFlush ? 'text-[#1E5246]' : 'text-[#788870]'}>{isFlush ? '12V DC Energized' : 'De-energized'}</strong>
-            </div>
-            <div className="text-[10px] text-[#788870]">High-Flow Descaling Bypass</div>
-          </div>
 
-          {/* GPIO34: ADC Current Sense ACS712 */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#2A3525]">GPIO34 (ADC Current)</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]">
-                ACS712-05B
-              </span>
+            {/* Field 2: FreeRTOS Task Scheduling */}
+            <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase">Active Task Sched</div>
+              <div className="text-cyan-300 text-xs">
+                SafetyInterlockTask (Prio 4)
+              </div>
             </div>
-            <div className="text-[11px] text-[#54684A] font-mono">
-              V_adc: <strong className="text-[#2A3525]">{(2.50 + pumpCurrent * 0.185).toFixed(3)} V</strong> ({pumpCurrent.toFixed(2)} A)
-            </div>
-            <div className="text-[10px] text-[#788870]">Sensitivity: 185 mV/A Hall Effect</div>
-          </div>
 
-          {/* GPIO35: ADC Flow Pulse Input */}
-          <div className="bg-[#FAFBF8] p-4 rounded-xl border border-[#DCE4D6] shadow-sm space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#2A3525]">GPIO35 (Flow Pulse)</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]">
-                YF-S201
-              </span>
+            {/* Field 3: Relay Actuation States */}
+            <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase">GPIO Relay Bus</div>
+              <div className="text-slate-200 text-xs">
+                GPIO26: <span className={!isTrip ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>{!isTrip ? 'CLOSED' : 'TRIP'}</span> | GPIO27: <span className={isFlush ? 'text-cyan-400 font-bold' : 'text-slate-400'}>{isFlush ? 'FLUSH' : 'IDLE'}</span>
+              </div>
             </div>
-            <div className="text-[11px] text-[#54684A] font-mono">
-              Freq: <strong className="text-[#2A3525]">{(flowLpm * 7.5).toFixed(1)} Hz</strong> ({flowLpm.toFixed(2)} L/m)
+
+            {/* Field 4: Transmembrane Pressure ΔP */}
+            <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 space-y-1">
+              <div className="text-[10px] text-slate-400 uppercase">Trans-Membrane ΔP</div>
+              <div className="text-amber-300 font-bold text-xs">
+                {(1.45 * pumpCurrent - 0.12).toFixed(2)} bar ({(pumpCurrent * 1.45 * 100).toFixed(0)} kPa)
+              </div>
             </div>
-            <div className="text-[10px] text-[#788870]">7.5 Pulses/sec per L/min</div>
           </div>
         </div>
+
       </div>
+
     </div>
   );
 }

@@ -1,20 +1,21 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 /**
  * ConsumerVideoShowcase
  * 
  * Continuous Ambient Video Showcase Banner for Atomberg Intellon Water Purifier.
- * Designed to play 100% continuously without pausing, stopping, or audio,
- * providing a premium, professional brand look directly above the Consumer Dashboard.
+ * Plays smoothly and continuously with an interactive Mute / Unmute audio toggle,
+ * styled in the signature White & Olive professional brand aesthetic.
  */
 function ConsumerVideoShowcase({ telemetry = null }) {
   const videoRef = useRef(null);
+  const [isMuted, setIsMuted] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Strict browser autoplay policy configuration (must be muted)
+    // Start muted to comply with browser autoplay requirements
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
@@ -23,7 +24,7 @@ function ConsumerVideoShowcase({ telemetry = null }) {
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn('[HydroTwin Video] Autoplay retry:', err);
+          console.warn('[HydroTwin Video] Autoplay delayed, retrying muted:', err);
           setTimeout(() => {
             if (video) {
               video.muted = true;
@@ -39,7 +40,6 @@ function ConsumerVideoShowcase({ telemetry = null }) {
     // Ensure playback resumes if user switches tabs and returns
     const handleVisibilityChange = () => {
       if (!document.hidden && video) {
-        video.muted = true;
         video.play().catch(() => {});
       }
     };
@@ -50,16 +50,25 @@ function ConsumerVideoShowcase({ telemetry = null }) {
     };
   }, []);
 
-  // Safety interlocks: if paused or ended, restart immediately to ensure continuous loop
+  // Guarantee continuous playback: if paused or ended, restart immediately
   const handlePause = (e) => {
-    e.target.muted = true;
     e.target.play().catch(() => {});
   };
 
   const handleEnded = (e) => {
     e.target.currentTime = 0;
-    e.target.muted = true;
     e.target.play().catch(() => {});
+  };
+
+  // Toggle Mute / Unmute sound
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const nextMuted = !videoRef.current.muted;
+      videoRef.current.muted = nextMuted;
+      setIsMuted(nextMuted);
+      // Ensure playback is active when unmuting
+      videoRef.current.play().catch(() => {});
+    }
   };
 
   const outletTds = Math.round(
@@ -78,7 +87,7 @@ function ConsumerVideoShowcase({ telemetry = null }) {
         {/* Top Tagline Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
-            <span className="text-[#96BF48] font-black text-sm tracking-widest">▶▶</span>
+            <span className="w-2 h-2 rounded-full bg-[#6C8360]"></span>
             <span className="text-xs font-bold uppercase tracking-wider text-[#576C4D]">
               Atomberg Intellon Flagship Showcase
             </span>
@@ -93,7 +102,7 @@ function ConsumerVideoShowcase({ telemetry = null }) {
         {/* Cinematic Video Showcase Frame */}
         <div className="relative w-full rounded-3xl overflow-hidden border border-[#DCE4D6] shadow-md bg-[#1F2D19] aspect-[16/9] md:aspect-[21/9] max-h-[520px]">
           
-          {/* Native HTML5 Continuous Video (Muted, AutoPlay, Loop, Inline) */}
+          {/* Native HTML5 Continuous Video */}
           <video
             ref={videoRef}
             src={videoSrc}
@@ -111,23 +120,53 @@ function ConsumerVideoShowcase({ telemetry = null }) {
           />
 
           {/* Top-Left Floating Brand Pill */}
-          <div className="absolute top-4 left-4 sm:top-5 sm:left-6 z-10 flex items-center space-x-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#DCE4D6] shadow-md">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#6C8360] animate-ping"></span>
+          <div className="absolute top-4 left-4 sm:top-5 sm:left-6 z-20 flex items-center space-x-2 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[#DCE4D6] shadow-md pointer-events-auto">
+            <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-ping"></span>
             <span className="text-xs font-black text-[#2A3525]">Atomberg Intellon</span>
             <span className="text-[10px] text-[#54684A] font-semibold hidden sm:inline">
               Smart IoT Water Purifier
             </span>
           </div>
 
-          {/* Top-Right Floating Live Metric Pill */}
-          <div className="absolute top-4 right-4 sm:top-5 sm:right-6 z-10 flex items-center space-x-2 bg-[#2A3525]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-white shadow-md font-mono text-xs">
-            <span className="text-sm">💎</span>
-            <span className="font-bold">{rejection}%</span>
-            <span className="text-[10px] text-white/75 font-sans">Pure Permeate</span>
+          {/* Top-Right Controls: Mute/Unmute Button & Purity Metric */}
+          <div className="absolute top-4 right-4 sm:top-5 sm:right-6 z-20 flex items-center space-x-2.5 pointer-events-auto">
+            
+            {/* Interactive Audio Mute / Unmute Button */}
+            <button
+              id="video-mute-toggle-btn"
+              type="button"
+              onClick={toggleMute}
+              className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/95 hover:bg-white text-[#2A3525] border border-[#BACAB3] shadow-md backdrop-blur-md transition-all duration-200 active:scale-95 text-xs font-bold cursor-pointer"
+              title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
+            >
+              {isMuted ? (
+                <>
+                  <svg className="w-4 h-4 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  </svg>
+                  <span>Unmute Audio</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 text-[#4E7A3D] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                  </svg>
+                  <span>Mute Audio</span>
+                </>
+              )}
+            </button>
+
+            {/* Live Rejection Metric Pill */}
+            <div className="hidden sm:flex items-center space-x-1.5 bg-[#2A3525]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-white shadow-md font-mono text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#849C77]"></span>
+              <span className="font-bold">{rejection}%</span>
+              <span className="text-[10px] text-white/80 font-sans">Rejection</span>
+            </div>
           </div>
 
           {/* Subtle Bottom Gradient Scrim */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent pointer-events-none"></div>
 
           {/* Bottom Floating Info Scrim on the Video */}
           <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-white pointer-events-none">
@@ -144,7 +183,9 @@ function ConsumerVideoShowcase({ telemetry = null }) {
             </div>
 
             <div className="flex items-center space-x-3 self-start sm:self-end bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/30 text-white shadow-lg shrink-0">
-              <div className="text-2xl">🚰</div>
+              <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center font-bold text-sm">
+                H₂O
+              </div>
               <div>
                 <div className="text-[10px] text-white/80 font-bold uppercase tracking-wider">Filtered Purity</div>
                 <div className="text-base font-black font-mono leading-tight">{outletTds} ppm • pH ~7.8</div>

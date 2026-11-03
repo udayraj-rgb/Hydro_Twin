@@ -268,7 +268,9 @@ function App() {
         
         {/* Top Slim Announcement Banner */}
         <div className="bg-[#384828] text-[#E4F0DE] text-[11px] font-medium tracking-widest text-center py-2 px-4 uppercase border-b border-[#2C3B1F] flex items-center justify-center space-x-2">
-          <span>🌿</span>
+          <svg className="w-3.5 h-3.5 text-[#C7E48F]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
           <span>AtomQuest 2026 • Track 2: Smart Water Purifier • Autonomous Digital Twin & PHM</span>
         </div>
 
@@ -312,7 +314,9 @@ function App() {
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
                 }`}
               >
-                <span>🛠️</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
                 <span>Virtual HIL Testbed</span>
               </button>
 
@@ -324,7 +328,9 @@ function App() {
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
                 }`}
               >
-                <span>📱</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
                 <span>Consumer App</span>
               </button>
 
@@ -336,7 +342,9 @@ function App() {
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
                 }`}
               >
-                <span>🏢</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
                 <span>Fleet OEM Portal</span>
               </button>
             </div>

@@ -68,7 +68,7 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${isAutonomous ? 'bg-white animate-pulse' : 'bg-[#9DB395]'}`}></span>
-              <span>🟢 Autonomous 24h Cycle</span>
+              <span>Autonomous 24h Cycle</span>
             </button>
 
             <button
@@ -79,7 +79,10 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
                   : 'text-[#54684A] hover:text-[#2A3525]'
               }`}
             >
-              <span>🛠️ Manual Override</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              <span>Manual Override</span>
             </button>
           </div>
 
@@ -94,7 +97,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
         {/* Right: Virtual Diurnal Clock & Daily Dispense Gauge */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="px-3.5 py-1.5 rounded-xl border border-[#DCE4D6] bg-[#F4F6F0] text-[#3E4D37] text-xs font-mono font-bold flex items-center space-x-2 shadow-sm">
-            <span>🕒</span>
+            <svg className="w-3.5 h-3.5 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <span className="text-sm tracking-wide text-[#2A3525]">{diurnalTime}</span>
             <span className="hidden md:inline text-[11px] font-sans font-medium text-[#54684A] border-l border-[#DCE4D6] pl-2">
               {diurnalPhase}
@@ -102,7 +107,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
           </div>
 
           <div className="px-3.5 py-1.5 rounded-xl border border-[#DCE4D6] bg-[#F4F6F0] text-[#3E4D37] text-xs font-mono font-bold flex items-center space-x-1.5 shadow-sm">
-            <span>💧</span>
+            <svg className="w-3.5 h-3.5 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
             <span className="text-[#2A3525]">{simulatedLiters} L</span>
             <span className="text-[10px] text-[#6C7E66] font-sans font-normal">dispensed</span>
           </div>
@@ -114,7 +121,7 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
               ? 'bg-[#E1EFEA] border-[#9CC7B8] text-[#1E5246] animate-pulse'
               : 'bg-[#EAEFE5] border-[#BACAB3] text-[#3E4D37]'
           }`}>
-            <span className="text-sm">{isTrip ? '🛑' : isFlush ? '🌀' : '⚡'}</span>
+            <span className={`w-2 h-2 rounded-full ${isTrip ? 'bg-rose-600' : isFlush ? 'bg-teal-600' : 'bg-[#6C8360]'}`}></span>
             <span className="font-mono text-xs">{statusText}</span>
           </div>
         </div>
@@ -134,8 +141,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             <span className="text-[#6C7E66]">Scale Fouling:</span>
             <span className="text-[#826947] font-bold">+{Number(accumulatedScale).toFixed(4)} kPa·s/L</span>
             {flushCountdown > 0 && (
-              <span className="px-2 py-0.5 rounded bg-[#E1EFEA] border border-[#9CC7B8] text-[#1E5246] font-bold animate-pulse ml-2">
-                🌀 Descaling: {flushCountdown}s (-18% R_cake)
+              <span className="px-2 py-0.5 rounded bg-[#E1EFEA] border border-[#9CC7B8] text-[#1E5246] font-bold animate-pulse ml-2 flex items-center space-x-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#1E5246] animate-ping"></span>
+                <span>Descaling: {flushCountdown}s (-18% R_cake)</span>
               </span>
             )}
           </div>
@@ -149,7 +157,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
               <div className="flex justify-between items-center text-xs text-white/90 font-medium">
                 <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>🚰</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
                   <span>Feed Water Quality</span>
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/20 text-white font-semibold">
@@ -172,7 +182,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
               <div className="flex justify-between items-center text-xs text-white/90 font-medium">
                 <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>⚡</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                   <span>Booster Pump Core</span>
                 </span>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
@@ -199,7 +211,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
               <div className="flex justify-between items-center text-xs text-white/90 font-medium">
                 <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>🔬</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                   <span>Hydraulic Impedance</span>
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/20 text-white font-semibold">
@@ -229,7 +243,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             <div className="border border-white/25 rounded-lg p-3 space-y-2.5 h-full flex flex-col justify-between">
               <div className="flex justify-between items-center text-xs text-white/90 font-medium">
                 <span className="flex items-center space-x-1.5 uppercase tracking-wider text-[11px]">
-                  <span>💧</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
                   <span>Permeate Stream</span>
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/20 text-white font-semibold">
@@ -267,12 +283,18 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
 
           <div className="text-[11px] font-mono">
             {isAutonomous ? (
-              <span className="text-[#54684A] font-semibold bg-[#EAEFE5] px-2.5 py-1 rounded-lg border border-[#BACAB3]">
-                🤖 Dynamic 24h Autonomous Household Simulation Active
+              <span className="text-[#54684A] font-semibold bg-[#EAEFE5] px-2.5 py-1 rounded-lg border border-[#BACAB3] flex items-center space-x-1.5">
+                <svg className="w-3.5 h-3.5 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                <span>Dynamic 24h Autonomous Household Simulation Active</span>
               </span>
             ) : (
-              <span className="text-[#826947] font-semibold bg-[#F9F5EB] px-2.5 py-1 rounded-lg border border-[#DFD3BE]">
-                🛠️ Manual Override Mode: Drag sliders or trigger edge presets
+              <span className="text-[#826947] font-semibold bg-[#F9F5EB] px-2.5 py-1 rounded-lg border border-[#DFD3BE] flex items-center space-x-1.5">
+                <svg className="w-3.5 h-3.5 text-[#826947]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                <span>Manual Override Mode: Drag sliders or trigger edge presets</span>
               </span>
             )}
           </div>
@@ -368,7 +390,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             onClick={() => onUpdate({ inlet_tds: 1650, mode: 'MANUAL', active_scenario: 'NONE' })}
             className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
           >
-            <span>🌊</span>
+            <svg className="w-3.5 h-3.5 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
             <span>Hard Water (1650 ppm)</span>
           </button>
 
@@ -376,7 +400,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             onClick={() => onUpdate({ pump_current: 0.08, flow_lpm: 0.0, mode: 'MANUAL', active_scenario: 'NONE' })}
             className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
           >
-            <span>⚡</span>
+            <svg className="w-3.5 h-3.5 text-[#826947]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
             <span>Dry Cavitation (0.08 A)</span>
           </button>
 
@@ -384,7 +410,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             onClick={() => onUpdate({ pump_current: 2.10, mode: 'MANUAL', active_scenario: 'NONE' })}
             className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
           >
-            <span>🛑</span>
+            <svg className="w-3.5 h-3.5 text-[#9C4A3B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
             <span>Locked Rotor (2.10 A)</span>
           </button>
 
@@ -392,7 +420,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             onClick={() => onUpdate({ inlet_tds: 850, flow_lpm: 1.20, pump_current: 0.85, mode: 'AUTONOMOUS', active_scenario: 'NONE' })}
             className="px-3.5 py-2.5 bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#849C77] rounded-xl text-xs font-semibold text-[#3E4D37] transition-all flex items-center justify-center space-x-1.5 shadow-sm"
           >
-            <span>🔄</span>
+            <svg className="w-3.5 h-3.5 text-[#54684A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
             <span>Reset Nominal</span>
           </button>
         </div>

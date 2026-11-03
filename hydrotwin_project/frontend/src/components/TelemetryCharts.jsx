@@ -191,7 +191,9 @@ function TelemetryCharts({ telemetry = null }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-[#E3E9DE] gap-3">
         <div>
           <h3 className="text-base font-bold text-[#2A3525] flex items-center space-x-2">
-            <span className="text-[#849C77]">📈</span>
+            <svg className="w-4 h-4 text-[#849C77]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
             <span>Darcy-Hermia Multi-Stage Hydraulic Decoupling Engine</span>
           </h3>
           <p className="text-xs text-[#6C7E66] mt-0.5">

@@ -266,19 +266,11 @@ function App() {
       {/* ----------------------------------------------------------------- */}
       <div className="max-w-[1400px] w-full mx-auto bg-[#FAFCF7] rounded-[24px] sm:rounded-[32px] shadow-2xl border border-white/70 overflow-hidden flex flex-col flex-1">
         
-        {/* Top Slim Announcement Banner */}
-        <div className="bg-[#384828] text-[#E4F0DE] text-[11px] font-medium tracking-widest text-center py-2 px-4 uppercase border-b border-[#2C3B1F] flex items-center justify-center space-x-2">
-          <svg className="w-3.5 h-3.5 text-[#C7E48F]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <span>AtomQuest 2026 • Track 2: Smart Water Purifier • Autonomous Digital Twin & PHM</span>
-        </div>
-
         {/* ----------------------------------------------------------------- */}
         {/* Navigation Header */}
         {/* ----------------------------------------------------------------- */}
         <header className="sticky top-0 z-50 bg-[#FAFCF7]/95 backdrop-blur border-b border-[#E1ECD9] px-6 sm:px-8 py-4 shadow-sm">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             
             {/* Brand Logo & Context */}
             <div className="flex items-center space-x-3.5">
@@ -292,33 +284,20 @@ function App() {
                 </div>
               </div>
               <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-black tracking-tight text-[#1F2D19] flex items-center gap-1.5">
-                    <span>HydroTwin–PHM</span>
-                  </h1>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#E8F2E3] text-[#384828] border border-[#BACAB3]">
-                    Virtual HIL Twin
-                  </span>
-                  <span className="inline-flex items-center space-x-1.5 text-[10px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-[#E8F2E3] text-[#2F3D21] border border-[#8FA385]/50">
-                    <span className="w-2 h-2 rounded-full bg-[#4E7A3D] animate-pulse"></span>
-                    <span>Live 1 Hz</span>
-                  </span>
-                </div>
-                <p className="text-xs text-[#576C4D] font-medium mt-0.5 flex flex-wrap items-center gap-x-1.5">
-                  <span>Team Atomizers • SCOPE, VIT Bhopal</span>
-                  <span className="text-[#849C77]">•</span>
-                  <span className="font-bold text-[#2A3525] bg-[#EAEFE5] px-1.5 py-0.5 rounded text-[10px] border border-[#BACAB3]">
-                    Powered by Atomberg
-                  </span>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-[#1F2D19] leading-tight">
+                  HydroTwin–PHM
+                </h1>
+                <p className="text-xs font-bold text-[#576C4D] tracking-wide mt-0.5">
+                  Powered by Atomberg
                 </p>
               </div>
             </div>
 
             {/* 3 Tab Navigation Buttons */}
-            <div className="flex items-center space-x-1.5 bg-[#EDF4EA] p-1.5 rounded-2xl border border-[#D5E4CC] self-start lg:self-center shadow-inner">
+            <div className="flex items-center space-x-1.5 bg-[#EDF4EA] p-1.5 rounded-2xl border border-[#D5E4CC] self-start sm:self-center shadow-inner">
               <button
                 onClick={() => setActiveTab('hil')}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
                   activeTab === 'hil'
                     ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
@@ -332,7 +311,7 @@ function App() {
 
               <button
                 onClick={() => setActiveTab('consumer')}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
                   activeTab === 'consumer'
                     ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
@@ -346,7 +325,7 @@ function App() {
 
               <button
                 onClick={() => setActiveTab('fleet')}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
                   activeTab === 'fleet'
                     ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
@@ -357,17 +336,6 @@ function App() {
                 </svg>
                 <span>Fleet OEM Portal</span>
               </button>
-            </div>
-
-            {/* Live Stream Status Pill */}
-            <div className="flex items-center space-x-3 self-end lg:self-center">
-              <div className="flex items-center space-x-2 px-3.5 py-1.5 rounded-xl border border-[#D5E4CC] bg-white text-[#2F3D21] text-xs font-semibold shadow-sm">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-[#B9D874]"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#4E7A3D]"></span>
-                </span>
-                <span>{connected ? 'FastAPI Stream (1 Hz)' : 'Browser Physics (1 Hz)'}</span>
-              </div>
             </div>
           </div>
         </header>

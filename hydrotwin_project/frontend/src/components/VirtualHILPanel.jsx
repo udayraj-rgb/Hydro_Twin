@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import HardwareActuatorLeds from './HardwareActuatorLeds';
-import InteractivePurifierIllustration from './InteractivePurifierIllustration';
 
 /**
  * VirtualHILPanel: Interactive Hardware-in-the-Loop Testbed & ESP32 Chassis
@@ -280,15 +279,6 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
 
         </div>
       </div>
-
-      {/* ----------------------------------------------------------------- */}
-      {/* SECTION 2.5: Interactive Visual Hydraulic Purification Schematic */}
-      {/* ----------------------------------------------------------------- */}
-      <InteractivePurifierIllustration
-        telemetry={telemetry}
-        sensorInputs={sensorInputs}
-        onUpdate={onUpdate}
-      />
 
       {/* ----------------------------------------------------------------- */}
       {/* SECTION 3: Formula-Driven Hardware Actuator LEDs Sub-System */}

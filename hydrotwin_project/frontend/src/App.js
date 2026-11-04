@@ -5,6 +5,7 @@ import TerminalConsole from './components/TerminalConsole';
 import ConsumerView from './components/ConsumerView';
 import FleetPortal from './components/FleetPortal';
 import ConsumerVideoShowcase from './components/ConsumerVideoShowcase';
+import PortalAuthView from './components/auth/PortalAuthView';
 
 const BACKEND_WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/telemetry';
 const BACKEND_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/update_sensors';
@@ -20,6 +21,39 @@ function App() {
     mode: 'AUTONOMOUS',
     active_scenario: 'NONE'
   });
+
+  // Role-Based Authentication Sessions for each of the 3 portals
+  const [authSessions, setAuthSessions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('hydrotwin_auth_sessions');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      hil: null,
+      consumer: null,
+      fleet: null
+    };
+  });
+
+  const handleLoginSuccess = useCallback((portalKey, userProfile) => {
+    setAuthSessions((prev) => {
+      const next = { ...prev, [portalKey]: userProfile };
+      try {
+        localStorage.setItem('hydrotwin_auth_sessions', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  }, []);
+
+  const handleSignOut = useCallback((portalKey) => {
+    setAuthSessions((prev) => {
+      const next = { ...prev, [portalKey]: null };
+      try {
+        localStorage.setItem('hydrotwin_auth_sessions', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  }, []);
 
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
@@ -306,47 +340,59 @@ function App() {
               </div>
             </div>
 
-            {/* 3 Tab Navigation Buttons */}
+            {/* 3 Tab Navigation Buttons with Authentication Indicators */}
             <div className="flex items-center space-x-1.5 bg-[#EDF4EA] p-1.5 rounded-2xl border border-[#D5E4CC] self-start sm:self-center shadow-inner">
               <button
                 onClick={() => setActiveTab('hil')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 ${
                   activeTab === 'hil'
                     ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
+                {authSessions.hil ? (
+                  <span className="w-2 h-2 rounded-full bg-[#98D88E] shadow-xs" title="Engineering Session Active"></span>
+                ) : (
+                  <svg className="w-3 h-3 text-[#7B9272]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
                 <span>Virtual HIL Testbed</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('consumer')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 ${
                   activeTab === 'consumer'
                     ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
+                {authSessions.consumer ? (
+                  <span className="w-2 h-2 rounded-full bg-[#98D88E] shadow-xs" title="Consumer Account Connected"></span>
+                ) : (
+                  <svg className="w-3 h-3 text-[#7B9272]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
                 <span>Consumer App</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('fleet')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-1.5 ${
+                className={`px-3.5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 ${
                   activeTab === 'fleet'
                     ? 'bg-[#384828] text-white shadow-md shadow-[#384828]/30 font-bold'
                     : 'text-[#576C4D] hover:text-[#1F2D19] hover:bg-[#E2EEDC]'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+                {authSessions.fleet ? (
+                  <span className="w-2 h-2 rounded-full bg-[#98D88E] shadow-xs" title="OEM Fleet Operations Active"></span>
+                ) : (
+                  <svg className="w-3 h-3 text-[#7B9272]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
                 <span>Fleet OEM Portal</span>
               </button>
             </div>
@@ -354,39 +400,93 @@ function App() {
         </header>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Continuous Brand Video Showcase for Consumer Dashboard */}
+        {/* Continuous Brand Video Showcase for Consumer Dashboard (When Authenticated) */}
         {/* ----------------------------------------------------------------- */}
-        {activeTab === 'consumer' && (
+        {activeTab === 'consumer' && authSessions.consumer && (
           <ConsumerVideoShowcase telemetry={telemetry} />
         )}
 
         {/* ----------------------------------------------------------------- */}
-        {/* Main Content Area */}
+        {/* Main Content Area: Protected by Role-Based Portal Authentication */}
         {/* ----------------------------------------------------------------- */}
         <main className="flex-1 w-full p-6 sm:p-8 space-y-6">
-          {activeTab === 'hil' && (
-            <div id="hil-container" className="space-y-6 animate-fadeIn">
-              {/* Component 1: ESP32 Edge Virtual HIL Control Panel */}
-              <VirtualHILPanel
-                sensorInputs={sensorInputs}
-                onUpdate={updateSensors}
-                telemetry={telemetry}
-              />
+          {/* Check Authentication Gateway for the currently active tab */}
+          {!authSessions[activeTab] ? (
+            <PortalAuthView
+              role={activeTab}
+              onLoginSuccess={handleLoginSuccess}
+              onSwitchPortal={(targetPortal) => setActiveTab(targetPortal)}
+            />
+          ) : (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Authenticated Active Session Bar */}
+              <div className="bg-white border border-[#DCE4D6] rounded-2xl px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#1F2D19] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                    {authSessions[activeTab].name ? authSessions[activeTab].name.charAt(0) : 'U'}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-[#1F2D19] flex flex-wrap items-center gap-2">
+                      <span>Authenticated: {authSessions[activeTab].name}</span>
+                      <span className="px-2 py-0.5 rounded bg-[#EAEFE5] text-[#384828] text-[10px] font-mono font-bold border border-[#BACAB3]">
+                        {authSessions[activeTab].badge || authSessions[activeTab].designation || 'Verified User'}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-[#6C7E66] flex flex-wrap items-center gap-1.5">
+                      <span>{authSessions[activeTab].email}</span>
+                      {authSessions[activeTab].location && (
+                        <>
+                          <span className="text-[#BACAB3]">•</span>
+                          <span>{authSessions[activeTab].location}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-              {/* Component 2: Real-time Darcy-Hermia Telemetry Line Charts */}
-              <TelemetryCharts telemetry={telemetry} />
+                <div className="flex items-center space-x-3 self-end sm:self-auto shrink-0">
+                  <span className="text-[10px] text-[#889A80] font-mono hidden md:inline">
+                    Logged in at {authSessions[activeTab].loginTime || '10:00 AM'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSignOut(activeTab)}
+                    className="px-3 py-1.5 rounded-xl bg-[#F4F6F0] hover:bg-rose-50 text-[#54684A] hover:text-rose-700 border border-[#BACAB3] hover:border-rose-200 text-xs font-bold transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
 
-              {/* Component 3: Live SQLite & MQTT Terminal Console */}
-              <TerminalConsole telemetry={telemetry} />
+              {/* Portal Content when Authenticated */}
+              {activeTab === 'hil' && (
+                <div id="hil-container" className="space-y-6">
+                  {/* Component 1: ESP32 Edge Virtual HIL Control Panel */}
+                  <VirtualHILPanel
+                    sensorInputs={sensorInputs}
+                    onUpdate={updateSensors}
+                    telemetry={telemetry}
+                  />
+
+                  {/* Component 2: Real-time Darcy-Hermia Telemetry Line Charts */}
+                  <TelemetryCharts telemetry={telemetry} />
+
+                  {/* Component 3: Live SQLite & MQTT Terminal Console */}
+                  <TerminalConsole telemetry={telemetry} />
+                </div>
+              )}
+
+              {activeTab === 'consumer' && (
+                <ConsumerView telemetry={telemetry} />
+              )}
+
+              {activeTab === 'fleet' && (
+                <FleetPortal telemetry={telemetry} />
+              )}
             </div>
-          )}
-
-          {activeTab === 'consumer' && (
-            <ConsumerView telemetry={telemetry} />
-          )}
-
-          {activeTab === 'fleet' && (
-            <FleetPortal telemetry={telemetry} />
           )}
         </main>
 

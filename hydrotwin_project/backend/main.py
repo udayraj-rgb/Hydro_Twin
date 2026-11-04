@@ -68,6 +68,12 @@ class ConsumerCommand(BaseModel):
     )
 
 
+class AuthRequest(BaseModel):
+    username: str = Field(..., description="Email or Username")
+    password: str = Field(..., description="Account secret key or password")
+    role: str = Field(default="hil", description="Portal key: 'hil' | 'consumer' | 'fleet'")
+
+
 class SensorUpdateResponse(BaseModel):
     message: str
     current_sensors: SensorInput
@@ -801,6 +807,60 @@ def get_fleet_states():
                 "cities": cities
             })
     return result
+
+
+@app.post("/api/auth/login")
+def portal_login(payload: AuthRequest):
+    """
+    Authenticates an operator, consumer, or fleet manager for one of the three HydroTwin-PHM access tiers:
+    1. 'hil' (Operator & Engineering Access - Virtual HIL Testbed)
+    2. 'consumer' (Consumer Access - Homeowner Mobile App & Dashboard)
+    3. 'fleet' (OEM Fleet Portal - Operations & Support)
+    """
+    role = payload.role.lower().strip()
+    username = payload.username.strip()
+
+    if role == "hil":
+        return {
+            "authenticated": True,
+            "role": "OPERATOR & ENGINEERING ACCESS",
+            "portal": "hil",
+            "name": username.split("@")[0].replace(".", " ").title(),
+            "email": username,
+            "badge": "ENGINEERING LEVEL 3 CLEARANCE",
+            "token": "ATOM-HIL-SESSION-2026",
+            "who_uses_it": "Atomberg R&D engineers, firmware developers, validation engineers, and fleet diagnostic technicians.",
+            "why_it_exists": "Provides low-level simulation controls to inject faults, override sensor inputs, view raw ADC/PWM signals, and test sub-200ms edge safety interlocks."
+        }
+    elif role == "consumer":
+        return {
+            "authenticated": True,
+            "role": "CONSUMER ACCESS",
+            "portal": "consumer",
+            "name": username.split("@")[0].replace(".", " ").title(),
+            "email": username,
+            "badge": "HOMEOWNER & END-USER",
+            "token": "ATOM-CONSUMER-SESSION-2026",
+            "who_uses_it": "Everyday homeowners and end-users.",
+            "why_it_exists": "Consumers only see high-level actionable data (water quality, filter life days, simple modes, automated doorstep delivery) shielded from raw relays."
+        }
+    elif role == "fleet":
+        return {
+            "authenticated": True,
+            "role": "OEM FLEET PORTAL",
+            "portal": "fleet",
+            "name": username.split("@")[0].replace(".", " ").title(),
+            "email": username,
+            "badge": "REGIONAL SERVICE & D2C SUPPLY CHAIN",
+            "token": "ATOM-FLEET-SESSION-2026",
+            "who_uses_it": "Regional service managers, supply chain teams, and OEM support staff.",
+            "why_it_exists": "Monitors multi-device health across city clusters, manages automated D2C cartridge dispatch queues, and tracks regional scaling trends."
+        }
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid portal role '{payload.role}'. Must be 'hil', 'consumer', or 'fleet'."
+        )
 
 
 @app.websocket("/ws/telemetry")

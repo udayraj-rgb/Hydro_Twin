@@ -294,6 +294,53 @@ class TestHydroTwinAPI(unittest.TestCase):
         self.assertIn(components["alkaline_remineralizer"]["status"], {"OPTIMAL_MINERALIZATION", "ACCEPTABLE", "DEPLETED"})
         self.assertIsInstance(diag["overall_health_score"], (int, float))
 
+    def test_portal_auth_login_endpoints(self):
+        # 1. Test Engineering HIL login
+        resp_hil = self.client.post("/api/auth/login", json={
+            "username": "alok.mishra@atomberg.internal",
+            "password": "AtombergHIL@2026",
+            "role": "hil"
+        })
+        self.assertEqual(resp_hil.status_code, 200)
+        data_hil = resp_hil.json()
+        self.assertTrue(data_hil["authenticated"])
+        self.assertEqual(data_hil["portal"], "hil")
+        self.assertEqual(data_hil["badge"], "ENGINEERING LEVEL 3 CLEARANCE")
+        self.assertIn("who_uses_it", data_hil)
+        self.assertIn("why_it_exists", data_hil)
+
+        # 2. Test Consumer login
+        resp_consumer = self.client.post("/api/auth/login", json={
+            "username": "rajesh.sharma@gmail.com",
+            "password": "WaterSafe@2026",
+            "role": "consumer"
+        })
+        self.assertEqual(resp_consumer.status_code, 200)
+        data_consumer = resp_consumer.json()
+        self.assertTrue(data_consumer["authenticated"])
+        self.assertEqual(data_consumer["portal"], "consumer")
+        self.assertEqual(data_consumer["badge"], "HOMEOWNER & END-USER")
+
+        # 3. Test OEM Fleet login
+        resp_fleet = self.client.post("/api/auth/login", json={
+            "username": "vikram.rathore@atomberg.com",
+            "password": "FleetOps@2026",
+            "role": "fleet"
+        })
+        self.assertEqual(resp_fleet.status_code, 200)
+        data_fleet = resp_fleet.json()
+        self.assertTrue(data_fleet["authenticated"])
+        self.assertEqual(data_fleet["portal"], "fleet")
+        self.assertEqual(data_fleet["badge"], "REGIONAL SERVICE & D2C SUPPLY CHAIN")
+
+        # 4. Test Invalid role
+        resp_invalid = self.client.post("/api/auth/login", json={
+            "username": "user",
+            "password": "pass",
+            "role": "unknown_tier"
+        })
+        self.assertEqual(resp_invalid.status_code, 400)
+
 
 if __name__ == "__main__":
     unittest.main()

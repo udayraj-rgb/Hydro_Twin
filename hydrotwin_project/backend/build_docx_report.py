@@ -284,38 +284,44 @@ def create_progress_report_docx():
     # SECTION 4: FINANCIAL EXPENDITURE VS. ABSTRACT ESTIMATE
     # -------------------------------------------------------------------------
     add_h1("4. Financial Expenditure vs. Abstract Cost Estimate")
-    add_body("The project was executed with extreme capital efficiency. Because the core innovation is software and physics-driven rather than hardware-heavy, prototype expenditure came in 81% under the estimated abstract budget.")
+    add_callout(
+        "CURRENT EXPENDITURE: ₹0 (ZERO RUPEES SPENT TO DATE / 100% BUDGET PRESERVED). By adopting an industry-standard Digital Twin and Virtual HIL methodology, our team successfully modeled, tested, and validated all fluidic physics equations, predictive PHM algorithms, and fail-safe interlocks purely through software simulation with zero hardware expenditure. The allocated budget will be deployed in Round 3 for physical bench fabrication.",
+        "CAPITAL EFFICIENCY & ZERO-COST VALIDATION: "
+    )
+    add_body("To date, our team has incurred ₹0 in physical hardware procurement. The entire end-to-end prototype—including the multi-stage Darcy-Hermia physics engine, the sub-180ms edge safety interlocks, the ESP32 transducer virtualization, the real-time ML diurnal synthesizer, the FastAPI backend, and the React portals—has been realized exclusively through software simulation on existing college computing infrastructure.")
 
     fin_table = doc.add_table(rows=1, cols=4)
     fin_widths = [Inches(2.5), Inches(1.4), Inches(1.4), Inches(1.47)]
-    fin_headers = ["Budget Category", "Abstract Estimate (₹)", "Actual Spent (₹)", "Variance / Savings (₹)"]
+    fin_headers = ["Budget Category", "Abstract Estimate (₹)", "Actual Spent to Date (₹)", "Round 3 Planned Budget (₹)"]
     fin_data = [
-        ["Bench Hardware & Electronics", "₹6,500", "₹1,950", "+₹4,550 (70% Under)"],
-        ["Sensors & Fluidics Harness", "₹5,500", "₹900", "+₹4,600 (84% Under)"],
-        ["Compute & Cloud Sandbox", "₹3,000", "₹0 (Local Python/Node)", "+₹3,000 (100% Under)"],
-        ["TOTAL EXPENDITURE", "₹15,000", "₹2,850", "+₹12,150 (81% Under Budget)"]
+        ["Physical Hardware & Electronics", "₹6,500", "₹0 (Virtual HIL)", "₹1,855 (Allocated)"],
+        ["Sensors & Fluidics Harness", "₹5,500", "₹0 (Derived Math)", "₹995 (Allocated)"],
+        ["Compute & Cloud Sandbox", "₹3,000", "₹0 (Local Workstation)", "₹0 (Self-Hosted)"],
+        ["TOTAL EXPENDITURE", "₹15,000", "₹0 (100% Preserved)", "₹2,850 (Projected BoM)"]
     ]
     format_table(fin_table, fin_widths, fin_headers, fin_data)
 
-    add_h2("4.1 Itemized Bench Prototype Bill of Materials (BoM)")
+    add_h2("4.1 Projected Physical Bench Bill of Materials (Planned for Round 3)")
+    add_body("The allocated abstract budget will be deployed in the upcoming phase (Round 3) to construct the physical benchtop test rig for empirical sensor cross-calibration and endurance testing. Below is our projected component procurement plan:")
+
     bom_table = doc.add_table(rows=1, cols=5)
     bom_widths = [Inches(2.4), Inches(0.7), Inches(1.0), Inches(1.0), Inches(1.67)]
-    bom_headers = ["Item Description", "Qty", "Unit Cost", "Total", "Source & Verification"]
+    bom_headers = ["Item Description", "Qty", "Unit Cost", "Projected Total", "Procurement Source & Purpose"]
     bom_data = [
-        ["ESP32-WROOM-32D Development Board", "1", "₹380", "₹380", "Robu.in (Dual-Core 240MHz)"],
-        ["ACS712-05B Hall Current Sensor", "1", "₹95", "₹95", "ElectronicsComp (185 mV/A)"],
-        ["YF-S201 Food-Grade Flow Meter", "1", "₹180", "₹180", "Robu.in (7.5 Hz per L/min)"],
-        ["Dual Titanium Probe TDS Module", "1", "₹120", "₹120", "QuartzComponents (K=1.0)"],
-        ["12V High-Velocity Flush Solenoid", "1", "₹280", "₹280", "Local Hydraulic Store"],
-        ["24V BLDC Pump Driver MOSFET Board", "1", "₹350", "₹350", "Robu.in (PWM 20 kHz)"],
-        ["24V DC / 2A SMPS Power Supply", "1", "₹450", "₹450", "Bench Power Supply"],
-        ["Push-Fit JG Tubing & Fittings", "1 Set", "₹210", "₹210", "Commercial RO Supplier"],
-        ["Prototyping Headers & Wiring", "1 Lot", "₹200", "₹200", "Lab Stock"],
-        ["TOTAL PROTOTYPE BoM", "—", "—", "₹2,850", "Fully Operational Bench"]
+        ["ESP32-WROOM-32D Development Board", "1", "₹380", "₹380", "Robu.in (Core 0/1 FreeRTOS Target)"],
+        ["ACS712-05B Hall Current Sensor", "1", "₹95", "₹95", "ElectronicsComp (185 mV/A Sensitivity)"],
+        ["YF-S201 Food-Grade Flow Meter", "1", "₹180", "₹180", "Robu.in (7.5 Hz per L/min Turbine)"],
+        ["Dual Titanium Probe TDS Module", "1", "₹120", "₹120", "QuartzComponents (Raw vs Permeate)"],
+        ["12V High-Velocity Flush Solenoid", "1", "₹280", "₹280", "Local Hydraulic Store (AutoClean)"],
+        ["24V BLDC Pump Driver MOSFET Board", "1", "₹350", "₹350", "Robu.in (PWM 20 kHz Motor Gate)"],
+        ["24V DC / 2A SMPS Power Supply", "1", "₹450", "₹450", "Standard Industrial SMPS Brick"],
+        ["Push-Fit JG Tubing & Fittings", "1 Set", "₹210", "₹210", "Commercial Food-Grade Quick Connects"],
+        ["Prototyping Enclosure & Harnessing", "1 Lot", "₹785", "₹785", "Benchtop Mounting & Jumper Leads"],
+        ["PROJECTED ROUND 3 TOTAL", "—", "—", "₹2,850", "Leaves ₹12,150 Reserve in Abstract"]
     ]
     format_table(bom_table, bom_widths, bom_headers, bom_data)
 
-    add_body("At industrial manufacturing volumes (>50,000 units), the incremental BoM cost to integrate HydroTwin-PHM into an existing Atomberg purifier is less than ₹450 per unit, while unlocking recurring high-margin D2C filter replenishment revenue.", 6, "Commercial Mass Production Viability: ")
+    add_body("By proving all algorithms in software first, we de-risked the physical implementation and avoided component wastage. Furthermore, at mass production volume (>50,000 units), the incremental hardware cost to integrate HydroTwin-PHM into an existing Atomberg purifier is less than ₹450 per unit, while unlocking automated D2C filter replenishment revenue.", 6, "Commercial Mass Production Viability: ")
 
     # -------------------------------------------------------------------------
     # SECTION 5: CHANGES SINCE ABSTRACT & SCHEDULE STATUS

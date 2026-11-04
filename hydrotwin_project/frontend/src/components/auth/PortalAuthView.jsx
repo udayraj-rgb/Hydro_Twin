@@ -53,16 +53,16 @@ const PORTAL_CONFIGS = {
   consumer: {
     key: 'consumer',
     tabLabel: 'Consumer App',
-    category: 'CONSUMER ACCESS & HOME HYDRATION',
-    badge: 'HOMEOWNER & END-USER PORTAL',
-    title: 'Atomberg Home Water Purifier App',
-    subtitle: 'Real-Time Drinking Water Purity, Health Countdowns & Autonomous Cartridge Replenishment',
+    category: 'CONSUMER ACCESS (HOMEOWNERS & END-USERS)',
+    badge: 'CONSUMER LOGIN PORTAL',
+    title: 'Atomberg Intellon Home Water • Consumer Login',
+    subtitle: 'Homeowner Access: Real-Time Permeate Purity, Remaining Filter Life & Proactive Doorstep Delivery',
     whoUsesIt: 'Everyday homeowners and end-users.',
     whyItExists:
       'Consumers only see high-level, actionable data—such as clean drinking water quality, remaining filter life countdowns in days, simple mode selectors (like TasteTune™ or Adaptive Flow), and automated doorstep cartridge delivery notifications. They are shielded from raw electrical parameters, fault injection buttons, and engineering relays to prevent accidental system trips or confusion.',
     securityNotice:
       'CONSUMER-SAFE INTERFACE: Directly manages drinking water mineralization (pH ~7.8), diurnal consumption tracking, TasteTune™ profiles, and automatic BlueDart doorstep filter delivery without complex engineering relays.',
-    loginLabel: 'Registered Mobile Number or Email',
+    loginLabel: 'Registered Mobile Number or Homeowner Email',
     loginPlaceholder: 'e.g., rajesh.sharma@gmail.com or +91 98260 42000',
     passwordLabel: '4-Digit Home Passcode or Account Password',
     passwordPlaceholder: 'Enter account passcode (e.g. 2026)',
@@ -83,7 +83,7 @@ const PORTAL_CONFIGS = {
         email: 'neha.joshi@gmail.com',
         pass: 'WaterSafe@2026',
         badge: 'Purifier Unit #ATOM-WP-2026-0055',
-        location: 'Vijay Nagar, Indore, MP'
+        location: 'Vijay Nagar, Scheme 54, Indore, MP'
       }
     ]
   },

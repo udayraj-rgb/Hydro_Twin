@@ -22,37 +22,32 @@ function App() {
     active_scenario: 'NONE'
   });
 
-  // Role-Based Authentication Sessions for each of the 3 portals
-  const [authSessions, setAuthSessions] = useState(() => {
-    try {
-      const saved = localStorage.getItem('hydrotwin_auth_sessions');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {
-      hil: null,
-      consumer: null,
-      fleet: null
-    };
+  // Role-Based Authentication Sessions for each of the 3 portals (starts logged out by default)
+  const [authSessions, setAuthSessions] = useState({
+    hil: null,
+    consumer: null,
+    fleet: null
   });
 
+  useEffect(() => {
+    // Clear any previous session so all 3 portals always display their dedicated login screen on initial load
+    try {
+      localStorage.removeItem('hydrotwin_auth_sessions');
+    } catch (e) {}
+  }, []);
+
   const handleLoginSuccess = useCallback((portalKey, userProfile) => {
-    setAuthSessions((prev) => {
-      const next = { ...prev, [portalKey]: userProfile };
-      try {
-        localStorage.setItem('hydrotwin_auth_sessions', JSON.stringify(next));
-      } catch (e) {}
-      return next;
-    });
+    setAuthSessions((prev) => ({
+      ...prev,
+      [portalKey]: userProfile
+    }));
   }, []);
 
   const handleSignOut = useCallback((portalKey) => {
-    setAuthSessions((prev) => {
-      const next = { ...prev, [portalKey]: null };
-      try {
-        localStorage.setItem('hydrotwin_auth_sessions', JSON.stringify(next));
-      } catch (e) {}
-      return next;
-    });
+    setAuthSessions((prev) => ({
+      ...prev,
+      [portalKey]: null
+    }));
   }, []);
 
   const wsRef = useRef(null);
@@ -395,14 +390,28 @@ function App() {
                 )}
                 <span>Fleet OEM Portal</span>
               </button>
+
+              {authSessions[activeTab] && (
+                <button
+                  type="button"
+                  onClick={() => handleSignOut(activeTab)}
+                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-[#54684A] hover:text-rose-700 border border-[#BACAB3] text-xs font-semibold transition-all flex items-center space-x-1 shadow-2xs cursor-pointer ml-1"
+                  title="Sign out of active portal session and view login screen"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign Out</span>
+                </button>
+              )}
             </div>
           </div>
         </header>
 
         {/* ----------------------------------------------------------------- */}
-        {/* Continuous Brand Video Showcase for Consumer Dashboard (When Authenticated) */}
+        {/* Continuous Brand Video Showcase for Consumer Dashboard */}
         {/* ----------------------------------------------------------------- */}
-        {activeTab === 'consumer' && authSessions.consumer && (
+        {activeTab === 'consumer' && (
           <ConsumerVideoShowcase telemetry={telemetry} />
         )}
 

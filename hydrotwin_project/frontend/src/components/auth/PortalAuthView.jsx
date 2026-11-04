@@ -195,36 +195,6 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
   return (
     <div className="w-full max-w-4xl mx-auto py-4 px-2 sm:px-4 animate-fadeIn">
       {/* ----------------------------------------------------------------- */}
-      {/* Top 3-Way Portal Switcher Tabs */}
-      {/* ----------------------------------------------------------------- */}
-      <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#F4F8F1] p-2 rounded-2xl border border-[#DCE4D6] shadow-2xs">
-        <div className="text-xs font-bold uppercase tracking-wider text-[#54684A] px-2 flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-pulse"></span>
-          <span>Access Control Gateways:</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-          {Object.keys(PORTAL_CONFIGS).map((k) => {
-            const p = PORTAL_CONFIGS[k];
-            const isActive = k === role;
-            return (
-              <button
-                key={k}
-                type="button"
-                onClick={() => onSwitchPortal && onSwitchPortal(k)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                  isActive
-                    ? 'bg-[#1F2D19] text-white shadow-sm'
-                    : 'bg-white text-[#54684A] hover:bg-[#EAEFE5] hover:text-[#1F2D19] border border-[#DCE4D6]'
-                }`}
-              >
-                <span>{p.tabLabel}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ----------------------------------------------------------------- */}
       {/* Main Authentication Card */}
       {/* ----------------------------------------------------------------- */}
       <div className="bg-white rounded-3xl border border-[#DCE4D6] shadow-xl overflow-hidden">
@@ -261,38 +231,16 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
           </div>
         </div>
 
-        {/* ----------------------------------------------------------------- */}
-        {/* Architectural Role Explanation Block (Who uses it & Why it exists) */}
-        {/* ----------------------------------------------------------------- */}
-        <div className="bg-[#FAFBF8] border-b border-[#E3E9DE] p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          {/* Who Uses It */}
-          <div className="bg-white p-4 rounded-2xl border border-[#DCE4D6] shadow-2xs space-y-1.5">
-            <div className="flex items-center space-x-2 text-[#2A3525] font-bold uppercase tracking-wider text-[11px]">
-              <div className="w-5 h-5 rounded-lg bg-[#EAEFE5] text-[#384828] flex items-center justify-center font-bold">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <span>Who Uses This Webpage</span>
-            </div>
-            <p className="text-[#3E4D37] leading-relaxed font-medium">
-              {config.whoUsesIt}
-            </p>
+        {/* Authorized Access Banner */}
+        <div className="bg-[#FAFBF8] border-b border-[#E3E9DE] px-6 py-3.5 flex items-center space-x-3 text-xs">
+          <div className="w-6 h-6 rounded-lg bg-[#EAEFE5] text-[#384828] flex items-center justify-center shrink-0">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           </div>
-
-          {/* Why It Exists */}
-          <div className="bg-white p-4 rounded-2xl border border-[#DCE4D6] shadow-2xs space-y-1.5">
-            <div className="flex items-center space-x-2 text-[#2A3525] font-bold uppercase tracking-wider text-[11px]">
-              <div className="w-5 h-5 rounded-lg bg-[#EAEFE5] text-[#384828] flex items-center justify-center font-bold">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span>Why This Webpage Exists</span>
-            </div>
-            <p className="text-[#3E4D37] leading-relaxed font-medium">
-              {config.whyItExists}
-            </p>
+          <div className="text-xs text-[#3E4D37] leading-snug">
+            <span className="font-bold text-[#1F2D19] uppercase tracking-wider text-[11px]">Authorized Access: </span>
+            <span className="font-medium text-[#54684A]">{config.whoUsesIt}</span>
           </div>
         </div>
 
@@ -464,16 +412,6 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
           </div>
         </div>
 
-        {/* Card Footer Status */}
-        <div className="bg-[#F4F6F0] border-t border-[#DCE4D6] px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#6C7E66]">
-          <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#6C8360]"></span>
-            <span>HydroTwin-PHM RBAC Security v2.4 • SCOPE, VIT Bhopal</span>
-          </div>
-          <div className="font-mono text-[#54684A]">
-            Active Role: <span className="font-bold text-[#1F2D19]">{config.tabLabel}</span>
-          </div>
-        </div>
       </div>
     </div>
   );

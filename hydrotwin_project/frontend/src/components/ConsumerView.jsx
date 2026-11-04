@@ -340,6 +340,15 @@ function ConsumerView({ telemetry = null }) {
                 <span className="w-2 h-2 rounded-full bg-[#6C8360] animate-pulse"></span>
                 <span>Live Connected</span>
               </span>
+              <span>•</span>
+              <span className="inline-flex items-center space-x-1.5 font-bold text-[#142010] bg-[#EAEFE5] px-2.5 py-0.5 rounded-lg border border-[#BACAB3] font-mono shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                <span>{telemetry?.simulation?.diurnal_time || new Date().toLocaleTimeString('en-GB')}</span>
+              </span>
+              <span>•</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#182514] bg-[#FAFBF8] px-2 py-0.5 rounded-lg border border-[#BACAB3]">
+                AI Real-Time ML Stream
+              </span>
             </p>
           </div>
 

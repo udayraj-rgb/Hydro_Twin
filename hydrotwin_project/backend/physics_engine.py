@@ -22,7 +22,18 @@ Features:
 
 import math
 import random
+from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
+
+try:
+    from ml_engine import ml_forecaster
+except ImportError:
+    import sys
+    import os
+    _backend_dir = os.path.dirname(os.path.abspath(__file__))
+    if _backend_dir not in sys.path:
+        sys.path.insert(0, _backend_dir)
+    from ml_engine import ml_forecaster
 
 
 class AutonomousEnvironmentSimulator:
@@ -30,18 +41,25 @@ class AutonomousEnvironmentSimulator:
     Autonomous household digital twin simulation engine.
     Models Indian diurnal domestic water consumption, stochastic sensor noise,
     dynamic membrane scale fouling, autonomous anti-scaling flush cycles,
-    and automated operational scenarios.
+    automated operational scenarios, real-time wall-clock synchronization,
+    and Physics-Informed ML hydrology forecasting.
     """
 
     def __init__(
         self,
         base_tds: float = 850.0,
-        initial_time_seconds: int = 7 * 3600 + 15 * 60,  # 07:15:00 AM (Morning Peak)
-        time_acceleration: float = 60.0  # 1 real second = 60 virtual seconds (1 virtual minute)
+        initial_time_seconds: int = 7 * 3600 + 15 * 60,  # 07:15:00 AM (Morning Peak default for replay)
+        time_acceleration: float = 60.0,  # 1 real second = 60 virtual seconds (in VIRTUAL mode)
+        clock_mode: str = "VIRTUAL"  # "REALTIME" | "VIRTUAL"
     ):
         self.base_tds = float(base_tds)
         self.virtual_time_seconds = int(initial_time_seconds) % 86400
         self.time_acceleration = float(time_acceleration)
+        self.clock_mode = str(clock_mode).upper()
+
+        if self.clock_mode == "REALTIME":
+            now = datetime.now()
+            self.virtual_time_seconds = now.hour * 3600 + now.minute * 60 + now.second
 
         # Operational simulation mode: "AUTONOMOUS" | "MANUAL" | "SCENARIO"
         self.mode = "AUTONOMOUS"
@@ -61,19 +79,42 @@ class AutonomousEnvironmentSimulator:
         self.manual_flow_lpm = 1.20
         self.manual_pump_current = 0.85
 
+    def set_clock_mode(self, clock_mode: str):
+        """Sets the clock mode: 'REALTIME' (1:1 system clock) or 'VIRTUAL' (fast accelerated clock)."""
+        mode_upper = str(clock_mode).upper()
+        if mode_upper in {"REALTIME", "VIRTUAL"}:
+            self.clock_mode = mode_upper
+            if self.clock_mode == "REALTIME":
+                now = datetime.now()
+                self.virtual_time_seconds = now.hour * 3600 + now.minute * 60 + now.second
+
     def get_clock_info(self) -> Dict[str, Any]:
-        """Returns virtual diurnal clock state and active phase information."""
-        h = int(self.virtual_time_seconds // 3600)
-        m = int((self.virtual_time_seconds % 3600) // 60)
-        s = int(self.virtual_time_seconds % 60)
-        time_str = f"{h:02d}:{m:02d}:{s:02d}"
+        """Returns diurnal clock state and active phase information."""
+        if self.clock_mode == "REALTIME":
+            now = datetime.now()
+            h = now.hour
+            m = now.minute
+            s = now.second
+            time_str = now.strftime("%H:%M:%S")
+            self.virtual_time_seconds = h * 3600 + m * 60 + s
+        else:
+            h = int(self.virtual_time_seconds // 3600)
+            m = int((self.virtual_time_seconds % 3600) // 60)
+            s = int(self.virtual_time_seconds % 60)
+            time_str = f"{h:02d}:{m:02d}:{s:02d}"
 
         if 6 <= h < 9:
             phase = "Morning Peak (Breakfast & Water Dispensing)"
+        elif 9 <= h < 12:
+            phase = "Mid-Day Hydration (Intermittent Glass Fill)"
         elif 12 <= h < 14:
             phase = "Afternoon Low (Post-Lunch Hydration)"
+        elif 14 <= h < 18:
+            phase = "Afternoon Standby (Intermittent Trickle)"
         elif 18 <= h < 21:
             phase = "Evening Peak (Dinner Cooking & Storage Batch)"
+        elif 21 <= h < 23:
+            phase = "Night Hydration (Post-Dinner Dispense)"
         elif h >= 23 or h < 5:
             phase = "Night Standby (Quiescent Leak Integrity Test)"
         else:
@@ -84,7 +125,8 @@ class AutonomousEnvironmentSimulator:
             "hour": h,
             "minute": m,
             "second": s,
-            "phase": phase
+            "phase": phase,
+            "clock_mode": self.clock_mode
         }
 
     def set_mode(self, mode: str):
@@ -129,15 +171,22 @@ class AutonomousEnvironmentSimulator:
         if active_scenario is not None and active_scenario != self.active_scenario:
             self.trigger_scenario(active_scenario)
 
-        # Advance diurnal clock by accelerated virtual step
-        self.virtual_time_seconds = (self.virtual_time_seconds + int(self.time_acceleration)) % 86400
-        clock = self.get_clock_info()
-        hour = clock["hour"]
+        # Advance clock based on clock mode
+        if self.clock_mode == "REALTIME":
+            now = datetime.now()
+            self.virtual_time_seconds = now.hour * 3600 + now.minute * 60 + now.second
+            clock = self.get_clock_info()
+            hour = clock["hour"]
+        else:
+            self.virtual_time_seconds = (self.virtual_time_seconds + int(self.time_acceleration)) % 86400
+            clock = self.get_clock_info()
+            hour = clock["hour"]
 
         # ---------------------------------------------------------------------
         # 1. Base Target Parameter Evaluation
         # ---------------------------------------------------------------------
         scenario_progress_pct = 0
+        ml_inference: Dict[str, Any] = {}
 
         if self.mode == "SCENARIO" and self.active_scenario != "NONE":
             target_flow, target_current, target_tds, scenario_progress_pct = self._step_scenario()
@@ -152,71 +201,79 @@ class AutonomousEnvironmentSimulator:
             target_current = self.manual_pump_current
             target_tds = self.manual_inlet_tds
         else:
-            # AUTONOMOUS Mode: Domestic Indian Water Consumption Pattern
-            # Morning Peak (06:00 - 09:00): Dispensing 1.4 L/min, pump current 0.92 A, TDS base + 50 ppm
-            if 6 <= hour < 9:
-                target_flow = 1.40
-                target_current = 0.92
-                tds_offset = 50.0
-            # Afternoon Low (12:00 - 14:00): Dispensing 0.8 L/min, pump current 0.78 A
-            elif 12 <= hour < 14:
-                target_flow = 0.80
-                target_current = 0.78
-                tds_offset = 0.0
-            # Evening Peak (18:00 - 21:00): Dispensing 1.3 L/min, pump current 0.90 A
-            elif 18 <= hour < 21:
-                target_flow = 1.30
-                target_current = 0.90
-                tds_offset = 25.0
-            # Night Standby (23:00 - 05:00): Standby flow 0.0 L/min, current 0.0 A (idle leak check)
-            elif hour >= 23 or hour < 5:
-                target_flow = 0.00
-                target_current = 0.00
-                tds_offset = -20.0
-            # Day Standby / Intermittent Trickle
-            else:
-                target_flow = 0.35
-                target_current = 0.42
-                tds_offset = 5.0
+            # AUTONOMOUS Mode: Physics-Informed ML Forecaster
+            ml_curr_time = datetime.now() if self.clock_mode == "REALTIME" else datetime(2026, 11, 4, hour, clock["minute"], clock["second"])
+            ml_inference = ml_forecaster.predict_realtime(
+                current_time=ml_curr_time,
+                base_tds=self.base_tds,
+                accumulated_scale=self.accumulated_scale,
+                inject_noise=(self.clock_mode == "REALTIME")
+            )
 
-            # Daily sinusoidal municipal TDS drift (+/- 15 ppm)
-            diurnal_sin = 15.0 * math.sin((self.virtual_time_seconds / 86400.0) * 2.0 * math.pi)
-            target_tds = self.base_tds + tds_offset + diurnal_sin
+            if self.clock_mode == "REALTIME":
+                # Real-Time mode driven directly by the ML Forecaster
+                target_flow = ml_inference["predicted_flow_lpm"]
+                target_current = ml_inference["predicted_pump_current"]
+                target_tds = ml_inference["predicted_inlet_tds"]
+            else:
+                # VIRTUAL Mode: Standard Indian domestic water consumption pattern
+                if 6 <= hour < 9:
+                    target_flow = 1.40
+                    target_current = 0.92
+                    tds_offset = 50.0
+                elif 12 <= hour < 14:
+                    target_flow = 0.80
+                    target_current = 0.78
+                    tds_offset = 0.0
+                elif 18 <= hour < 21:
+                    target_flow = 1.30
+                    target_current = 0.90
+                    tds_offset = 25.0
+                elif hour >= 23 or hour < 5:
+                    target_flow = 0.00
+                    target_current = 0.00
+                    tds_offset = -20.0
+                else:
+                    target_flow = 0.35
+                    target_current = 0.42
+                    tds_offset = 5.0
+
+                diurnal_sin = 15.0 * math.sin((self.virtual_time_seconds / 86400.0) * 2.0 * math.pi)
+                target_tds = self.base_tds + tds_offset + diurnal_sin
 
         # ---------------------------------------------------------------------
         # 2. Inject Physical Gaussian Noise (Applied in AUTONOMOUS Mode)
         # ---------------------------------------------------------------------
         if self.mode == "MANUAL":
-            # Exact user-specified manual setpoints
             flow_lpm = round(max(0.0, target_flow), 2)
             pump_current = round(max(0.0, target_current), 2)
             inlet_tds = round(max(10.0, target_tds), 1)
         elif self.mode == "SCENARIO":
-            # Controlled scenario ramps with micro electrical ripple
+            flow_lpm = round(max(0.0, target_flow), 2)
+            pump_current = round(max(0.0, target_current), 2)
+            inlet_tds = round(max(10.0, target_tds), 1)
+        elif self.clock_mode == "REALTIME":
+            # Noise was already injected by the ML model
             flow_lpm = round(max(0.0, target_flow), 2)
             pump_current = round(max(0.0, target_current), 2)
             inlet_tds = round(max(10.0, target_tds), 1)
         else:
-            # AUTONOMOUS Mode: Dynamic physical Gaussian noise
+            # VIRTUAL Mode Gaussian noise
             if target_flow > 0.05:
-                # +/- 2% volumetric flow fluctuations
                 noisy_flow = target_flow * (1.0 + random.gauss(0.0, 0.02))
                 flow_lpm = round(max(0.0, min(2.5, noisy_flow)), 2)
-                # +/- 0.03 A electrical armature ripple
                 noisy_current = target_current + random.gauss(0.0, 0.03)
                 pump_current = round(max(0.0, min(3.0, noisy_current)), 2)
             else:
                 flow_lpm = 0.0
                 pump_current = 0.0
 
-            # Municipal TDS drift noise (+/- 2.5 ppm)
             noisy_tds = target_tds + random.gauss(0.0, 2.5)
             inlet_tds = round(max(50.0, min(3000.0, noisy_tds)), 1)
 
         # ---------------------------------------------------------------------
         # 3. Dynamic Scale Accumulation & Autonomous Anti-Scaling Flush
         # ---------------------------------------------------------------------
-        # Scale accumulation rate: proportional to (inlet_tds * flow_lpm)
         if flow_lpm > 0.05 and pump_current > 0.15:
             d_scale = (inlet_tds * flow_lpm) * 0.000035
             self.accumulated_scale += d_scale
@@ -224,31 +281,29 @@ class AutonomousEnvironmentSimulator:
         if self.flush_cooldown > 0:
             self.flush_cooldown -= 1
 
-        # Preliminary CP check to trigger autonomous flush window
         inferred_delta_p = max(0.2, (1.45 * pump_current) - 0.12)
         prelim_cp = (inlet_tds / 1000.0) * (inferred_delta_p / max(flow_lpm, 0.2))
 
-        # Check if flush should initiate (acute CP > 1.25 or severe hardness > 1200 ppm)
         if (prelim_cp > 1.25 or inlet_tds > 1200.0) and self.flush_countdown <= 0 and self.flush_cooldown <= 0:
-            self.flush_countdown = 5  # 5-second dynamic washdown window
+            self.flush_countdown = 5
 
         washdown_factor = 1.0
         flush_solenoid = False
 
         if self.flush_countdown > 0:
             flush_solenoid = True
-            washdown_factor = 0.82  # Decrements R_cake by 18% during washdown window
-            # Flushes away 12% of accumulated scale per active flush tick
+            washdown_factor = 0.82
             self.accumulated_scale = max(0.0, self.accumulated_scale * 0.88)
             self.flush_countdown -= 1
             if self.flush_countdown == 0:
-                self.flush_cooldown = 45  # Cooldown refractory period to prevent infinite loop
+                self.flush_cooldown = 45
 
         self.is_flushing = flush_solenoid
 
         return {
             "mode": self.mode,
             "active_scenario": self.active_scenario,
+            "clock_mode": self.clock_mode,
             "time_str": clock["time_str"],
             "hour": clock["hour"],
             "minute": clock["minute"],
@@ -261,7 +316,8 @@ class AutonomousEnvironmentSimulator:
             "washdown_factor": washdown_factor,
             "flush_solenoid": flush_solenoid,
             "flush_countdown": self.flush_countdown,
-            "scenario_progress_pct": scenario_progress_pct
+            "scenario_progress_pct": scenario_progress_pct,
+            "ml_inference": ml_inference
         }
 
     def _step_scenario(self) -> Tuple[float, float, float, int]:

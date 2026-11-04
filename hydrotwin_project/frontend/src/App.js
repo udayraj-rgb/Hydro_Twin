@@ -7,8 +7,10 @@ import FleetPortal from './components/FleetPortal';
 import ConsumerVideoShowcase from './components/ConsumerVideoShowcase';
 import PortalAuthView from './components/auth/PortalAuthView';
 
+const BACKEND_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
 const BACKEND_WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/telemetry';
-const BACKEND_API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/update_sensors';
+const BACKEND_API_URL = process.env.REACT_APP_API_URL || `${BACKEND_BASE}/api/update_sensors`;
+const CLOCK_MODE_API_URL = `${BACKEND_BASE}/api/simulation/clock_mode`;
 
 function App() {
   const [activeTab, setActiveTab] = useState('hil');
@@ -57,6 +59,22 @@ function App() {
   const updateSensors = useCallback(async (newInputs) => {
     const updated = { ...sensorInputs, ...newInputs };
     setSensorInputs(updated);
+
+    // If clock_mode changed, dispatch to simulation clock mode endpoint
+    if (newInputs.clock_mode) {
+      fetch(CLOCK_MODE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clock_mode: newInputs.clock_mode })
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.latest_state) {
+            setTelemetry(data.latest_state);
+          }
+        })
+        .catch(() => {});
+    }
 
     try {
       const response = await fetch(BACKEND_API_URL, {

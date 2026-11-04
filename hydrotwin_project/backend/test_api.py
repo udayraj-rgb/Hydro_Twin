@@ -468,6 +468,41 @@ class TestHydroTwinAPI(unittest.TestCase):
         self.assertIn("EMAIL", contact_types)
         self.assertIn("CALL", contact_types)
 
+    def test_realtime_clock_mode_endpoints(self):
+        # 1. Switch to REALTIME clock mode
+        resp = self.client.post("/api/simulation/clock_mode", json={"clock_mode": "REALTIME"})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["clock_mode"], "REALTIME")
+        self.assertIn("clock_info", data)
+        self.assertIn("time_str", data["clock_info"])
+
+        # 2. Get clock status
+        resp_clock = self.client.get("/api/simulation/clock")
+        self.assertEqual(resp_clock.status_code, 200)
+        clock_data = resp_clock.json()
+        self.assertEqual(clock_data["clock_mode"], "REALTIME")
+        self.assertIn("phase", clock_data)
+
+        # 3. Switch back to VIRTUAL for test isolation
+        resp_virt = self.client.post("/api/simulation/clock_mode", json={"clock_mode": "VIRTUAL"})
+        self.assertEqual(resp_virt.status_code, 200)
+        self.assertEqual(resp_virt.json()["clock_mode"], "VIRTUAL")
+
+    def test_ml_realtime_inference_endpoint(self):
+        resp = self.client.get("/api/ml/realtime")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data["status"], "SUCCESS")
+        self.assertIn("inference", data)
+        inf = data["inference"]
+        self.assertIn("model_name", inf)
+        self.assertIn("confidence_score", inf)
+        self.assertIn("predicted_flow_lpm", inf)
+        self.assertIn("predicted_inlet_tds", inf)
+        self.assertIn("realtime_clock", inf)
+        self.assertGreaterEqual(inf["confidence_score"], 0.90)
+
 
 if __name__ == "__main__":
     unittest.main()

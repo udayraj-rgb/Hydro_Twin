@@ -395,6 +395,11 @@ function FleetPortal({ telemetry = null }) {
               <span>15 Major Indian States</span>
               <span className="text-[#384828] font-bold">•</span>
               <span>75 Connected Cities</span>
+              <span className="text-[#384828] font-bold">•</span>
+              <span className="inline-flex items-center space-x-1.5 font-mono px-2 py-0.5 rounded bg-[#EAEFE5] border border-[#BACAB3] text-[#142010]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                <span>{telemetry?.simulation?.diurnal_time || new Date().toLocaleTimeString('en-GB')} IST</span>
+              </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-[#1F2D19] tracking-tight flex items-center space-x-3">
               <span>Regional Groundwater Hydrology & Fleet Diagnostics</span>

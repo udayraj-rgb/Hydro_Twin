@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field
 import database
 import fleet_data
 from edge_interlocks import DeterministicEdgeInterlocks
+from ml_engine import ml_forecaster
 from physics_engine import AutonomousEnvironmentSimulator, DarcyHermiaPhysicsEngine
 from prognostics import WeibullXGBoostPrognostics
 
@@ -45,6 +46,10 @@ class SensorInput(BaseModel):
 class ModeUpdateRequest(BaseModel):
     mode: str = Field(default="AUTONOMOUS", description="'AUTONOMOUS' | 'MANUAL' | 'SCENARIO'")
     active_scenario: Optional[str] = Field(default="NONE", description="'NONE' | 'MUNICIPAL_CUTOFF' | 'HARDNESS_SPIKE' | 'PUMP_STALL'")
+
+
+class ClockModeRequest(BaseModel):
+    clock_mode: str = Field(default="REALTIME", description="'REALTIME' | 'VIRTUAL'")
 
 
 class ConsumerCommand(BaseModel):
@@ -102,8 +107,7 @@ class SensorUpdateResponse(BaseModel):
 # Global shared instances
 simulator = AutonomousEnvironmentSimulator(
     base_tds=850.0,
-    initial_time_seconds=7 * 3600 + 15 * 60,  # 07:15:00 AM (Morning Peak)
-    time_acceleration=60.0                     # 1 real second = 1 virtual minute
+    clock_mode="REALTIME"  # Live real-time clock synchronized to local system time & ML forecaster
 )
 physics_engine = DarcyHermiaPhysicsEngine(membrane_area=1.0, clean_membrane_resistance=0.35)
 edge_interlocks = DeterministicEdgeInterlocks()
@@ -344,6 +348,7 @@ async def execute_pipeline_tick() -> Dict[str, Any]:
         "simulation": {
             "mode": sim_state["mode"],
             "active_scenario": sim_state["active_scenario"],
+            "clock_mode": sim_state.get("clock_mode", simulator.clock_mode),
             "diurnal_time": sim_state["time_str"],
             "diurnal_phase": sim_state["phase"],
             "diurnal_hour": sim_state["hour"],
@@ -351,8 +356,11 @@ async def execute_pipeline_tick() -> Dict[str, Any]:
             "accumulated_scale": round(accumulated_scale, 4),
             "washdown_factor": washdown_factor,
             "flush_countdown": sim_state["flush_countdown"],
-            "scenario_progress_pct": sim_state.get("scenario_progress_pct", 0)
-        }
+            "scenario_progress_pct": sim_state.get("scenario_progress_pct", 0),
+            "ml_inference": sim_state.get("ml_inference", {})
+        },
+        "clock_mode": sim_state.get("clock_mode", simulator.clock_mode),
+        "ml_inference": sim_state.get("ml_inference", {})
     }
     return latest_packet
 
@@ -529,6 +537,50 @@ async def trigger_named_scenario(scenario_name: str):
         "message": f"Scenario {scenario_name} initiated",
         "simulation": new_state.get("simulation", {}),
         "latest_state": new_state
+    }
+
+
+@app.post("/api/simulation/clock_mode")
+async def update_simulation_clock_mode(payload: ClockModeRequest):
+    """
+    Switches simulation diurnal clock mode:
+    - 'REALTIME': Synchronizes 1:1 with real local wall-clock time and drives predictions via ML.
+    - 'VIRTUAL': Accelerated simulation mode (1 second = 1 virtual minute).
+    """
+    simulator.set_clock_mode(payload.clock_mode)
+    new_state = await execute_pipeline_tick()
+    return {
+        "message": f"Simulation clock mode set to {simulator.clock_mode}",
+        "clock_mode": simulator.clock_mode,
+        "clock_info": simulator.get_clock_info(),
+        "latest_state": new_state
+    }
+
+
+@app.get("/api/simulation/clock")
+def get_simulation_clock():
+    """Returns the current simulation clock information and mode."""
+    return simulator.get_clock_info()
+
+
+@app.get("/api/ml/realtime")
+def get_ml_realtime_inference():
+    """
+    Returns real-time Machine Learning model inference, confidence score,
+    harmonic decomposition, and feature attribution weights.
+    """
+    now = datetime.now()
+    pred = ml_forecaster.predict_realtime(
+        current_time=now,
+        base_tds=simulator.base_tds,
+        accumulated_scale=simulator.accumulated_scale,
+        inject_noise=True
+    )
+    return {
+        "status": "SUCCESS",
+        "clock_mode": simulator.clock_mode,
+        "inference": pred,
+        "history": ml_forecaster.get_recent_history(limit=10)
     }
 
 

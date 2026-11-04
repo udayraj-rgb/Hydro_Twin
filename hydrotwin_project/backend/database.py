@@ -46,6 +46,8 @@ def init_db(db_path: Optional[str] = None) -> None:
                 delta_p REAL NOT NULL,
                 r_sediment REAL NOT NULL,
                 r_cake REAL NOT NULL,
+                r_sed_slope REAL DEFAULT 0.0,
+                r_cake_slope REAL DEFAULT 0.0,
                 salt_rejection REAL NOT NULL,
                 status TEXT NOT NULL
             );
@@ -56,6 +58,17 @@ def init_db(db_path: Optional[str] = None) -> None:
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_telemetry_device ON telemetry(device_id);
         """)
+
+        # Migration: Add r_sed_slope and r_cake_slope to existing databases if missing
+        try:
+            cursor = conn.execute("PRAGMA table_info(telemetry);")
+            existing_cols = {row["name"] for row in cursor.fetchall()}
+            if "r_sed_slope" not in existing_cols:
+                conn.execute("ALTER TABLE telemetry ADD COLUMN r_sed_slope REAL DEFAULT 0.0;")
+            if "r_cake_slope" not in existing_cols:
+                conn.execute("ALTER TABLE telemetry ADD COLUMN r_cake_slope REAL DEFAULT 0.0;")
+        except Exception:
+            pass
 
         # Table 2: replenishment_orders
         conn.execute("""
@@ -150,6 +163,8 @@ def log_telemetry(data: Dict[str, Any], db_path: Optional[str] = None) -> int:
     delta_p = float(data.get("delta_p", 0.0))
     r_sediment = float(data.get("r_sediment", 0.0))
     r_cake = float(data.get("r_cake", 0.0))
+    r_sed_slope = float(data.get("r_sed_slope", 0.0))
+    r_cake_slope = float(data.get("r_cake_slope", 0.0))
     salt_rejection = float(data.get("salt_rejection", 0.0))
     status = str(data.get("status", "NOMINAL"))
 
@@ -159,12 +174,12 @@ def log_telemetry(data: Dict[str, Any], db_path: Optional[str] = None) -> int:
             """
             INSERT INTO telemetry (
                 timestamp, device_id, inlet_tds, outlet_tds, flow_lpm,
-                pump_current, delta_p, r_sediment, r_cake, salt_rejection, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                pump_current, delta_p, r_sediment, r_cake, r_sed_slope, r_cake_slope, salt_rejection, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """,
             (
                 timestamp, device_id, inlet_tds, outlet_tds, flow_lpm,
-                pump_current, delta_p, r_sediment, r_cake, salt_rejection, status
+                pump_current, delta_p, r_sediment, r_cake, r_sed_slope, r_cake_slope, salt_rejection, status
             )
         )
         row_id = cursor.lastrowid

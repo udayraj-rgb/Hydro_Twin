@@ -435,7 +435,7 @@ class DarcyHermiaPhysicsEngine:
 
         # 5. Pre-Sediment Vacuum Choking Resistance (R_sediment):
         # Increases when pump current rises without corresponding flow delivery
-        flow_denom = max(flow_lpm, 0.1)
+        flow_denom = max(flow_lpm, 0.05)
         r_sediment = round(max(0.1, (pump_current / flow_denom) * 0.85), 3)
 
         # 6. RO Membrane Cake Surface Layer Resistance via Darcy's Law:
@@ -448,12 +448,16 @@ class DarcyHermiaPhysicsEngine:
         )
         r_cake = round(max(0.1, raw_r_cake * float(washdown_factor)), 3)
 
+        # Rate of hydraulic resistance degradation slopes (dR/dt in kPa*s/(L*h))
+        r_sed_slope = round(max(0.001, (pump_current / 0.85) * (0.85 / max(flow_lpm, 0.05)) * 0.0085), 4)
+        r_cake_slope = round(max(0.002, (inlet_tds / 1000.0) * (effective_flux / 1.20) * 0.0142 * float(washdown_factor)), 4)
+
         # 7. Salt Rejection Efficiency (eta %):
         salt_rejection = round((1.0 - (outlet_tds / max(inlet_tds, 1.0))) * 100.0, 2)
 
         # 8. Concentration Polarization (CP) Risk Index:
-        # CP = (inlet_tds / 1000.0) * (Delta_P / max(flow_lpm, 0.2))
-        cp_flow_denom = max(flow_lpm, 0.2)
+        # CP = (inlet_tds / 1000.0) * (Delta_P / max(flow_lpm, 0.05))
+        cp_flow_denom = max(flow_lpm, 0.05)
         cp_index = round((inlet_tds / 1000.0) * (delta_p / cp_flow_denom), 3)
 
         # 9. Alkaliser Elution Mineral Balance:
@@ -476,6 +480,9 @@ class DarcyHermiaPhysicsEngine:
             "delta_pi": delta_pi,
             "r_sediment": r_sediment,
             "r_cake": r_cake,
+            "r_sed_slope": r_sed_slope,
+            "r_cake_slope": r_cake_slope,
+            "dr_dt": r_cake_slope,
             "salt_rejection": salt_rejection,
             "delta_mineral": delta_mineral,
             "cp_index": cp_index,

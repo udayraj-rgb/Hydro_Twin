@@ -242,47 +242,88 @@ async def execute_pipeline_tick() -> Dict[str, Any]:
             "delta_p": phys["delta_p"],
             "r_sediment": phys["r_sediment"],
             "r_cake": phys["r_cake"],
+            "r_sed_slope": phys.get("r_sed_slope", 0.0085),
+            "r_cake_slope": phys.get("r_cake_slope", 0.0142),
             "salt_rejection": phys["salt_rejection"],
             "status": status
         })
     except Exception as e:
         print(f"[HydroTwin-PHM] Telemetry logging error: {e}")
 
-    # 8. Build Consolidated Digital Twin Packet
+    # 8. Build Consolidated Digital Twin Packet (Flat Keys + Grouped Schemas for Complete Interop)
     latest_packet = {
+        # Core identification & sequencing
         "sequence_id": packet_sequence_id,
         "device_id": "ATOM-WP-2026-0042",
         "timestamp": now_iso,
+        "status": status,
+
+        # Top-Level Direct Physical & Sensor Telemetry
+        "inlet_tds": round(float(inlet_tds), 1),
+        "outlet_tds": round(float(actual_outlet_tds), 1),
+        "flow_lpm": round(float(flow_lpm), 2),
+        "pump_current": round(float(pump_current), 2),
+        "delta_p": round(float(phys["delta_p"]), 3),
+        "delta_pi": round(float(phys.get("delta_pi", 0.0)), 4),
+        "r_sediment": round(float(phys["r_sediment"]), 3),
+        "r_cake": round(float(phys["r_cake"]), 3),
+        "r_sed_slope": round(float(phys.get("r_sed_slope", 0.0085)), 4),
+        "r_cake_slope": round(float(phys.get("r_cake_slope", 0.0142)), 4),
+        "dr_dt": round(float(phys.get("dr_dt", 0.0142)), 4),
+        "salt_rejection": round(float(phys["salt_rejection"]), 2),
+        "delta_mineral": round(float(phys["delta_mineral"]), 2),
+        "cp_index": round(float(phys["cp_index"]), 3),
+        "flux": round(float(phys.get("flux", flow_lpm)), 3),
+
+        # Top-Level Direct Prognostics & Health Metrics
+        "sediment_health": round(float(prog["sediment_health"]), 1),
+        "carbon_health": round(float(prog["carbon_health"]), 1),
+        "ro_health": round(float(prog["ro_health"]), 1),
+        "alkaliser_health": round(float(prog["alkaliser_health"]), 1),
+        "limiting_health": round(float(prog.get("limiting_health", min(prog["sediment_health"], prog["ro_health"]))), 1),
+        "rul_days": int(prog["rul_days"]),
+        "auto_dispatch": bool(prog["auto_dispatch"]),
+        "failing_stage": str(prog["failing_stage"]),
+
+        # Top-Level Hardware Actuator Relays
+        "relay_pump": bool(relay_pump),
+        "inlet_valve": bool(inlet_valve),
+        "flush_solenoid": bool(flush_solenoid),
+
+        # Grouped Domain Objects for Standard UI Hierarchy
         "sensors": {
-            "inlet_tds": inlet_tds,
-            "outlet_tds": actual_outlet_tds,
-            "flow_lpm": flow_lpm,
-            "pump_current": pump_current
+            "inlet_tds": round(float(inlet_tds), 1),
+            "outlet_tds": round(float(actual_outlet_tds), 1),
+            "flow_lpm": round(float(flow_lpm), 2),
+            "pump_current": round(float(pump_current), 2)
         },
         "actuators": {
-            "relay_pump": relay_pump,
-            "inlet_valve": inlet_valve,
-            "flush_solenoid": flush_solenoid
+            "relay_pump": bool(relay_pump),
+            "inlet_valve": bool(inlet_valve),
+            "flush_solenoid": bool(flush_solenoid)
         },
         "physics": {
-            "delta_p": phys["delta_p"],
-            "delta_pi": phys["delta_pi"],
-            "r_sediment": phys["r_sediment"],
-            "r_cake": phys["r_cake"],
-            "salt_rejection": phys["salt_rejection"],
-            "delta_mineral": phys["delta_mineral"],
-            "cp_index": phys["cp_index"],
-            "flux": phys["flux"]
+            "delta_p": round(float(phys["delta_p"]), 3),
+            "delta_pi": round(float(phys.get("delta_pi", 0.0)), 4),
+            "r_sediment": round(float(phys["r_sediment"]), 3),
+            "r_cake": round(float(phys["r_cake"]), 3),
+            "r_sed_slope": round(float(phys.get("r_sed_slope", 0.0085)), 4),
+            "r_cake_slope": round(float(phys.get("r_cake_slope", 0.0142)), 4),
+            "dr_dt": round(float(phys.get("dr_dt", 0.0142)), 4),
+            "salt_rejection": round(float(phys["salt_rejection"]), 2),
+            "delta_mineral": round(float(phys["delta_mineral"]), 2),
+            "cp_index": round(float(phys["cp_index"]), 3),
+            "flux": round(float(phys.get("flux", flow_lpm)), 3)
         },
         "prognostics": {
-            "sediment_health": prog["sediment_health"],
-            "ro_health": prog["ro_health"],
-            "carbon_health": prog["carbon_health"],
-            "alkaliser_health": prog["alkaliser_health"],
-            "limiting_health": prog["limiting_health"],
-            "rul_days": prog["rul_days"],
-            "auto_dispatch": prog["auto_dispatch"],
-            "failing_stage": prog["failing_stage"]
+            "sediment_health": round(float(prog["sediment_health"]), 1),
+            "ro_health": round(float(prog["ro_health"]), 1),
+            "carbon_health": round(float(prog["carbon_health"]), 1),
+            "alkaliser_health": round(float(prog["alkaliser_health"]), 1),
+            "limiting_health": round(float(prog.get("limiting_health", min(prog["sediment_health"], prog["ro_health"]))), 1),
+            "rul_days": int(prog["rul_days"]),
+            "auto_dispatch": bool(prog["auto_dispatch"]),
+            "failing_stage": str(prog["failing_stage"])
         },
         "simulation": {
             "mode": sim_state["mode"],
@@ -295,8 +336,7 @@ async def execute_pipeline_tick() -> Dict[str, Any]:
             "washdown_factor": washdown_factor,
             "flush_countdown": sim_state["flush_countdown"],
             "scenario_progress_pct": sim_state.get("scenario_progress_pct", 0)
-        },
-        "status": status
+        }
     }
     return latest_packet
 
@@ -724,6 +764,7 @@ def get_recent_telemetry(limit: int = Query(default=25, ge=1, le=500)):
 
 
 @app.get("/api/state")
+@app.get("/api/telemetry/latest")
 def get_live_state():
     """Returns the most recent in-memory evaluated state packet."""
     return latest_packet or {}

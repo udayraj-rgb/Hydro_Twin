@@ -341,6 +341,67 @@ class TestHydroTwinAPI(unittest.TestCase):
         })
         self.assertEqual(resp_invalid.status_code, 400)
 
+    def test_telemetry_latest_and_contract_completeness(self):
+        # Trigger an update so latest_packet is populated
+        self.client.post("/api/update_sensors", json={
+            "inlet_tds": 850.0,
+            "flow_lpm": 1.20,
+            "pump_current": 0.85
+        })
+
+        # Test both /api/state and /api/telemetry/latest
+        for endpoint in ["/api/state", "/api/telemetry/latest"]:
+            resp = self.client.get(endpoint)
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+
+            # Verify checklist required keys:
+            required_keys = [
+                "device_id", "inlet_tds", "outlet_tds", "flow_lpm", "pump_current", "delta_p",
+                "r_sediment", "r_cake", "r_sed_slope", "r_cake_slope", "salt_rejection",
+                "delta_mineral", "cp_index", "sediment_health", "carbon_health", "ro_health",
+                "alkaliser_health", "rul_days", "auto_dispatch", "failing_stage",
+                "relay_pump", "inlet_valve", "flush_solenoid", "status"
+            ]
+            for key in required_keys:
+                self.assertIn(key, data, f"Missing required telemetry contract key: '{key}'")
+                self.assertIsNotNone(data[key], f"Key '{key}' is None")
+
+            # Verify grouped structures are also present
+            for grp in ["sensors", "actuators", "physics", "prognostics", "simulation"]:
+                self.assertIn(grp, data)
+
+    def test_database_slope_columns_logged(self):
+        # Verify columns exist in SQLite schema
+        conn = main.database.get_db_connection()
+        cols = {row["name"] for row in conn.execute("PRAGMA table_info(telemetry);").fetchall()}
+        conn.close()
+        self.assertIn("r_sed_slope", cols)
+        self.assertIn("r_cake_slope", cols)
+
+        # Log a test frame and verify retrieval
+        row_id = main.database.log_telemetry({
+            "device_id": "TEST-DEVICE-01",
+            "inlet_tds": 850.0,
+            "outlet_tds": 42.0,
+            "flow_lpm": 1.20,
+            "pump_current": 0.85,
+            "delta_p": 1.11,
+            "r_sediment": 0.60,
+            "r_cake": 0.18,
+            "r_sed_slope": 0.0085,
+            "r_cake_slope": 0.0142,
+            "salt_rejection": 95.2,
+            "status": "NOMINAL"
+        })
+        self.assertGreater(row_id, 0)
+
+        recent = main.database.get_recent_telemetry(limit=5)
+        self.assertTrue(len(recent) > 0)
+        latest_row = recent[-1]
+        self.assertIn("r_sed_slope", latest_row)
+        self.assertIn("r_cake_slope", latest_row)
+
 
 if __name__ == "__main__":
     unittest.main()

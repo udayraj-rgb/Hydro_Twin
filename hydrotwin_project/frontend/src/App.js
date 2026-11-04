@@ -215,8 +215,10 @@ function App() {
       const washdown = isFlush ? 0.82 : 1.0;
       if (isFlush) localScale = Math.max(0, localScale * 0.88);
 
-      const rSed = parseFloat(Math.max(0.1, (curCurrent / Math.max(curFlow, 0.1)) * 0.85).toFixed(2));
+      const rSed = parseFloat(Math.max(0.1, (curCurrent / Math.max(curFlow, 0.05)) * 0.85).toFixed(2));
       const rCake = parseFloat(Math.max(0.1, (((deltaP - deltaPi) / (1.002 * Math.max(curFlow, 0.05))) - 0.35 + localScale) * washdown).toFixed(2));
+      const rSedSlope = parseFloat(Math.max(0.001, (curCurrent / 0.85) * (0.85 / Math.max(curFlow, 0.05)) * 0.0085).toFixed(4));
+      const rCakeSlope = parseFloat(Math.max(0.002, (curTds / 1000.0) * (Math.max(curFlow, 0.05) / 1.20) * 0.0142 * washdown).toFixed(4));
       const saltRej = parseFloat(((1.0 - (42.0 / Math.max(curTds, 1.0))) * 100.0).toFixed(2));
 
       // Deterministic Safety Interlocks (<200ms)
@@ -232,12 +234,45 @@ function App() {
 
       const sedHealth = parseFloat(Math.max(0, Math.min(100, 100.0 - (rSed * 28.0))).toFixed(1));
       const roHealth = parseFloat(Math.max(0, Math.min(100, (saltRej / 95.0) * 100.0 - (rCake * 14.0))).toFixed(1));
-      const rulDays = Math.max(1, Math.round(Math.min(sedHealth, roHealth) * 0.45));
+      const rulDays = Math.max(1, Math.round(Math.min(sedHealth, roHealth) * 0.42));
 
       setTelemetry({
         sequence_id: localSequence,
         device_id: 'ATOM-WP-2026-0042',
         timestamp: new Date().toISOString(),
+        status: status,
+
+        // Direct flat contract keys
+        inlet_tds: curTds,
+        outlet_tds: 42.0,
+        flow_lpm: curFlow,
+        pump_current: curCurrent,
+        delta_p: deltaP,
+        delta_pi: deltaPi,
+        r_sediment: rSed,
+        r_cake: rCake,
+        r_sed_slope: rSedSlope,
+        r_cake_slope: rCakeSlope,
+        dr_dt: rCakeSlope,
+        salt_rejection: saltRej,
+        delta_mineral: 28.0,
+        cp_index: cpIndex,
+        flux: curFlow,
+
+        sediment_health: sedHealth,
+        ro_health: roHealth,
+        carbon_health: 84.0,
+        alkaliser_health: 93.3,
+        limiting_health: Math.min(sedHealth, roHealth),
+        rul_days: rulDays,
+        auto_dispatch: rulDays <= 14,
+        failing_stage: sedHealth < roHealth ? 'Pre-Sediment Filter' : 'RO Membrane',
+
+        relay_pump: relayPump,
+        inlet_valve: inletValve,
+        flush_solenoid: isFlush,
+
+        // Grouped schemas
         sensors: {
           inlet_tds: curTds,
           outlet_tds: 42.0,
@@ -254,6 +289,9 @@ function App() {
           delta_pi: deltaPi,
           r_sediment: rSed,
           r_cake: rCake,
+          r_sed_slope: rSedSlope,
+          r_cake_slope: rCakeSlope,
+          dr_dt: rCakeSlope,
           salt_rejection: saltRej,
           delta_mineral: 28.0,
           cp_index: cpIndex,
@@ -280,8 +318,7 @@ function App() {
           washdown_factor: washdown,
           flush_countdown: isFlush ? 4 : 0,
           scenario_progress_pct: 0
-        },
-        status: status
+        }
       });
     }, 1000);
 

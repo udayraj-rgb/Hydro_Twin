@@ -85,26 +85,13 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
               onClick={() => onUpdate({ mode: 'AUTONOMOUS', active_scenario: 'NONE', clock_mode: 'REALTIME' })}
               title="Real-time 1:1 local system clock synchronization driven by Machine Learning"
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                isAutonomous && isRealtime
+                isAutonomous
                   ? 'bg-[#182514] text-white shadow-sm'
                   : 'text-[#142010] hover:text-[#182514]'
               }`}
             >
-              <span className={`w-2 h-2 rounded-full ${isAutonomous && isRealtime ? 'bg-[#A6E39D] animate-pulse' : 'bg-[#54684A]'}`}></span>
+              <span className={`w-2 h-2 rounded-full ${isAutonomous ? 'bg-[#A6E39D] animate-pulse' : 'bg-[#54684A]'}`}></span>
               <span>● Real-Time (ML)</span>
-            </button>
-
-            <button
-              onClick={() => onUpdate({ mode: 'AUTONOMOUS', active_scenario: 'NONE', clock_mode: 'VIRTUAL' })}
-              title="Accelerated 60x diurnal replay cycle for rapid 24h testing"
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                isAutonomous && !isRealtime
-                  ? 'bg-[#2E4324] text-white shadow-sm'
-                  : 'text-[#142010] hover:text-[#182514]'
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${isAutonomous && !isRealtime ? 'bg-amber-400 animate-pulse' : 'bg-[#54684A]'}`}></span>
-              <span>⏩ 60x Fast Cycle</span>
             </button>
 
             <button
@@ -123,17 +110,10 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
             </button>
           </div>
 
-          {isAutonomous && isRealtime && (
+          {isAutonomous && (
             <div className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-mono font-bold px-3 py-1 rounded-xl bg-[#EAEFE5] text-[#142010] border border-[#BACAB3]">
               <span className="w-2 h-2 rounded-full bg-[#182514] animate-ping"></span>
               <span>AI ML Engine: Real-Time Stream Active</span>
-            </div>
-          )}
-
-          {isAutonomous && !isRealtime && (
-            <div className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-mono font-bold px-3 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping"></span>
-              <span>Fast Simulation: 60x Diurnal Warp Active</span>
             </div>
           )}
         </div>
@@ -141,9 +121,9 @@ function VirtualHILPanel({ sensorInputs = {}, onUpdate = () => {}, telemetry = n
         {/* Right: Virtual Diurnal Clock & Daily Dispense Gauge */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="px-3.5 py-1.5 rounded-xl border border-[#BACAB3] bg-[#F4F6F0] text-[#142010] text-xs font-mono font-bold flex items-center space-x-2 shadow-sm">
-            <span className={`w-2 h-2 rounded-full ${isRealtime ? 'bg-emerald-600 animate-pulse' : 'bg-amber-500'}`}></span>
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
             <span className="text-[10px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-white border border-[#BACAB3] text-[#182514]">
-              {isRealtime ? 'Live Clock' : '60x Warp'}
+              Live Clock
             </span>
             <span className="text-sm tracking-wide text-[#142010] font-black">{diurnalTime}</span>
             <span className="hidden md:inline text-xs font-sans font-bold text-[#142010] border-l border-[#BACAB3] pl-2">

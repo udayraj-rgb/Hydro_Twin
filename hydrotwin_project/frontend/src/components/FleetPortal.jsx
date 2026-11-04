@@ -222,16 +222,50 @@ function FleetPortal({ telemetry = null }) {
     }
   };
 
-  // Handler for simulated dynamic washdown
+  // Handler for simulated dynamic washdown with live feedback and backend synchronization
   const handleSimulateWashdown = (deviceId) => {
+    if (washdownActiveDevices[deviceId]) return;
+
     setWashdownActiveDevices((prev) => ({ ...prev, [deviceId]: true }));
+    notify(`🌊 Micro-Flush Initiated: High-velocity shear washdown active on Device #${deviceId}. Mineral cake resistance (R_cake) decremented by 18%.`, 'success');
+
+    if (selectedUnit && selectedUnit.device_id === deviceId) {
+      setSelectedUnit((prev) => ({
+        ...prev,
+        status: 'DYNAMIC FLUSH ACTIVE (Descaling)',
+        health_score: Math.min(100, (prev.health_score || 85) + 6),
+        rul_days: (prev.rul_days || 30) + 5
+      }));
+    }
+
+    // If this is the active live hardware twin, dispatch flush command to backend
+    if (deviceId === 'ATOM-WP-2026-0042') {
+      fetch(`${BACKEND_BASE}/api/consumer/control`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ manual_flush: true })
+      }).catch((err) => {
+        console.warn('[Micro-Flush] Backend flush error:', err);
+      });
+    }
+
     setTimeout(() => {
       setWashdownActiveDevices((prev) => {
         const copy = { ...prev };
         delete copy[deviceId];
         return copy;
       });
-    }, 4000);
+      setSelectedUnit((prev) => {
+        if (prev && prev.device_id === deviceId) {
+          return {
+            ...prev,
+            status: 'NOMINAL (Descaled Baseline)'
+          };
+        }
+        return prev;
+      });
+      notify(`✅ Micro-Flush Complete for Device #${deviceId}: Surface cake layer purged (-18% R_cake). Nominal filtration recovered.`, 'success');
+    }, 4500);
   };
 
   // ---------------------------------------------------------------------------
@@ -1431,21 +1465,49 @@ function FleetPortal({ telemetry = null }) {
               )}
             </div>
 
+            {/* Operator Active Descaling Notification */}
+            {washdownActiveDevices[selectedUnit.device_id] && (
+              <div className="p-3.5 rounded-xl bg-[#182514] text-[#A6E39D] border border-[#384828] flex items-center space-x-2.5 text-xs font-bold animate-pulse shadow-sm">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#A6E39D] animate-ping shrink-0"></span>
+                <span>Active High-Velocity Boundary Layer Descaling: Purging RO Mineral Cake Layer (-18% R_cake)...</span>
+              </div>
+            )}
+
             {/* Operator Simulation Control Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
               <div className="flex items-center space-x-2 w-full sm:w-auto">
                 <button
                   type="button"
+                  disabled={Boolean(washdownActiveDevices[selectedUnit.device_id])}
                   onClick={() => handleSimulateWashdown(selectedUnit.device_id)}
-                  className="px-3.5 py-2 rounded-xl bg-[#F4F6F0] hover:bg-[#EAEFE5] text-[#384828] border border-[#BACAB3] text-xs font-bold transition-all shadow-2xs"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 shadow-sm ${
+                    washdownActiveDevices[selectedUnit.device_id]
+                      ? 'bg-[#182514] text-[#A6E39D] border border-[#384828] animate-pulse cursor-wait'
+                      : 'bg-[#F4F6F0] hover:bg-[#EAEFE5] text-[#384828] border border-[#BACAB3] active:scale-95 cursor-pointer'
+                  }`}
                 >
-                  Trigger Micro-Flush (-18% Cake)
+                  {washdownActiveDevices[selectedUnit.device_id] ? (
+                    <>
+                      <svg className="w-3.5 h-3.5 animate-spin text-[#A6E39D]" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                      </svg>
+                      <span>Flushing Active... (-18% Cake)</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3.5 h-3.5 text-[#384828]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span>Trigger Micro-Flush (-18% Cake)</span>
+                    </>
+                  )}
                 </button>
                 {selectedUnit.d2c_status !== 'ORDER DISPATCHED' && (
                   <button
                     type="button"
                     onClick={() => handleSimulateDispatch(selectedUnit.device_id)}
-                    className="px-3.5 py-2 rounded-xl bg-[#384828] hover:bg-[#1F2D19] text-white text-xs font-bold transition-all shadow-sm"
+                    className="px-3.5 py-2 rounded-xl bg-[#384828] hover:bg-[#1F2D19] text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
                   >
                     Dispatch D2C Cartridge
                   </button>

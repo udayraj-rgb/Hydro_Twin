@@ -163,50 +163,60 @@ function App() {
   useEffect(() => {
     if (connected) return; // If server WebSocket is active, let server drive the stream
 
-    let virtualSeconds = 7 * 3600 + 45 * 60; // Start at 07:45:00 AM (Morning Peak)
     let localSequence = 1000;
     let localScale = 0.0142;
 
     const interval = setInterval(() => {
-      virtualSeconds = (virtualSeconds + 60) % 86400;
-      localSequence += 1;
-      const h = Math.floor(virtualSeconds / 3600);
-      const m = Math.floor((virtualSeconds % 3600) / 60);
-      const s = Math.floor(virtualSeconds % 60);
+      // ALWAYS use true real-time local system clock
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
       const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      localSequence += 1;
 
       let curFlow = sensorInputs.flow_lpm;
       let curCurrent = sensorInputs.pump_current;
       let curTds = sensorInputs.inlet_tds;
-      let phase = 'Morning Peak (Breakfast & Water Dispensing)';
+      let phase = 'Day Standby (Intermittent Glass Dispense)';
 
-      // In Autonomous Mode, evaluate diurnal cycle with physical Gaussian noise
+      // In Autonomous Mode, evaluate diurnal cycle with physical Gaussian noise matching exact local hour
       if (sensorInputs.mode === 'AUTONOMOUS' && sensorInputs.active_scenario === 'NONE') {
         if (h >= 6 && h < 9) {
           curFlow = 1.40;
           curCurrent = 0.92;
           curTds = 850 + 50;
           phase = 'Morning Peak (Breakfast & Water Dispensing)';
+        } else if (h >= 9 && h < 12) {
+          curFlow = 0.45;
+          curCurrent = 0.50;
+          curTds = 860;
+          phase = 'Mid-Day Hydration (Intermittent Glass Fill)';
         } else if (h >= 12 && h < 14) {
           curFlow = 0.80;
           curCurrent = 0.78;
           curTds = 850;
           phase = 'Afternoon Low (Post-Lunch Hydration)';
+        } else if (h >= 14 && h < 18) {
+          curFlow = 0.35;
+          curCurrent = 0.42;
+          curTds = 855;
+          phase = 'Afternoon Standby (Intermittent Trickle)';
         } else if (h >= 18 && h < 21) {
           curFlow = 1.30;
           curCurrent = 0.90;
           curTds = 875;
           phase = 'Evening Peak (Dinner Cooking & Storage Batch)';
-        } else if (h >= 23 || h < 5) {
+        } else if (h >= 21 && h < 23) {
+          curFlow = 0.65;
+          curCurrent = 0.62;
+          curTds = 860;
+          phase = 'Night Hydration (Post-Dinner Dispense)';
+        } else {
           curFlow = 0.00;
           curCurrent = 0.00;
           curTds = 830;
           phase = 'Night Standby (Quiescent Leak Integrity Test)';
-        } else {
-          curFlow = 0.35;
-          curCurrent = 0.42;
-          curTds = 855;
-          phase = 'Day Standby (Intermittent Glass Dispense)';
         }
 
         // Add real-time Gaussian noise: +/- 2% flow, +/- 0.03 A current, +/- 3 ppm TDS

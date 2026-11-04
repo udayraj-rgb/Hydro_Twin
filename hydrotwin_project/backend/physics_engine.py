@@ -48,18 +48,16 @@ class AutonomousEnvironmentSimulator:
     def __init__(
         self,
         base_tds: float = 850.0,
-        initial_time_seconds: int = 7 * 3600 + 15 * 60,  # 07:15:00 AM (Morning Peak default for replay)
-        time_acceleration: float = 60.0,  # 1 real second = 60 virtual seconds (in VIRTUAL mode)
-        clock_mode: str = "VIRTUAL"  # "REALTIME" | "VIRTUAL"
+        initial_time_seconds: Optional[int] = None,
+        time_acceleration: float = 1.0,
+        clock_mode: str = "REALTIME"  # 100% Real-Time system clock default
     ):
+        now = datetime.now()
+        current_sec = now.hour * 3600 + now.minute * 60 + now.second
         self.base_tds = float(base_tds)
-        self.virtual_time_seconds = int(initial_time_seconds) % 86400
+        self.virtual_time_seconds = current_sec if initial_time_seconds is None else int(initial_time_seconds) % 86400
         self.time_acceleration = float(time_acceleration)
-        self.clock_mode = str(clock_mode).upper()
-
-        if self.clock_mode == "REALTIME":
-            now = datetime.now()
-            self.virtual_time_seconds = now.hour * 3600 + now.minute * 60 + now.second
+        self.clock_mode = "REALTIME"  # Enforce REALTIME clock mode by default
 
         # Operational simulation mode: "AUTONOMOUS" | "MANUAL" | "SCENARIO"
         self.mode = "AUTONOMOUS"

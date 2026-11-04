@@ -153,17 +153,51 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
 
           {/* Tooltip */}
           {activeTooltip === 'pump' && (
-            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-xs font-mono space-y-1 text-[#142010] pointer-events-none">
-              <div className="font-black text-[#142010] border-b border-[#E3E9DE] pb-1">
-                Booster Pump Relay Logic (Thermal Decoupling)
+            <div
+              className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 p-3.5 bg-[#182514] text-white border-2 border-[#384828] rounded-2xl shadow-2xl text-xs font-mono space-y-2 pointer-events-none drop-shadow-2xl"
+              style={{ backgroundColor: '#182514', opacity: 1 }}
+            >
+              <div className="font-black text-white border-b border-[#384828] pb-1.5 flex items-center justify-between">
+                <span>Booster Pump Relay Logic</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2D3E25] text-[#A6E39D] border border-[#445E37] font-bold">
+                  GPIO26
+                </span>
               </div>
-              <div className="text-[#142010]">Ia: <span className="font-black text-[#142010]">{Ia.toFixed(2)} A</span> | Q: <span className="font-black text-[#142010]">{Q.toFixed(2)} L/min</span></div>
-              <div>Load Ratio: <span className="text-[#384828] font-black">{Math.round(loadRatio * 100)}%</span> (0.15A - 1.80A)</div>
-              <div>Overcurrent: {isOvercurrent ? '<span class="text-rose-700 font-bold">TRUE (>1.80A)</span>' : 'Nominal'}</div>
-              <div>Cavitation: {isCavitation ? '<span class="text-rose-700 font-bold">TRUE (<0.15A)</span>' : 'Nominal'}</div>
-              <div className="text-[10px] text-[#1F2D19] font-medium pt-1 border-t border-[#E3E9DE]">
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Armature Current (Ia):</span>
+                  <span className="font-black text-white font-mono">{Ia.toFixed(2)} A</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Flow Rate (Q):</span>
+                  <span className="font-black text-white font-mono">{Q.toFixed(2)} L/min</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Thermal Load Ratio:</span>
+                  <span className="font-black text-[#A6E39D] font-mono">{Math.round(loadRatio * 100)}% (0.15A - 1.80A)</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Overcurrent Trip:</span>
+                  {isOvercurrent ? (
+                    <span className="text-rose-400 font-black animate-pulse font-mono">TRIP (&gt;1.80A)</span>
+                  ) : (
+                    <span className="text-[#A6E39D] font-bold font-mono">Nominal</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Cavitation Trip:</span>
+                  {isCavitation ? (
+                    <span className="text-amber-400 font-black animate-pulse font-mono">TRIP (&lt;0.15A)</span>
+                  ) : (
+                    <span className="text-[#A6E39D] font-bold font-mono">Nominal</span>
+                  )}
+                </div>
+              </div>
+              <div className="text-[10px] text-[#C8E6C0] font-mono pt-1.5 border-t border-[#384828] bg-[#111C0E]/80 px-2.5 py-1.5 rounded-lg">
                 Formula: Load = clamp((Ia - 0.15) / 1.65, 0, 1) | Trip &lt; 180ms
               </div>
+              {/* Downward Caret */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#384828]"></div>
             </div>
           )}
         </div>
@@ -203,17 +237,41 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
 
           {/* Tooltip */}
           {activeTooltip === 'flush' && (
-            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-xs font-mono space-y-1 text-[#142010] pointer-events-none">
-              <div className="font-black text-[#142010] border-b border-[#E3E9DE] pb-1">
-                Concentration Polarization (CP) Nucleation
+            <div
+              className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 p-3.5 bg-[#182514] text-white border-2 border-[#384828] rounded-2xl shadow-2xl text-xs font-mono space-y-2 pointer-events-none drop-shadow-2xl"
+              style={{ backgroundColor: '#182514', opacity: 1 }}
+            >
+              <div className="font-black text-white border-b border-[#384828] pb-1.5 flex items-center justify-between">
+                <span>Concentration Polarization (CP)</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2D3E25] text-[#A6E39D] border border-[#445E37] font-bold">
+                  GPIO27
+                </span>
               </div>
-              <div>Inlet TDS: <span className="font-black text-[#142010]">{inletTds.toFixed(1)} ppm</span></div>
-              <div>ΔP Inferred: <span className="font-black text-[#142010]">{deltaP.toFixed(2)} bar</span></div>
-              <div>CP Index: <span className={isFlushActive ? 'text-[#1E5246] font-black' : 'text-[#142010] font-bold'}>{cpIndex.toFixed(3)}</span> (Threshold: 1.25)</div>
-              <div>Duty Intensity: <span className="text-[#384828] font-black">{(flushIntensity * 100).toFixed(0)}%</span></div>
-              <div className="text-[10px] text-[#1F2D19] font-medium pt-1 border-t border-[#E3E9DE]">
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Inlet Feed TDS:</span>
+                  <span className="font-black text-white font-mono">{inletTds.toFixed(1)} ppm</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Inferred Head Loss (ΔP):</span>
+                  <span className="font-black text-white font-mono">{deltaP.toFixed(2)} bar</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>CP Index:</span>
+                  <span className={`font-black font-mono ${isFlushActive ? 'text-[#72DEC2]' : 'text-[#A6E39D]'}`}>
+                    {cpIndex.toFixed(3)} (Limit: 1.25)
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Flush Solenoid Duty:</span>
+                  <span className="font-black text-[#A6E39D] font-mono">{(flushIntensity * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              <div className="text-[10px] text-[#C8E6C0] font-mono pt-1.5 border-t border-[#384828] bg-[#111C0E]/80 px-2.5 py-1.5 rounded-lg">
                 Formula: CP = (TDS/1000) * (ΔP / max(Q, 0.2)) | -18% R_cake washdown
               </div>
+              {/* Downward Caret */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#384828]"></div>
             </div>
           )}
         </div>
@@ -253,17 +311,43 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
 
           {/* Tooltip */}
           {activeTooltip === 'valve' && (
-            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-[11px] font-mono space-y-1 text-[#142010] pointer-events-none">
-              <div className="font-black text-[#142010] border-b border-[#BACAB3] pb-1">
-                Membrane Integrity & Osmotic Rejection
+            <div
+              className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-3 w-80 p-3.5 bg-[#182514] text-white border-2 border-[#384828] rounded-2xl shadow-2xl text-xs font-mono space-y-2 pointer-events-none drop-shadow-2xl"
+              style={{ backgroundColor: '#182514', opacity: 1 }}
+            >
+              <div className="font-black text-white border-b border-[#384828] pb-1.5 flex items-center justify-between">
+                <span>Membrane Integrity & Salt Rejection</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2D3E25] text-[#A6E39D] border border-[#445E37] font-bold">
+                  GPIO27
+                </span>
               </div>
-              <div>Inlet TDS: <span className="font-black text-[#142010]">{Math.round(inletTds)} ppm</span></div>
-              <div>Outlet TDS: <span className="font-black text-[#142010]">{Math.round(outletTds)} ppm</span></div>
-              <div>Salt Rejection (η): <span className="text-[#2D5A1E] font-black">{eta.toFixed(1)}%</span></div>
-              <div>Membrane Breach: <span className={isBreached ? 'text-rose-700 font-black' : 'text-[#2D5A1E] font-bold'}>{isBreached ? 'CRITICAL BREACH' : 'Integrity Verified'}</span></div>
-              <div className="text-[10px] text-[#1F2D19] font-semibold pt-1 border-t border-[#BACAB3]">
-                Formula: η = (1 - Out/In)*100% | Trip: Out &gt;= 0.50*In (In &gt; 200)
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Feed Groundwater TDS:</span>
+                  <span className="font-black text-white font-mono">{Math.round(inletTds)} ppm</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Purified Permeate TDS:</span>
+                  <span className="font-black text-white font-mono">{Math.round(outletTds)} ppm</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Salt Rejection (η):</span>
+                  <span className="font-black text-[#A6E39D] font-mono">{eta.toFixed(1)}%</span>
+                </div>
+                <div className="flex justify-between items-center text-[#E2F0DC]">
+                  <span>Safety Interlock:</span>
+                  {isBreached ? (
+                    <span className="text-rose-400 font-black animate-pulse font-mono">CRITICAL BREACH</span>
+                  ) : (
+                    <span className="text-[#A6E39D] font-bold font-mono">Integrity Verified</span>
+                  )}
+                </div>
               </div>
+              <div className="text-[10px] text-[#C8E6C0] font-mono pt-1.5 border-t border-[#384828] bg-[#111C0E]/80 px-2.5 py-1.5 rounded-lg">
+                Formula: η = (1 - Out/In)*100% | Trip: Out &ge; 0.50*In (In &gt; 200)
+              </div>
+              {/* Downward Caret */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-[#384828]"></div>
             </div>
           )}
         </div>

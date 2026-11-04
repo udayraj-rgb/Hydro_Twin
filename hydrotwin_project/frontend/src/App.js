@@ -287,16 +287,22 @@ function App() {
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#1F2D19] leading-none">
                   HydroTwin–PHM
                 </h1>
-                <div className="flex items-center space-x-2 pt-0.5">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#576C4D]">
+                <a
+                  href="https://atomberg.com/products/intellon-waterpurifier"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2 pt-0.5 group cursor-pointer hover:opacity-90 transition-opacity"
+                  title="Visit Atomberg Intellon Water Purifier Official Page"
+                >
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#576C4D] group-hover:text-[#2A3525] transition-colors">
                     Powered by
                   </span>
                   <img
                     src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
                     alt="Atomberg"
-                    className="h-5 sm:h-6 w-auto object-contain hover:opacity-95 transition-opacity"
+                    className="h-5 sm:h-6 w-auto object-contain transition-transform group-hover:scale-105"
                   />
-                </div>
+                </a>
               </div>
             </div>
 
@@ -401,7 +407,13 @@ function App() {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
                   <span className="text-base font-black text-[#1F2D19] tracking-tight">HydroTwin–PHM</span>
-                  <div className="flex items-center space-x-1.5 bg-white px-2 py-0.5 rounded-full border border-[#BACAB3] shadow-xs">
+                  <a
+                    href="https://atomberg.com/products/intellon-waterpurifier"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-1.5 bg-white hover:bg-[#F4F6F0] px-2.5 py-0.5 rounded-full border border-[#BACAB3] shadow-xs transition-all cursor-pointer hover:scale-105"
+                    title="Visit Atomberg Intellon Water Purifier Official Page"
+                  >
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#576C4D]">
                       Powered by
                     </span>
@@ -410,7 +422,7 @@ function App() {
                       alt="Atomberg"
                       className="h-3.5 w-auto object-contain"
                     />
-                  </div>
+                  </a>
                 </div>
                 <p className="text-xs text-[#576C4D] max-w-md">
                   Autonomous Digital Twin & Prognostic Health Management for Smart Water Purifiers. AtomQuest 2026 Innovation Challenge (Track 2).

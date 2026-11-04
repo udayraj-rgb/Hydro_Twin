@@ -123,11 +123,19 @@ function ConsumerVideoShowcase({ telemetry = null }) {
             </div>
             <span className="text-xs font-black text-[#2A3525]">HydroTwin–PHM</span>
             <span className="text-gray-300">•</span>
-            <img
-              src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
-              alt="Atomberg"
-              className="h-3.5 w-auto object-contain"
-            />
+            <a
+              href="https://atomberg.com/products/intellon-waterpurifier"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center hover:opacity-80 transition-opacity cursor-pointer"
+              title="Visit Atomberg Intellon Water Purifier Official Page"
+            >
+              <img
+                src={`${process.env.PUBLIC_URL}/assets/atomberg_logo.png`}
+                alt="Atomberg"
+                className="h-3.5 w-auto object-contain hover:scale-105 transition-transform"
+              />
+            </a>
           </div>
 
           {/* Top-Right Controls: Mute/Unmute Button & Purity Metric */}

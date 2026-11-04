@@ -292,7 +292,13 @@ function ConsumerView({ telemetry = null }) {
               <div className="space-y-0.5">
                 <h2 className="text-xl sm:text-2xl font-black text-[#2A3525] tracking-tight flex flex-wrap items-center gap-2">
                   <span>HydroTwin–PHM</span>
-                  <div className="flex items-center space-x-1.5 bg-[#EAEFE5] px-2.5 py-1 rounded-full border border-[#BACAB3]">
+                  <a
+                    href="https://atomberg.com/products/intellon-waterpurifier"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-1.5 bg-[#EAEFE5] hover:bg-[#DCE4D6] px-2.5 py-1 rounded-full border border-[#BACAB3] transition-all cursor-pointer hover:scale-105"
+                    title="Visit Atomberg Intellon Water Purifier Official Page"
+                  >
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#384828]">
                       Powered by
                     </span>
@@ -301,7 +307,7 @@ function ConsumerView({ telemetry = null }) {
                       alt="Atomberg"
                       className="h-3.5 w-auto object-contain"
                     />
-                  </div>
+                  </a>
                 </h2>
               </div>
             </div>

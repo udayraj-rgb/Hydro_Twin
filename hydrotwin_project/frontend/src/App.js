@@ -395,7 +395,7 @@ function App() {
                 <button
                   type="button"
                   onClick={() => handleSignOut(activeTab)}
-                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-[#54684A] hover:text-rose-700 border border-[#BACAB3] text-xs font-semibold transition-all flex items-center space-x-1 shadow-2xs cursor-pointer ml-1"
+                  className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-[#142010] hover:text-rose-700 border border-[#BACAB3] text-xs font-bold transition-all flex items-center space-x-1 shadow-2xs cursor-pointer ml-1"
                   title="Sign out of active portal session and view login screen"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -441,7 +441,7 @@ function App() {
                         {authSessions[activeTab].badge || authSessions[activeTab].designation || 'Verified User'}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#6C7E66] flex flex-wrap items-center gap-1.5">
+                    <div className="text-xs text-[#1F2D19] font-medium flex flex-wrap items-center gap-1.5">
                       <span>{authSessions[activeTab].email}</span>
                       {authSessions[activeTab].location && (
                         <>
@@ -454,13 +454,13 @@ function App() {
                 </div>
 
                 <div className="flex items-center space-x-3 self-end sm:self-auto shrink-0">
-                  <span className="text-[10px] text-[#889A80] font-mono hidden md:inline">
+                  <span className="text-xs text-[#1F2D19] font-mono font-semibold hidden md:inline">
                     Logged in at {authSessions[activeTab].loginTime || '10:00 AM'}
                   </span>
                   <button
                     type="button"
                     onClick={() => handleSignOut(activeTab)}
-                    className="px-3 py-1.5 rounded-xl bg-[#F4F6F0] hover:bg-rose-50 text-[#54684A] hover:text-rose-700 border border-[#BACAB3] hover:border-rose-200 text-xs font-bold transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-[#F4F6F0] hover:bg-rose-50 text-[#142010] hover:text-rose-700 border border-[#BACAB3] hover:border-rose-200 text-xs font-bold transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -551,7 +551,7 @@ function App() {
                   className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
-              <span className="text-[10px] text-[#6C7E66] font-mono">
+              <span className="text-xs text-[#1F2D19] font-mono font-bold">
                 Hardware-in-the-Loop • Darcy-Hermia Decoupling Engine
               </span>
             </div>

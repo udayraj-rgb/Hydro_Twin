@@ -75,11 +75,11 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3
-              className={`text-base font-bold tracking-tight flex items-center space-x-2 ${
-                isConsumer ? 'text-[#2A3525]' : 'text-white'
+              className={`text-base font-black tracking-tight flex items-center space-x-2 ${
+                isConsumer ? 'text-[#142010]' : 'text-white'
               }`}
             >
-              <svg className={`w-4 h-4 ${isConsumer ? 'text-[#4E7A3D]' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className={`w-4 h-4 ${isConsumer ? 'text-[#384828]' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               <span>Predictive Health & Remaining Useful Life (PHM)</span>
@@ -87,14 +87,14 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <span
               className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
                 isConsumer
-                  ? 'bg-[#EAEFE5] text-[#3E4D37] border-[#BACAB3]'
+                  ? 'bg-[#EAEFE5] text-[#142010] border-[#BACAB3]'
                   : 'bg-cyan-950 text-cyan-300 border-cyan-800/80'
               }`}
             >
               Weibull + XGBoost Survival Regressor (±5 Day Precision)
             </span>
           </div>
-          <p className={`text-xs ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+          <p className={`text-xs ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-400'}`}>
             Coupled machine learning survival analysis trained on multi-stage hydraulic degradation trajectories.
           </p>
         </div>
@@ -109,32 +109,32 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
         >
           <div className="text-right">
             <div
-              className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
-                isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'
+              className={`text-[10px] font-mono uppercase tracking-wider font-black ${
+                isConsumer ? 'text-[#142010]' : 'text-slate-400'
               }`}
             >
               Forecasted Window
             </div>
             <div
               className={`text-xs font-mono font-bold ${
-                isConsumer ? 'text-[#54684A]' : 'text-emerald-400'
+                isConsumer ? 'text-[#142010]' : 'text-emerald-400'
               }`}
             >
               Est. Swap: {formattedProjectedDate}
             </div>
           </div>
-          <div className={`h-8 w-px ${isConsumer ? 'bg-[#DCE4D6]' : 'bg-slate-800'}`}></div>
+          <div className={`h-8 w-px ${isConsumer ? 'bg-[#BACAB3]' : 'bg-slate-800'}`}></div>
           <div className="flex items-baseline space-x-1.5">
             <span
               className={`text-3xl font-black font-mono tracking-tight ${
-                isConsumer ? 'text-[#2A3525]' : 'text-white'
+                isConsumer ? 'text-[#142010]' : 'text-white'
               }`}
             >
               {rulDays}
             </span>
             <span
-              className={`text-xs font-bold font-mono ${
-                isConsumer ? 'text-[#54684A]' : 'text-cyan-400'
+              className={`text-xs font-black font-mono ${
+                isConsumer ? 'text-[#142010]' : 'text-cyan-400'
               }`}
             >
               DAYS RUL
@@ -186,7 +186,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                     Auto-Dispatch Triggered
                   </span>
                 </div>
-                <p className={`text-xs mt-0.5 ${isConsumer ? 'text-[#54684A]' : 'text-slate-300'}`}>
+                <p className={`text-xs mt-0.5 ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-300'}`}>
                   {isConsumer
                     ? 'Custom replacement cartridge dispatched via Atomberg D2C Logistics. Delivery in 3 business days.'
                     : `ERP Reorder Triggered for Device #ATOM-WP-2026-0042. Consignment hub: Central Logistics Hub (Bottleneck: ${failingStage}).`}
@@ -197,7 +197,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div
               className={`text-xs font-mono font-bold px-3 py-1.5 rounded-lg border shrink-0 self-start sm:self-center ${
                 isConsumer
-                  ? 'bg-white text-[#2A3525] border-[#BACAB3]'
+                  ? 'bg-white text-[#142010] border-[#BACAB3]'
                   : 'text-emerald-300 bg-emerald-950/80 border-emerald-700/80'
               }`}
             >
@@ -209,20 +209,20 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           <div
             className={`p-3 rounded-xl border space-y-1.5 ${
               isConsumer
-                ? 'bg-white border-[#BACAB3]/60'
+                ? 'bg-white border-[#BACAB3]'
                 : 'bg-slate-950/90 border-emerald-900/50'
             }`}
           >
             <div
-              className={`flex justify-between text-[10px] font-mono ${
-                isConsumer ? 'text-[#3E4D37]' : 'text-emerald-400'
+              className={`flex justify-between text-xs font-mono ${
+                isConsumer ? 'text-[#142010] font-bold' : 'text-emerald-400'
               }`}
             >
               <span>1. AI Wear Trigger (RUL ≤ 14d)</span>
-              <span className={`font-bold ${isConsumer ? 'text-[#2A3525]' : 'text-emerald-300'}`}>
+              <span className={`font-black ${isConsumer ? 'text-[#142010]' : 'text-emerald-300'}`}>
                 2. Dispatched (In Transit)
               </span>
-              <span className={isConsumer ? 'text-[#788870]' : 'text-slate-500'}>
+              <span className={isConsumer ? 'text-[#142010] font-bold' : 'text-slate-500'}>
                 3. Doorstep Delivery
               </span>
             </div>
@@ -236,7 +236,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
               <div
                 className={`h-full rounded-full transition-all duration-1000 ${
                   isConsumer
-                    ? 'bg-[#6C8360] w-2/3'
+                    ? 'bg-[#182514] w-2/3'
                     : 'bg-gradient-to-r from-teal-500 to-emerald-400 w-2/3'
                 }`}
               ></div>
@@ -247,7 +247,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
         <div
           className={`p-4 rounded-2xl border flex items-center justify-between gap-4 ${
             isConsumer
-              ? 'bg-[#FAFBF8] border-[#DCE4D6] text-[#54684A]'
+              ? 'bg-[#FAFBF8] border-[#BACAB3] text-[#142010]'
               : 'bg-slate-950 border-slate-800 text-slate-400'
           }`}
         >
@@ -255,7 +255,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div
               className={`w-9 h-9 rounded-xl border flex items-center justify-center text-lg ${
                 isConsumer
-                  ? 'bg-white border-[#DCE4D6] text-[#54684A] shadow-sm'
+                  ? 'bg-white border-[#BACAB3] text-[#142010] shadow-sm'
                   : 'bg-slate-900 border-slate-800 text-slate-400'
               }`}
             >
@@ -265,21 +265,21 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             </div>
             <div>
               <div
-                className={`text-xs font-semibold ${
-                  isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                className={`text-xs font-black ${
+                  isConsumer ? 'text-[#142010]' : 'text-slate-300'
                 }`}
               >
                 Replenishment Logistics on Standby
               </div>
-              <div className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+              <div className={`text-xs ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-400'}`}>
                 All 4 filtration stages operating safely within nominal degradation boundaries. Automated doorstep delivery initiates automatically when RUL reaches ≤ 14 days.
               </div>
             </div>
           </div>
           <span
-            className={`text-[10px] font-mono px-2.5 py-1 rounded border shrink-0 hidden sm:inline ${
+            className={`text-xs font-mono font-bold px-2.5 py-1 rounded border shrink-0 hidden sm:inline ${
               isConsumer
-                ? 'bg-[#EAEFE5] text-[#3E4D37] border-[#BACAB3]'
+                ? 'bg-[#EAEFE5] text-[#142010] border-[#BACAB3]'
                 : 'bg-slate-900 border-slate-800 text-slate-400'
             }`}
           >
@@ -294,8 +294,8 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span
-            className={`text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5 ${
-              isConsumer ? 'text-[#54684A]' : 'text-slate-400'
+            className={`text-xs font-black uppercase tracking-wider flex items-center space-x-1.5 ${
+              isConsumer ? 'text-[#142010]' : 'text-slate-400'
             }`}
           >
             <svg className="w-3.5 h-3.5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -303,7 +303,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             </svg>
             <span>Multi-Stage Hydraulic Degradation Matrix</span>
           </span>
-          <span className={`text-[10px] font-mono ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+          <span className={`text-[10px] font-mono ${isConsumer ? 'text-[#142010] font-bold' : 'text-slate-400'}`}>
             Continuous Darcy-Hermia Estimators
           </span>
         </div>
@@ -320,8 +320,8 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
                 <span
-                  className={`font-semibold flex items-center space-x-1.5 ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  className={`font-black flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#142010]' : 'text-slate-300'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -332,18 +332,18 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
                     sedimentLoadPct > 75
-                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      ? 'bg-rose-100 text-rose-900 border border-rose-300'
                       : sedimentLoadPct > 40
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      ? 'bg-amber-100 text-amber-950 border border-amber-300'
                       : isConsumer
-                      ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                      ? 'bg-[#EAEFE5] text-[#142010] border border-[#BACAB3]'
                       : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
                   }`}
                 >
                   {sedimentLoadPct > 75 ? 'Critical' : sedimentLoadPct > 40 ? 'Loaded' : 'Nominal'}
                 </span>
               </div>
-              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+              <p className={`text-xs ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-400'}`}>
                 Suction vacuum head resistance (silt & rust capture).
               </p>
             </div>
@@ -351,13 +351,13 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
                 <span
-                  className={`text-xl font-bold tracking-tight ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-white'
+                  className={`text-xl font-black tracking-tight ${
+                    isConsumer ? 'text-[#142010]' : 'text-white'
                   }`}
                 >
                   {rSediment.toFixed(2)}
                 </span>
-                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                <span className={`text-xs ${isConsumer ? 'text-[#142010] font-bold' : 'text-slate-400'}`}>
                   kPa·s/L (Limit: 1.80)
                 </span>
               </div>
@@ -375,15 +375,15 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                       : sedimentLoadPct > 40
                       ? 'bg-amber-500'
                       : isConsumer
-                      ? 'bg-[#849C77]'
+                      ? 'bg-[#384828]'
                       : 'bg-emerald-500'
                   }`}
                   style={{ width: `${sedimentLoadPct}%` }}
                 />
               </div>
               <div
-                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
-                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                className={`flex justify-between text-xs font-mono font-bold pt-0.5 ${
+                  isConsumer ? 'text-[#1F2D19]' : 'text-slate-500'
                 }`}
               >
                 <span>0.35 Clean</span>
@@ -397,15 +397,15 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           <div
             className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
               isConsumer
-                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                ? 'bg-[#FAFBF8] border-[#BACAB3] shadow-sm'
                 : 'bg-slate-950 border-slate-800 shadow-md'
             }`}
           >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
                 <span
-                  className={`font-semibold flex items-center space-x-1.5 ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  className={`font-black flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#142010]' : 'text-slate-300'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -417,18 +417,18 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
                     cakeLoadPct > 70
-                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                      ? 'bg-rose-100 text-rose-900 border border-rose-300'
                       : cakeLoadPct > 40
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                      ? 'bg-amber-100 text-amber-950 border border-amber-300'
                       : isConsumer
-                      ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                      ? 'bg-[#EAEFE5] text-[#142010] border border-[#BACAB3]'
                       : 'bg-cyan-950 text-cyan-300 border border-cyan-800'
                   }`}
                 >
                   {cakeLoadPct > 70 ? 'Fouled' : cakeLoadPct > 40 ? 'Scaling' : 'Clean'}
                 </span>
               </div>
-              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+              <p className={`text-xs ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-400'}`}>
                 Boundary layer colloidal deposition on TFC surface.
               </p>
             </div>
@@ -436,13 +436,13 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
                 <span
-                  className={`text-xl font-bold tracking-tight ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-cyan-400'
+                  className={`text-xl font-black tracking-tight ${
+                    isConsumer ? 'text-[#142010]' : 'text-cyan-400'
                   }`}
                 >
                   {rCake.toFixed(2)}
                 </span>
-                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                <span className={`text-xs ${isConsumer ? 'text-[#142010] font-bold' : 'text-slate-400'}`}>
                   kPa·s/L (Limit: 1.40)
                 </span>
               </div>
@@ -460,15 +460,15 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                       : cakeLoadPct > 40
                       ? 'bg-amber-500'
                       : isConsumer
-                      ? 'bg-[#6C8360]'
+                      ? 'bg-[#384828]'
                       : 'bg-cyan-500'
                   }`}
                   style={{ width: `${cakeLoadPct}%` }}
                 />
               </div>
               <div
-                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
-                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                className={`flex justify-between text-xs font-mono font-bold pt-0.5 ${
+                  isConsumer ? 'text-[#1F2D19]' : 'text-slate-500'
                 }`}
               >
                 <span>0.05 Clean</span>
@@ -482,15 +482,15 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           <div
             className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
               isConsumer
-                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                ? 'bg-[#FAFBF8] border-[#BACAB3] shadow-sm'
                 : 'bg-slate-950 border-slate-800 shadow-md'
             }`}
           >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
                 <span
-                  className={`font-semibold flex items-center space-x-1.5 ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  className={`font-black flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#142010]' : 'text-slate-300'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -502,17 +502,17 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                   className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
                     saltRejection >= 95.0
                       ? isConsumer
-                        ? 'bg-[#EAEFE5] text-[#2A3525] border border-[#BACAB3]'
+                        ? 'bg-[#EAEFE5] text-[#142010] border border-[#BACAB3]'
                         : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
                       : saltRejection >= 90.0
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                      : 'bg-rose-100 text-rose-800 border border-rose-300 animate-pulse'
+                      ? 'bg-amber-100 text-amber-950 border border-amber-300'
+                      : 'bg-rose-100 text-rose-900 border border-rose-300 animate-pulse'
                   }`}
                 >
                   {saltRejection >= 95.0 ? 'Optimal' : saltRejection >= 90.0 ? 'Permeable' : 'Breach'}
                 </span>
               </div>
-              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+              <p className={`text-xs ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-400'}`}>
                 Mineral & heavy salt cross-flow rejection ratio (η).
               </p>
             </div>
@@ -520,13 +520,13 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
                 <span
-                  className={`text-xl font-bold tracking-tight ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-emerald-400'
+                  className={`text-xl font-black tracking-tight ${
+                    isConsumer ? 'text-[#142010]' : 'text-emerald-400'
                   }`}
                 >
                   {saltRejection.toFixed(1)}%
                 </span>
-                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                <span className={`text-xs ${isConsumer ? 'text-[#142010] font-bold' : 'text-slate-400'}`}>
                   {Math.round(inletTds)} → {Math.round(outletTds)} ppm
                 </span>
               </div>
@@ -541,7 +541,7 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                   className={`h-full rounded-full transition-all duration-500 ${
                     saltRejection >= 95.0
                       ? isConsumer
-                        ? 'bg-[#6C8360]'
+                        ? 'bg-[#384828]'
                         : 'bg-emerald-500'
                       : saltRejection >= 90.0
                       ? 'bg-amber-500'
@@ -551,8 +551,8 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                 />
               </div>
               <div
-                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
-                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                className={`flex justify-between text-xs font-mono font-bold pt-0.5 ${
+                  isConsumer ? 'text-[#1F2D19]' : 'text-slate-500'
                 }`}
               >
                 <span>90% Cutoff</span>
@@ -566,15 +566,15 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
           <div
             className={`p-4 rounded-2xl border space-y-3 flex flex-col justify-between ${
               isConsumer
-                ? 'bg-[#FAFBF8] border-[#DCE4D6] shadow-sm'
+                ? 'bg-[#FAFBF8] border-[#BACAB3] shadow-sm'
                 : 'bg-slate-950 border-slate-800 shadow-md'
             }`}
           >
             <div className="space-y-1">
               <div className="flex justify-between items-center text-xs">
                 <span
-                  className={`font-semibold flex items-center space-x-1.5 ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-slate-300'
+                  className={`font-black flex items-center space-x-1.5 ${
+                    isConsumer ? 'text-[#142010]' : 'text-slate-300'
                   }`}
                 >
                   <svg className="w-3.5 h-3.5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -585,14 +585,14 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
                     isConsumer
-                      ? 'bg-[#EAEFE5] text-[#3E4D37] border border-[#BACAB3]'
+                      ? 'bg-[#EAEFE5] text-[#142010] border border-[#BACAB3]'
                       : 'bg-purple-950 text-purple-300 border border-purple-800'
                   }`}
                 >
                   Hermia Slope
                 </span>
               </div>
-              <p className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+              <p className={`text-xs ${isConsumer ? 'text-[#1F2D19] font-medium' : 'text-slate-400'}`}>
                 Hermia cake pore-blocking acceleration per operating hour.
               </p>
             </div>
@@ -600,13 +600,13 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline text-xs font-mono">
                 <span
-                  className={`text-xl font-bold tracking-tight ${
-                    isConsumer ? 'text-[#2A3525]' : 'text-purple-400'
+                  className={`text-xl font-black tracking-tight ${
+                    isConsumer ? 'text-[#142010]' : 'text-purple-400'
                   }`}
                 >
                   +{drDt.toFixed(4)}
                 </span>
-                <span className={`text-[11px] ${isConsumer ? 'text-[#6C7E66]' : 'text-slate-400'}`}>
+                <span className={`text-xs ${isConsumer ? 'text-[#142010] font-bold' : 'text-slate-400'}`}>
                   kPa·s/(L·h)
                 </span>
               </div>
@@ -620,15 +620,15 @@ function PredictiveHealthIntelligence({ telemetry = null, mode = 'hil' }) {
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     isConsumer
-                      ? 'bg-[#849C77]'
+                      ? 'bg-[#384828]'
                       : 'bg-gradient-to-r from-purple-500 to-indigo-500'
                   }`}
                   style={{ width: `${slopeLoadPct}%` }}
                 />
               </div>
               <div
-                className={`flex justify-between text-[10px] font-mono pt-0.5 ${
-                  isConsumer ? 'text-[#788870]' : 'text-slate-500'
+                className={`flex justify-between text-xs font-mono font-bold pt-0.5 ${
+                  isConsumer ? 'text-[#1F2D19]' : 'text-slate-500'
                 }`}
               >
                 <span>0.0000 Base</span>

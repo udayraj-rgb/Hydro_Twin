@@ -233,14 +233,14 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
 
         {/* Authorized Access Banner */}
         <div className="bg-[#FAFBF8] border-b border-[#E3E9DE] px-6 py-3.5 flex items-center space-x-3 text-xs">
-          <div className="w-6 h-6 rounded-lg bg-[#EAEFE5] text-[#384828] flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded-lg bg-[#EAEFE5] text-[#142010] flex items-center justify-center shrink-0">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <div className="text-xs text-[#3E4D37] leading-snug">
-            <span className="font-bold text-[#1F2D19] uppercase tracking-wider text-[11px]">Authorized Access: </span>
-            <span className="font-medium text-[#54684A]">{config.whoUsesIt}</span>
+          <div className="text-xs text-[#142010] leading-snug">
+            <span className="font-black text-[#142010] uppercase tracking-wider text-xs">Authorized Access: </span>
+            <span className="font-semibold text-[#1F2D19]">{config.whoUsesIt}</span>
           </div>
         </div>
 
@@ -253,17 +253,17 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
             {/* Left Column: Login Form (7 Cols) */}
             <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-4">
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-[#1F2D19] flex items-center space-x-2">
+                <h3 className="text-base font-black text-[#142010] flex items-center space-x-2">
                   <span>Sign In with Authorized Credentials</span>
                 </h3>
-                <p className="text-xs text-[#6C7E66]">
+                <p className="text-xs text-[#1F2D19] font-medium">
                   Enter your assigned credentials below or choose a verified test persona from the right.
                 </p>
               </div>
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center space-x-2">
-                  <svg className="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-300 text-rose-950 text-xs font-bold flex items-center space-x-2">
+                  <svg className="w-4 h-4 text-rose-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span>{errorMsg}</span>
@@ -272,7 +272,7 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
 
               {/* Username Input */}
               <div className="space-y-1">
-                <label className="block text-xs font-bold text-[#2A3525] uppercase tracking-wider">
+                <label className="block text-xs font-black text-[#142010] uppercase tracking-wider">
                   {config.loginLabel}
                 </label>
                 <div className="relative">
@@ -281,9 +281,9 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder={config.loginPlaceholder}
-                    className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F4F6F0] border border-[#BACAB3] rounded-xl text-[#1F2D19] placeholder-[#889A80] focus:outline-none focus:ring-2 focus:ring-[#384828] transition-all font-mono"
+                    className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F4F6F0] border border-[#BACAB3] rounded-xl text-[#142010] placeholder-[#142010]/50 focus:outline-none focus:ring-2 focus:ring-[#384828] transition-all font-mono font-bold"
                   />
-                  <div className="absolute right-3 top-3 text-[#6C7E66]">
+                  <div className="absolute right-3 top-3 text-[#142010]">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                     </svg>
@@ -294,13 +294,13 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
               {/* Password Input */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="block text-xs font-bold text-[#2A3525] uppercase tracking-wider">
+                  <label className="block text-xs font-black text-[#142010] uppercase tracking-wider">
                     {config.passwordLabel}
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[11px] text-[#54684A] hover:text-[#1F2D19] font-medium"
+                    className="text-xs text-[#142010] hover:text-[#384828] font-bold"
                   >
                     {showPassword ? 'Hide Secret' : 'Show Secret'}
                   </button>
@@ -311,9 +311,9 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={config.passwordPlaceholder}
-                    className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F4F6F0] border border-[#BACAB3] rounded-xl text-[#1F2D19] placeholder-[#889A80] focus:outline-none focus:ring-2 focus:ring-[#384828] transition-all font-mono"
+                    className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-[#F4F6F0] border border-[#BACAB3] rounded-xl text-[#142010] placeholder-[#142010]/50 focus:outline-none focus:ring-2 focus:ring-[#384828] transition-all font-mono font-bold"
                   />
-                  <div className="absolute right-3 top-3 text-[#6C7E66]">
+                  <div className="absolute right-3 top-3 text-[#142010]">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -323,7 +323,7 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
 
               {/* Checkbox & Forgot */}
               <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center space-x-2 cursor-pointer text-[#3E4D37]">
+                <label className="flex items-center space-x-2 cursor-pointer text-[#142010] font-medium">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -332,7 +332,7 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
                   />
                   <span>Persist session in local browser storage</span>
                 </label>
-                <span className="text-[11px] text-[#6C7E66] font-mono">
+                <span className="text-xs text-[#142010] font-mono font-bold">
                   Role: {config.tabLabel}
                 </span>
               </div>
@@ -341,7 +341,7 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-4 rounded-xl bg-[#1F2D19] hover:bg-[#2A3B22] text-white font-bold text-sm tracking-wide transition-all shadow-md hover:shadow-lg flex items-center justify-center space-x-2 disabled:opacity-75 cursor-pointer mt-2"
+                className="w-full py-3 px-4 rounded-xl bg-[#182514] hover:bg-[#25381D] text-white font-bold text-sm tracking-wide transition-all shadow-md hover:shadow-lg flex items-center justify-center space-x-2 disabled:opacity-75 cursor-pointer mt-2"
               >
                 {isSubmitting ? (
                   <>
@@ -363,18 +363,18 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
             </form>
 
             {/* Right Column: 1-Click Fast Demo Personas (5 Cols) */}
-            <div className="lg:col-span-5 bg-[#F8FAF5] border border-[#DCE4D6] rounded-2xl p-5 space-y-4">
+            <div className="lg:col-span-5 bg-[#F8FAF5] border border-[#BACAB3] rounded-2xl p-5 space-y-4">
               <div className="space-y-0.5">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[#54684A]">
+                <div className="text-xs font-black uppercase tracking-wider text-[#142010]">
                   AtomQuest 2026 Evaluator Fast-Track
                 </div>
-                <h4 className="text-sm font-bold text-[#1F2D19] flex items-center space-x-1.5">
+                <h4 className="text-sm font-black text-[#142010] flex items-center space-x-1.5">
                   <svg className="w-4 h-4 text-[#384828]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <span>1-Click Test Personas</span>
                 </h4>
-                <p className="text-[11px] text-[#6C7E66]">
+                <p className="text-xs text-[#1F2D19] font-medium">
                   Click any verified profile below to auto-authenticate instantly:
                 </p>
               </div>
@@ -385,27 +385,27 @@ function PortalAuthView({ role = 'hil', onLoginSuccess, onSwitchPortal }) {
                     key={idx}
                     type="button"
                     onClick={() => handleQuickDemoLogin(p)}
-                    className="w-full text-left p-3.5 rounded-xl bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] hover:border-[#BACAB3] transition-all shadow-2xs group cursor-pointer space-y-1"
+                    className="w-full text-left p-3.5 rounded-xl bg-white hover:bg-[#EAEFE5] border border-[#BACAB3] transition-all shadow-2xs group cursor-pointer space-y-1"
                   >
                     <div className="flex justify-between items-start">
-                      <div className="font-bold text-[#1F2D19] text-xs group-hover:text-[#384828]">
+                      <div className="font-black text-[#142010] text-sm group-hover:text-[#182514]">
                         {p.name}
                       </div>
-                      <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#EAEFE5] text-[#384828] group-hover:bg-[#384828] group-hover:text-white transition-colors">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black bg-[#182514] text-white group-hover:bg-[#384828] transition-colors">
                         1-Click Login →
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#54684A] font-medium">{p.role}</div>
-                    <div className="text-[10px] text-[#889A80] font-mono flex items-center space-x-1">
+                    <div className="text-xs text-[#142010] font-bold">{p.role}</div>
+                    <div className="text-xs text-[#1F2D19] font-mono font-medium flex items-center space-x-1">
                       <span>{p.location}</span>
                     </div>
                   </button>
                 ))}
               </div>
 
-              <div className="pt-2 border-t border-[#E3E9DE] text-[10px] text-[#6C7E66] space-y-1">
-                <div className="font-bold text-[#2A3525]">Security Protocol:</div>
-                <p>{config.securityNotice}</p>
+              <div className="pt-2 border-t border-[#BACAB3] text-xs text-[#1F2D19] space-y-1">
+                <div className="font-black text-[#142010]">Security Protocol:</div>
+                <p className="font-medium">{config.securityNotice}</p>
               </div>
             </div>
 

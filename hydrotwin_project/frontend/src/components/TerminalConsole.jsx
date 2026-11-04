@@ -65,22 +65,22 @@ function TerminalConsole({ telemetry = null }) {
               className="w-full h-full object-contain"
             />
           </div>
-          <span className="text-xs font-mono font-bold text-[#3E4D37] ml-1">
+          <span className="text-xs font-mono font-black text-[#142010] ml-1">
             SQLite / MQTT Virtual Serial Console (/dev/ttyUSB0)
           </span>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-[11px] font-mono text-[#6C7E66] hidden sm:inline">
+          <span className="text-[11px] font-mono font-bold text-[#1F2D19] hidden sm:inline">
             {logs.length} packet(s)
           </span>
 
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-all border ${
+            className={`px-2.5 py-1 text-[11px] font-mono font-bold rounded-lg transition-all border ${
               isPaused
-                ? 'bg-[#FAF5EB] text-[#826947] border-[#DFD3BE]'
-                : 'bg-white text-[#3E4D37] border-[#DCE4D6] hover:bg-[#EAEFE5]'
+                ? 'bg-[#FAF5EB] text-[#6B4B1C] border-[#DFD3BE]'
+                : 'bg-white text-[#142010] border-[#BACAB3] hover:bg-[#EAEFE5]'
             }`}
           >
             {isPaused ? '▶ Resume' : '⏸ Pause'}
@@ -88,7 +88,7 @@ function TerminalConsole({ telemetry = null }) {
 
           <button
             onClick={handleClear}
-            className="px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg bg-white hover:bg-[#EAEFE5] border border-[#DCE4D6] text-[#3E4D37] transition-all"
+            className="px-2.5 py-1 text-[11px] font-mono font-bold rounded-lg bg-white hover:bg-[#EAEFE5] border border-[#BACAB3] text-[#142010] transition-all"
           >
             Clear
           </button>

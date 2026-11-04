@@ -131,8 +131,8 @@ function TelemetryCharts({ telemetry = null }) {
       },
       tooltip: {
         backgroundColor: 'rgba(255, 255, 255, 0.98)',
-        titleColor: '#2A3525',
-        bodyColor: '#54684A',
+        titleColor: '#142010',
+        bodyColor: '#142010',
         borderColor: '#BACAB3',
         borderWidth: 1,
         padding: 10,
@@ -147,10 +147,11 @@ function TelemetryCharts({ telemetry = null }) {
           drawBorder: false
         },
         ticks: {
-          color: '#788870',
+          color: '#142010',
           font: {
             size: 10,
-            family: 'ui-monospace, SFMono-Regular, monospace'
+            family: 'ui-monospace, SFMono-Regular, monospace',
+            weight: 'bold'
           }
         }
       },
@@ -160,17 +161,18 @@ function TelemetryCharts({ telemetry = null }) {
           drawBorder: false
         },
         ticks: {
-          color: '#788870',
+          color: '#142010',
           font: {
             size: 10,
-            family: 'ui-monospace, SFMono-Regular, monospace'
+            family: 'ui-monospace, SFMono-Regular, monospace',
+            weight: 'bold'
           },
           callback: (value) => `${value} kPa·s/L`
         },
         title: {
           display: true,
           text: 'Hydraulic Resistance (kPa·s/L)',
-          color: '#54684A',
+          color: '#142010',
           font: {
             size: 11,
             weight: 'bold'
@@ -200,21 +202,21 @@ function TelemetryCharts({ telemetry = null }) {
             </div>
             <span>Darcy-Hermia Multi-Stage Hydraulic Decoupling Engine</span>
           </h3>
-          <p className="text-xs text-[#6C7E66] mt-0.5">
+          <p className="text-xs text-[#1F2D19] font-medium mt-0.5">
             Rolling 15-second decoupling curves isolating pre-sediment clogging vs. RO cake nucleation.
           </p>
         </div>
 
         {/* Instantaneous KPI Readouts */}
         <div className="flex items-center space-x-2 font-mono text-xs">
-          <div className="px-3 py-1 bg-[#FAF5EB] border border-[#DFD3BE] rounded-lg text-[#826947]">
-            <span className="text-[10px] text-[#826947]/80 uppercase mr-1">R_sed:</span>
-            <span className="font-bold">{Number(currentSed).toFixed(2)}</span>
+          <div className="px-3 py-1 bg-[#FAF5EB] border border-[#DFD3BE] rounded-lg text-[#6B4B1C]">
+            <span className="text-[10px] text-[#6B4B1C] uppercase mr-1 font-bold">R_sed:</span>
+            <span className="font-black text-sm">{Number(currentSed).toFixed(2)}</span>
           </div>
 
-          <div className="px-3 py-1 bg-[#EAEFE5] border border-[#BACAB3] rounded-lg text-[#3E4D37]">
-            <span className="text-[10px] text-[#54684A] uppercase mr-1">R_cake:</span>
-            <span className="font-bold">{Number(currentCake).toFixed(2)}</span>
+          <div className="px-3 py-1 bg-[#EAEFE5] border border-[#BACAB3] rounded-lg text-[#142010]">
+            <span className="text-[10px] text-[#142010] uppercase mr-1 font-bold">R_cake:</span>
+            <span className="font-black text-sm">{Number(currentCake).toFixed(2)}</span>
           </div>
         </div>
       </div>

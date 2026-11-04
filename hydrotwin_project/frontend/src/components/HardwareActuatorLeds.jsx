@@ -107,11 +107,11 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
       `}</style>
 
       <div className="flex items-center justify-between">
-        <div className="text-xs font-bold text-[#54684A] uppercase tracking-wider flex items-center space-x-2">
-          <span className="w-2 h-2 rounded-full bg-[#849C77]"></span>
+        <div className="text-xs font-black text-[#142010] uppercase tracking-wider flex items-center space-x-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#4D7736]"></span>
           <span>Formula-Driven Actuator Indicators (Deterministic Physical Decoupling)</span>
         </div>
-        <span className="text-[10px] font-mono text-[#54684A] bg-[#EAEFE5] px-2 py-0.5 rounded border border-[#BACAB3]">
+        <span className="text-xs font-mono font-bold text-[#142010] bg-[#EAEFE5] px-2.5 py-0.5 rounded border border-[#BACAB3]">
           Sub-200ms Math Engine: Active
         </span>
       </div>
@@ -127,18 +127,18 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
           className={`relative p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
             isPumpTripped
               ? 'bg-rose-50 border-rose-300 shadow-sm'
-              : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] shadow-sm'
+              : 'bg-[#FAFBF8] border-[#BACAB3] hover:border-[#384828] shadow-sm'
           }`}
         >
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-[#2A3525] flex items-center space-x-1.5">
+            <div className="text-xs font-black text-[#142010] flex items-center space-x-1.5">
               <span>Booster Pump Relay</span>
-              <span className="text-[10px] font-mono text-[#788870]">GPIO26</span>
+              <span className="text-[10px] font-mono text-[#142010] font-bold">GPIO26</span>
             </div>
-            <div className={`text-[11px] font-mono font-bold ${isPumpTripped ? 'text-rose-700' : 'text-[#3E4D37]'}`}>
+            <div className={`text-xs font-mono font-black ${isPumpTripped ? 'text-rose-800' : 'text-[#142010]'}`}>
               {pumpLabel}
             </div>
-            <div className="text-[10px] text-[#6C7E66] font-mono">
+            <div className="text-xs text-[#1F2D19] font-mono font-semibold">
               Ia: {Ia.toFixed(2)} A | Load: {Math.round(loadRatio * 100)}%
             </div>
           </div>
@@ -153,15 +153,15 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
 
           {/* Tooltip */}
           {activeTooltip === 'pump' && (
-            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-[11px] font-mono space-y-1 text-[#2A3525] pointer-events-none">
-              <div className="font-bold text-[#3E4D37] border-b border-[#E3E9DE] pb-1">
+            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-xs font-mono space-y-1 text-[#142010] pointer-events-none">
+              <div className="font-black text-[#142010] border-b border-[#E3E9DE] pb-1">
                 Booster Pump Relay Logic (Thermal Decoupling)
               </div>
-              <div className="text-[#54684A]">Ia: <span className="font-bold text-[#2A3525]">{Ia.toFixed(2)} A</span> | Q: <span className="font-bold text-[#2A3525]">{Q.toFixed(2)} L/min</span></div>
-              <div>Load Ratio: <span className="text-[#6C8360] font-bold">{Math.round(loadRatio * 100)}%</span> (0.15A - 1.80A)</div>
-              <div>Overcurrent: {isOvercurrent ? '<span class="text-rose-600 font-bold">TRUE (>1.80A)</span>' : 'Nominal'}</div>
-              <div>Cavitation: {isCavitation ? '<span class="text-rose-600 font-bold">TRUE (<0.15A)</span>' : 'Nominal'}</div>
-              <div className="text-[10px] text-[#788870] pt-1 border-t border-[#E3E9DE]">
+              <div className="text-[#142010]">Ia: <span className="font-black text-[#142010]">{Ia.toFixed(2)} A</span> | Q: <span className="font-black text-[#142010]">{Q.toFixed(2)} L/min</span></div>
+              <div>Load Ratio: <span className="text-[#384828] font-black">{Math.round(loadRatio * 100)}%</span> (0.15A - 1.80A)</div>
+              <div>Overcurrent: {isOvercurrent ? '<span class="text-rose-700 font-bold">TRUE (>1.80A)</span>' : 'Nominal'}</div>
+              <div>Cavitation: {isCavitation ? '<span class="text-rose-700 font-bold">TRUE (<0.15A)</span>' : 'Nominal'}</div>
+              <div className="text-[10px] text-[#1F2D19] font-medium pt-1 border-t border-[#E3E9DE]">
                 Formula: Load = clamp((Ia - 0.15) / 1.65, 0, 1) | Trip &lt; 180ms
               </div>
             </div>
@@ -177,18 +177,18 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
           className={`relative p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
             isFlushActive
               ? 'bg-[#E1EFEA] border-[#9CC7B8] shadow-sm'
-              : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] shadow-sm'
+              : 'bg-[#FAFBF8] border-[#BACAB3] hover:border-[#384828] shadow-sm'
           }`}
         >
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-[#2A3525] flex items-center space-x-1.5">
+            <div className="text-xs font-black text-[#142010] flex items-center space-x-1.5">
               <span>Anti-Scaling Flush</span>
-              <span className="text-[10px] font-mono text-[#788870]">GPIO27</span>
+              <span className="text-[10px] font-mono text-[#142010] font-bold">GPIO27</span>
             </div>
-            <div className={`text-[11px] font-mono font-bold ${isFlushActive ? 'text-[#1E5246]' : 'text-[#788870]'}`}>
+            <div className={`text-xs font-mono font-black ${isFlushActive ? 'text-[#1E5246]' : 'text-[#142010]'}`}>
               {flushLabel}
             </div>
-            <div className="text-[10px] text-[#6C7E66] font-mono">
+            <div className="text-xs text-[#1F2D19] font-mono font-semibold">
               CP: {cpIndex.toFixed(2)} | ΔP: {deltaP.toFixed(2)} bar
             </div>
           </div>
@@ -203,15 +203,15 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
 
           {/* Tooltip */}
           {activeTooltip === 'flush' && (
-            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-[11px] font-mono space-y-1 text-[#2A3525] pointer-events-none">
-              <div className="font-bold text-[#3E4D37] border-b border-[#E3E9DE] pb-1">
+            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-xs font-mono space-y-1 text-[#142010] pointer-events-none">
+              <div className="font-black text-[#142010] border-b border-[#E3E9DE] pb-1">
                 Concentration Polarization (CP) Nucleation
               </div>
-              <div>Inlet TDS: <span className="font-bold text-[#2A3525]">{inletTds.toFixed(1)} ppm</span></div>
-              <div>ΔP Inferred: <span className="font-bold text-[#2A3525]">{deltaP.toFixed(2)} bar</span></div>
-              <div>CP Index: <span className={isFlushActive ? 'text-[#1E5246] font-bold' : 'text-[#54684A]'}>{cpIndex.toFixed(3)}</span> (Threshold: 1.25)</div>
-              <div>Duty Intensity: <span className="text-[#6C8360] font-bold">{(flushIntensity * 100).toFixed(0)}%</span></div>
-              <div className="text-[10px] text-[#788870] pt-1 border-t border-[#E3E9DE]">
+              <div>Inlet TDS: <span className="font-black text-[#142010]">{inletTds.toFixed(1)} ppm</span></div>
+              <div>ΔP Inferred: <span className="font-black text-[#142010]">{deltaP.toFixed(2)} bar</span></div>
+              <div>CP Index: <span className={isFlushActive ? 'text-[#1E5246] font-black' : 'text-[#142010] font-bold'}>{cpIndex.toFixed(3)}</span> (Threshold: 1.25)</div>
+              <div>Duty Intensity: <span className="text-[#384828] font-black">{(flushIntensity * 100).toFixed(0)}%</span></div>
+              <div className="text-[10px] text-[#1F2D19] font-medium pt-1 border-t border-[#E3E9DE]">
                 Formula: CP = (TDS/1000) * (ΔP / max(Q, 0.2)) | -18% R_cake washdown
               </div>
             </div>
@@ -227,18 +227,18 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
           className={`relative p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
             isBreached
               ? 'bg-rose-50 border-rose-300 shadow-sm'
-              : 'bg-[#FAFBF8] border-[#DCE4D6] hover:border-[#BACAB3] shadow-sm'
+              : 'bg-[#FAFBF8] border-[#BACAB3] hover:border-[#384828] shadow-sm'
           }`}
         >
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-[#2A3525] flex items-center space-x-1.5">
+            <div className="text-xs font-black text-[#142010] flex items-center space-x-1.5">
               <span>Feed Inlet Valve</span>
-              <span className="text-[10px] font-mono text-[#788870]">GPIO27</span>
+              <span className="text-[10px] font-mono text-[#142010] font-bold">GPIO27</span>
             </div>
-            <div className={`text-[11px] font-mono font-bold ${isBreached ? 'text-rose-700' : 'text-[#3E4D37]'}`}>
+            <div className={`text-xs font-mono font-black ${isBreached ? 'text-rose-800' : 'text-[#142010]'}`}>
               {valveLabel}
             </div>
-            <div className="text-[10px] text-[#6C7E66] font-mono">
+            <div className="text-xs text-[#1F2D19] font-mono font-semibold">
               In: {Math.round(inletTds)} ppm | Out: {Math.round(outletTds)} ppm
             </div>
           </div>
@@ -253,16 +253,16 @@ function HardwareActuatorLeds({ telemetry = null, sensorInputs = {} }) {
 
           {/* Tooltip */}
           {activeTooltip === 'valve' && (
-            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-[11px] font-mono space-y-1 text-[#2A3525] pointer-events-none">
-              <div className="font-bold text-[#3E4D37] border-b border-[#E3E9DE] pb-1">
+            <div className="absolute z-30 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-3 bg-white/98 backdrop-blur border border-[#BACAB3] rounded-xl shadow-xl text-[11px] font-mono space-y-1 text-[#142010] pointer-events-none">
+              <div className="font-black text-[#142010] border-b border-[#BACAB3] pb-1">
                 Membrane Integrity & Osmotic Rejection
               </div>
-              <div>Inlet TDS: <span className="font-bold text-[#2A3525]">{Math.round(inletTds)} ppm</span></div>
-              <div>Outlet TDS: <span className="font-bold text-[#2A3525]">{Math.round(outletTds)} ppm</span></div>
-              <div>Salt Rejection (η): <span className="text-[#6C8360] font-bold">{eta.toFixed(1)}%</span></div>
-              <div>Membrane Breach: <span className={isBreached ? 'text-rose-700 font-bold' : 'text-[#6C8360]'}>{isBreached ? 'CRITICAL BREACH' : 'Integrity Verified'}</span></div>
-              <div className="text-[10px] text-[#788870] pt-1 border-t border-[#E3E9DE]">
-                Formula: η = (1 - Out/In)*100% | Trip: Out >= 0.50*In (In > 200)
+              <div>Inlet TDS: <span className="font-black text-[#142010]">{Math.round(inletTds)} ppm</span></div>
+              <div>Outlet TDS: <span className="font-black text-[#142010]">{Math.round(outletTds)} ppm</span></div>
+              <div>Salt Rejection (η): <span className="text-[#2D5A1E] font-black">{eta.toFixed(1)}%</span></div>
+              <div>Membrane Breach: <span className={isBreached ? 'text-rose-700 font-black' : 'text-[#2D5A1E] font-bold'}>{isBreached ? 'CRITICAL BREACH' : 'Integrity Verified'}</span></div>
+              <div className="text-[10px] text-[#1F2D19] font-semibold pt-1 border-t border-[#BACAB3]">
+                Formula: η = (1 - Out/In)*100% | Trip: Out &gt;= 0.50*In (In &gt; 200)
               </div>
             </div>
           )}

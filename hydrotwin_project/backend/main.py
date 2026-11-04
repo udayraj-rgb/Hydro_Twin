@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 import database
+import fleet_data
 from edge_interlocks import DeterministicEdgeInterlocks
 from physics_engine import AutonomousEnvironmentSimulator, DarcyHermiaPhysicsEngine
 from prognostics import WeibullXGBoostPrognostics
@@ -736,78 +737,70 @@ def get_recent_orders(limit: int = Query(default=20, ge=1, le=100)):
 
 
 @app.get("/api/fleet")
-def get_fleet_telemetry():
+def get_fleet_telemetry(state: Optional[str] = Query(default=None, description="Optional Indian State filter (e.g. 'Madhya Pradesh', 'Maharashtra')")):
     """
-    Returns regional fleet monitoring data for 5 connected purifiers across
-    Madhya Pradesh, Gujarat, and Rajasthan.
+    Returns regional fleet monitoring data for connected smart purifiers across India.
+    - If `state` is not specified: returns the 5 benchmark units (Bhopal, Sehore, Ahmedabad, Jaipur, Indore) for backwards-compatibility.
+    - If `state` is specified: returns the 5 major city purifier units for that state from SQLite.
     """
-    return [
-        {
-            "device_id": "ATOM-WP-2026-0042",
-            "customer_name": "Rajesh Sharma",
-            "city": "Bhopal",
-            "state": "Madhya Pradesh",
-            "raw_tds": 850,
-            "permeate_tds": 42,
-            "primary_bottleneck": "Activated Carbon Block",
-            "rul_days": 18,
-            "d2c_status": "Standby",
-            "health_score": 94,
-            "status": "NOMINAL"
-        },
-        {
-            "device_id": "ATOM-WP-2026-0019",
-            "customer_name": "Pooja Verma",
-            "city": "Sehore",
-            "state": "Madhya Pradesh",
-            "raw_tds": 1420,
-            "permeate_tds": 78,
-            "primary_bottleneck": "Pre-Sediment Filter",
-            "rul_days": 11,
-            "d2c_status": "ORDER DISPATCHED",
-            "health_score": 62,
-            "status": "DEGRADED"
-        },
-        {
-            "device_id": "ATOM-WP-2026-0103",
-            "customer_name": "Amit Patel",
-            "city": "Ahmedabad",
-            "state": "Gujarat",
-            "raw_tds": 1680,
-            "permeate_tds": 92,
-            "primary_bottleneck": "RO Membrane",
-            "rul_days": 7,
-            "d2c_status": "ORDER DISPATCHED",
-            "health_score": 48,
-            "status": "ACTION REQUIRED"
-        },
-        {
-            "device_id": "ATOM-WP-2026-0077",
-            "customer_name": "Vikram Rathore",
-            "city": "Jaipur",
-            "state": "Rajasthan",
-            "raw_tds": 1150,
-            "permeate_tds": 65,
-            "primary_bottleneck": "RO Membrane",
-            "rul_days": 22,
-            "d2c_status": "Standby",
-            "health_score": 81,
-            "status": "NOMINAL"
-        },
-        {
-            "device_id": "ATOM-WP-2026-0055",
-            "customer_name": "Neha Joshi",
-            "city": "Indore",
-            "state": "Madhya Pradesh",
-            "raw_tds": 720,
-            "permeate_tds": 38,
-            "primary_bottleneck": "Alkaliser Mineralizer",
-            "rul_days": 34,
-            "d2c_status": "Standby",
-            "health_score": 96,
-            "status": "NOMINAL"
-        }
-    ]
+    if not state or not state.strip():
+        return fleet_data.BENCHMARK_FLEET
+
+    clean_state = state.strip()
+    try:
+        db_units = database.get_fleet_units(clean_state)
+        if db_units:
+            return db_units
+    except Exception:
+        pass
+
+    # Fallback to in-memory fleet dictionary if SQLite query misses
+    matched = fleet_data.FLEET_BY_STATE.get(clean_state)
+    if matched:
+        return matched
+
+    # Case-insensitive search
+    for s_name, s_units in fleet_data.FLEET_BY_STATE.items():
+        if s_name.lower() == clean_state.lower():
+            return s_units
+
+    return []
+
+
+@app.get("/api/fleet/states")
+def get_fleet_states():
+    """
+    Returns telemetry aggregates for all 15 major Indian States in the OEM Fleet Grid:
+    state name, active unit count, average raw groundwater TDS, average permeate TDS,
+    average system health score, dispatched D2C order count, and major cities list.
+    """
+    try:
+        summaries = database.get_fleet_states_summary()
+        if summaries:
+            return summaries
+    except Exception:
+        pass
+
+    # In-memory fallback
+    result = []
+    for state_name in fleet_data.INDIAN_STATES:
+        units = fleet_data.FLEET_BY_STATE.get(state_name, [])
+        if units:
+            avg_raw = round(sum(u["raw_tds"] for u in units) / len(units), 1)
+            avg_perm = round(sum(u["permeate_tds"] for u in units) / len(units), 1)
+            avg_health = round(sum(u["health_score"] for u in units) / len(units), 1)
+            disp_count = sum(1 for u in units if u["d2c_status"] == "ORDER DISPATCHED")
+            cities = ", ".join(u["city"] for u in units)
+            result.append({
+                "state": state_name,
+                "unit_count": len(units),
+                "avg_raw_tds": avg_raw,
+                "avg_permeate_tds": avg_perm,
+                "avg_health": avg_health,
+                "dispatched_count": disp_count,
+                "cities": cities
+            })
+    return result
 
 
 @app.websocket("/ws/telemetry")

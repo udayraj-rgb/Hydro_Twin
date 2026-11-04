@@ -47,6 +47,43 @@ class TestHydroTwinAPI(unittest.TestCase):
         cities = {f["city"] for f in fleet}
         self.assertTrue({"Bhopal", "Sehore", "Ahmedabad", "Jaipur", "Indore"}.issubset(cities))
 
+    def test_fleet_state_filtering(self):
+        # Test Maharashtra 5 major cities
+        response_mh = self.client.get("/api/fleet?state=Maharashtra")
+        self.assertEqual(response_mh.status_code, 200)
+        fleet_mh = response_mh.json()
+        self.assertEqual(len(fleet_mh), 5)
+        cities_mh = {f["city"] for f in fleet_mh}
+        self.assertTrue({"Mumbai", "Pune", "Nagpur", "Nashik"}.issubset(cities_mh))
+        for unit in fleet_mh:
+            self.assertEqual(unit["state"], "Maharashtra")
+            self.assertIn("ATOM-WP-2026", unit["device_id"])
+            self.assertTrue(len(unit["customer_name"]) > 2)
+
+        # Test Karnataka 5 major cities
+        response_ka = self.client.get("/api/fleet?state=Karnataka")
+        self.assertEqual(response_ka.status_code, 200)
+        fleet_ka = response_ka.json()
+        self.assertEqual(len(fleet_ka), 5)
+        cities_ka = {f["city"] for f in fleet_ka}
+        self.assertTrue({"Bengaluru", "Mysuru", "Mangaluru"}.issubset(cities_ka))
+
+    def test_fleet_states_summary_endpoint(self):
+        response = self.client.get("/api/fleet/states")
+        self.assertEqual(response.status_code, 200)
+        states = response.json()
+        self.assertEqual(len(states), 15)
+        state_names = {s["state"] for s in states}
+        self.assertIn("Madhya Pradesh", state_names)
+        self.assertIn("Maharashtra", state_names)
+        self.assertIn("Delhi (NCR)", state_names)
+        self.assertIn("Tamil Nadu", state_names)
+        self.assertIn("Rajasthan", state_names)
+        for s in states:
+            self.assertEqual(s["unit_count"], 5)
+            self.assertGreater(s["avg_raw_tds"], 100)
+            self.assertGreater(s["avg_health"], 0)
+
     def test_update_sensors_nominal(self):
         payload = {
             "inlet_tds": 850.0,

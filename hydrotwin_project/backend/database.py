@@ -73,6 +73,66 @@ def init_db(db_path: Optional[str] = None) -> None:
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_orders_device ON replenishment_orders(device_id);
         """)
+
+        # Table 3: fleet_units (15 Indian States, 5 Major Cities each)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS fleet_units (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id TEXT UNIQUE NOT NULL,
+                customer_name TEXT NOT NULL,
+                city TEXT NOT NULL,
+                location TEXT NOT NULL,
+                state TEXT NOT NULL,
+                raw_tds REAL NOT NULL,
+                permeate_tds REAL NOT NULL,
+                primary_bottleneck TEXT NOT NULL,
+                rul_days INTEGER NOT NULL,
+                d2c_status TEXT NOT NULL,
+                health_score INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                installed_date TEXT,
+                daily_consumption_liters REAL
+            );
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_fleet_state ON fleet_units(state);
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_fleet_city ON fleet_units(city);
+        """)
+
+        # Auto-seed fleet units if table is currently empty
+        cursor = conn.execute("SELECT COUNT(*) FROM fleet_units;")
+        count = cursor.fetchone()[0]
+        if count == 0:
+            try:
+                import fleet_data
+                for unit in fleet_data.FLEET_UNITS:
+                    conn.execute("""
+                        INSERT OR IGNORE INTO fleet_units (
+                            device_id, customer_name, city, location, state,
+                            raw_tds, permeate_tds, primary_bottleneck, rul_days,
+                            d2c_status, health_score, status, installed_date, daily_consumption_liters
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    """, (
+                        unit["device_id"],
+                        unit["customer_name"],
+                        unit["city"],
+                        unit["location"],
+                        unit["state"],
+                        float(unit["raw_tds"]),
+                        float(unit["permeate_tds"]),
+                        unit["primary_bottleneck"],
+                        int(unit["rul_days"]),
+                        unit["d2c_status"],
+                        int(unit["health_score"]),
+                        unit["status"],
+                        unit.get("installed_date", "2025-06-01"),
+                        float(unit.get("daily_consumption_liters", 20.0))
+                    ))
+            except Exception as e:
+                # Fallback silently or log if fleet_data is not available in unit test sandbox
+                pass
     conn.close()
 
 
@@ -193,6 +253,64 @@ def get_recent_orders(
         LIMIT ?;
         """,
         (limit,)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_fleet_units(
+    state: Optional[str] = None,
+    db_path: Optional[str] = None
+) -> List[Dict[str, Any]]:
+    """
+    Retrieves fleet units from SQLite.
+    If `state` is specified, filters by state name (case-insensitive).
+    Returns list of dict records.
+    """
+    conn = get_db_connection(db_path)
+    if state and state.strip():
+        cursor = conn.execute(
+            """
+            SELECT * FROM fleet_units
+            WHERE LOWER(state) = LOWER(?)
+            ORDER BY id ASC;
+            """,
+            (state.strip(),)
+        )
+    else:
+        cursor = conn.execute(
+            """
+            SELECT * FROM fleet_units
+            ORDER BY id ASC;
+            """
+        )
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_fleet_states_summary(db_path: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Retrieves aggregated summary statistics for each of the 15 Indian States:
+    unit count, average groundwater TDS, average permeate TDS, average health score,
+    and count of D2C orders dispatched.
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.execute(
+        """
+        SELECT 
+            state,
+            COUNT(*) as unit_count,
+            ROUND(AVG(raw_tds), 1) as avg_raw_tds,
+            ROUND(AVG(permeate_tds), 1) as avg_permeate_tds,
+            ROUND(AVG(health_score), 1) as avg_health,
+            SUM(CASE WHEN d2c_status = 'ORDER DISPATCHED' THEN 1 ELSE 0 END) as dispatched_count,
+            GROUP_CONCAT(city, ', ') as cities
+        FROM fleet_units
+        GROUP BY state
+        ORDER BY state ASC;
+        """
     )
     rows = cursor.fetchall()
     conn.close()

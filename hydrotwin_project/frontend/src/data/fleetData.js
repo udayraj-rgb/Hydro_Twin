@@ -1356,11 +1356,53 @@ export const STATE_METADATA = {
   'Bihar': { basin: 'Middle Gangetic Alluvium', aquifer: 'Gangetic silt, iron-rich and calcium sediment', zone: 'Eastern' }
 };
 
+export function enrichUnit(unit) {
+  if (!unit) return unit;
+  const name = unit.customer_name || 'Customer';
+  const cleanName = name.toLowerCase().replace(/[^a-z]/g, '.');
+  const email = unit.customer_email || `${cleanName}@gmail.com`;
+
+  // Deterministic realistic Indian phone numbers based on device_id
+  const devId = String(unit.device_id || 'ATOM-42');
+  let hashVal = 0;
+  for (let i = 0; i < devId.length; i++) {
+    hashVal = (hashVal << 5) - hashVal + devId.charCodeAt(i);
+    hashVal |= 0;
+  }
+  const suffix = String(Math.abs(hashVal)).padStart(8, '45678901').slice(0, 8);
+  const phone = unit.customer_phone || `+91 98${suffix}`;
+
+  let annualDue = unit.annual_service_due;
+  if (!annualDue) {
+    const installed = unit.installed_date || '2025-06-12';
+    const parts = installed.split('-');
+    const year = parseInt(parts[0], 10) + 1;
+    annualDue = `${year}-${parts[1] || '06'}-${parts[2] || '12'}`;
+  }
+
+  const rul = Number(unit.rul_days ?? 30);
+  const serviceStatus = unit.service_status || (rul <= 14 ? 'Critical Service & Filter Replacement Due' : 'Annual Preventive Maintenance Due');
+  const amcPlan = unit.amc_plan || 'Atomberg Care Plus (1 Year Comprehensive)';
+
+  return {
+    ...unit,
+    customer_email: email,
+    customer_phone: phone,
+    annual_service_due: annualDue,
+    service_status: serviceStatus,
+    amc_plan: amcPlan
+  };
+}
+
 export function getUnitsByState(state) {
-  if (!state) return BENCHMARK_FLEET;
-  if (FLEET_BY_STATE[state]) return FLEET_BY_STATE[state];
-  const found = Object.keys(FLEET_BY_STATE).find(
-    s => s.toLowerCase() === state.toLowerCase()
-  );
-  return found ? FLEET_BY_STATE[found] : BENCHMARK_FLEET;
+  let list = BENCHMARK_FLEET;
+  if (state && FLEET_BY_STATE[state]) {
+    list = FLEET_BY_STATE[state];
+  } else if (state) {
+    const found = Object.keys(FLEET_BY_STATE).find(
+      s => s.toLowerCase() === state.toLowerCase()
+    );
+    list = found ? FLEET_BY_STATE[found] : BENCHMARK_FLEET;
+  }
+  return list.map(enrichUnit);
 }

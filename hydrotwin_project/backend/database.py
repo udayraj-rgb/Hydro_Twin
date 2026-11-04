@@ -114,6 +114,48 @@ def init_db(db_path: Optional[str] = None) -> None:
             CREATE INDEX IF NOT EXISTS idx_fleet_city ON fleet_units(city);
         """)
 
+        # Table 4: customer_outreach_log (OEM customer emails & phone calls for purifier health & yearly service)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS customer_outreach_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL,
+                device_id TEXT NOT NULL,
+                customer_name TEXT NOT NULL,
+                customer_email TEXT,
+                customer_phone TEXT,
+                contact_type TEXT NOT NULL,
+                subject TEXT,
+                service_enquiry TEXT,
+                notes TEXT,
+                scheduled_date TEXT,
+                outcome TEXT NOT NULL,
+                operator TEXT DEFAULT 'OEM Regional Support'
+            );
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_outreach_device ON customer_outreach_log(device_id);
+        """)
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_outreach_timestamp ON customer_outreach_log(timestamp DESC);
+        """)
+
+        # Migration: Add customer contact & service due fields to fleet_units if missing
+        try:
+            cursor = conn.execute("PRAGMA table_info(fleet_units);")
+            existing_cols = {row["name"] for row in cursor.fetchall()}
+            if "customer_phone" not in existing_cols:
+                conn.execute("ALTER TABLE fleet_units ADD COLUMN customer_phone TEXT;")
+            if "customer_email" not in existing_cols:
+                conn.execute("ALTER TABLE fleet_units ADD COLUMN customer_email TEXT;")
+            if "annual_service_due" not in existing_cols:
+                conn.execute("ALTER TABLE fleet_units ADD COLUMN annual_service_due TEXT;")
+            if "service_status" not in existing_cols:
+                conn.execute("ALTER TABLE fleet_units ADD COLUMN service_status TEXT;")
+            if "amc_plan" not in existing_cols:
+                conn.execute("ALTER TABLE fleet_units ADD COLUMN amc_plan TEXT;")
+        except Exception:
+            pass
+
         # Auto-seed fleet units if table is currently empty
         cursor = conn.execute("SELECT COUNT(*) FROM fleet_units;")
         count = cursor.fetchone()[0]
@@ -327,6 +369,65 @@ def get_fleet_states_summary(db_path: Optional[str] = None) -> List[Dict[str, An
         ORDER BY state ASC;
         """
     )
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def log_outreach(record: Dict[str, Any], db_path: Optional[str] = None) -> int:
+    """
+    Logs an OEM customer outreach event (Email or Phone Call).
+    """
+    conn = get_db_connection(db_path)
+    now_iso = datetime.now(timezone.utc).isoformat()
+    with conn:
+        cursor = conn.execute("""
+            INSERT INTO customer_outreach_log (
+                timestamp, device_id, customer_name, customer_email,
+                customer_phone, contact_type, subject, service_enquiry,
+                notes, scheduled_date, outcome, operator
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (
+            record.get("timestamp") or now_iso,
+            str(record["device_id"]),
+            str(record["customer_name"]),
+            record.get("customer_email") or "",
+            record.get("customer_phone") or "",
+            str(record.get("contact_type", "EMAIL")),
+            record.get("subject") or "Purifier Health & Yearly Service Enquiry",
+            record.get("service_enquiry") or "Annual Preventive Maintenance & Filter Inspection",
+            record.get("notes") or "",
+            record.get("scheduled_date") or "",
+            str(record.get("outcome", "DISPATCHED")),
+            record.get("operator") or "OEM Regional Support"
+        ))
+        row_id = cursor.lastrowid
+    conn.close()
+    return row_id
+
+
+def get_outreach_logs(device_id: Optional[str] = None, limit: int = 50, db_path: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Retrieves logged customer outreach records.
+    """
+    conn = get_db_connection(db_path)
+    if device_id and device_id.strip():
+        cursor = conn.execute(
+            """
+            SELECT * FROM customer_outreach_log
+            WHERE device_id = ?
+            ORDER BY id DESC LIMIT ?;
+            """,
+            (device_id.strip(), limit)
+        )
+    else:
+        cursor = conn.execute(
+            """
+            SELECT * FROM customer_outreach_log
+            ORDER BY id DESC LIMIT ?;
+            """,
+            (limit,)
+        )
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]

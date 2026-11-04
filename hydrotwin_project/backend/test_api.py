@@ -402,6 +402,72 @@ class TestHydroTwinAPI(unittest.TestCase):
         self.assertIn("r_sed_slope", latest_row)
         self.assertIn("r_cake_slope", latest_row)
 
+    def test_fleet_customer_contact_and_annual_service_fields(self):
+        resp = self.client.get("/api/fleet")
+        self.assertEqual(resp.status_code, 200)
+        fleet = resp.json()
+        self.assertGreater(len(fleet), 0)
+        first = fleet[0]
+        self.assertIn("customer_email", first)
+        self.assertIn("customer_phone", first)
+        self.assertIn("annual_service_due", first)
+        self.assertIn("service_status", first)
+        self.assertIn("amc_plan", first)
+        self.assertTrue("@" in first["customer_email"])
+        self.assertTrue(first["customer_phone"].startswith("+91"))
+
+    def test_fleet_outreach_email_and_call_logging(self):
+        # 1. Log an email inquiry
+        email_payload = {
+            "device_id": "ATOM-WP-2026-0042",
+            "customer_name": "Aarav Sharma",
+            "customer_email": "aarav.sharma@gmail.com",
+            "customer_phone": "+91 9876543210",
+            "contact_type": "EMAIL",
+            "subject": "Atomberg Service Notice: Annual Preventive Health Audit Due",
+            "service_enquiry": "Annual Preventive Maintenance & Filter Inspection",
+            "notes": "Sent automated annual health audit report.",
+            "scheduled_date": "2026-11-10 10:30 AM",
+            "outcome": "EMAIL_SENT"
+        }
+        res_email = self.client.post("/api/fleet/outreach", json=email_payload)
+        self.assertEqual(res_email.status_code, 200)
+        data_email = res_email.json()
+        self.assertEqual(data_email["status"], "SUCCESS")
+        self.assertIn("record", data_email)
+        self.assertGreater(data_email["record"]["id"], 0)
+
+        # 2. Log a tele-call inquiry
+        call_payload = {
+            "device_id": "ATOM-WP-2026-0042",
+            "customer_name": "Aarav Sharma",
+            "customer_email": "aarav.sharma@gmail.com",
+            "customer_phone": "+91 9876543210",
+            "contact_type": "CALL",
+            "subject": "Telephonic Service Call",
+            "service_enquiry": "Yearly Comprehensive Service & Membrane Audit",
+            "notes": "Customer accepted 2 PM slot for membrane check.",
+            "scheduled_date": "2026-11-11 02:00 PM",
+            "outcome": "Connected - Service Scheduled"
+        }
+        res_call = self.client.post("/api/fleet/outreach", json=call_payload)
+        self.assertEqual(res_call.status_code, 200)
+        data_call = res_call.json()
+        self.assertEqual(data_call["status"], "SUCCESS")
+        self.assertIn("record", data_call)
+        self.assertGreater(data_call["record"]["id"], 0)
+
+        # 3. Retrieve outreach logs for the device
+        res_logs = self.client.get("/api/fleet/outreach?device_id=ATOM-WP-2026-0042")
+        self.assertEqual(res_logs.status_code, 200)
+        logs_data = res_logs.json()
+        self.assertIn("outreach_logs", logs_data)
+        logs = logs_data["outreach_logs"]
+        self.assertGreaterEqual(len(logs), 2)
+        contact_types = [l["contact_type"] for l in logs]
+        self.assertIn("EMAIL", contact_types)
+        self.assertIn("CALL", contact_types)
+
 
 if __name__ == "__main__":
     unittest.main()

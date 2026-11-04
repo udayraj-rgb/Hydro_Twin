@@ -40,13 +40,22 @@ function ConsumerView({ telemetry = null }) {
   const outletTds = Number(telemetry?.sensors?.outlet_tds ?? telemetry?.physics?.outlet_tds ?? telemetry?.outlet_tds ?? 42);
   const saltRejection = Number(telemetry?.physics?.salt_rejection ?? telemetry?.salt_rejection ?? 95.2).toFixed(1);
 
-  // Sync flush state with backend telemetry if backend triggers it autonomously
+  // Safely synchronize flush state with backend telemetry
   useEffect(() => {
-    if (telemetry?.actuators?.flush_solenoid && !isFlushing) {
+    const serverFlush = Boolean(telemetry?.actuators?.flush_solenoid ?? telemetry?.flush_solenoid);
+    const serverCountdown = Number(telemetry?.simulation?.flush_countdown ?? 0);
+
+    // If server is actively running an autonomous flush with remaining seconds
+    if (serverFlush && serverCountdown > 0) {
       setIsFlushing(true);
+      setFlushCountdown((prev) => (prev > 0 ? prev : serverCountdown));
       setFlushFeedback('Autonomous Boundary Layer High-Shear Washdown Active');
+    } else if (!serverFlush && !flushTimerRef.current) {
+      // If server is not flushing and no local user-initiated flush timer is ticking, ensure clean state
+      setIsFlushing(false);
+      setFlushCountdown(0);
     }
-  }, [telemetry?.actuators?.flush_solenoid, isFlushing]);
+  }, [telemetry?.actuators?.flush_solenoid, telemetry?.flush_solenoid, telemetry?.simulation?.flush_countdown]);
 
   // Clean up timers on unmount
   useEffect(() => {
@@ -104,27 +113,38 @@ function ConsumerView({ telemetry = null }) {
   // Action 1: AutoClean Micro-Flush Trigger (5-second dynamic washdown)
   // ---------------------------------------------------------------------------
   const handleAutoCleanFlush = async () => {
-    if (isFlushing) return;
+    if (isFlushing || flushCountdown > 0) return;
+
+    if (flushTimerRef.current) {
+      clearInterval(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
 
     setIsFlushing(true);
     setFlushCountdown(5);
     setFlushFeedback('High-velocity crossflow shear initiated. Washing away cake resistance (-18%)...');
     notify('AutoClean Micro-Flush initiated: high-shear crossflow washdown running for 5 seconds.', 'success');
 
-    await sendConsumerCommand({ manual_flush: true });
+    // Notify backend
+    sendConsumerCommand({ manual_flush: true }).catch((err) => {
+      console.warn('[AutoClean] Backend control sync warning:', err);
+    });
 
-    if (flushTimerRef.current) clearInterval(flushTimerRef.current);
+    let remaining = 5;
     flushTimerRef.current = setInterval(() => {
-      setFlushCountdown((prev) => {
-        if (prev <= 1) {
+      remaining -= 1;
+      if (remaining <= 0) {
+        if (flushTimerRef.current) {
           clearInterval(flushTimerRef.current);
-          setIsFlushing(false);
-          setFlushFeedback('Dynamic washdown completed. Nominal filtration recovered.');
-          notify('AutoClean Complete: Membrane surface restored to optimal baseline.', 'success');
-          return 0;
+          flushTimerRef.current = null;
         }
-        return prev - 1;
-      });
+        setIsFlushing(false);
+        setFlushCountdown(0);
+        setFlushFeedback('Dynamic washdown completed. Nominal filtration recovered.');
+        notify('AutoClean Complete: Membrane surface restored to optimal baseline.', 'success');
+      } else {
+        setFlushCountdown(remaining);
+      }
     }, 1000);
   };
 
@@ -327,9 +347,9 @@ function ConsumerView({ telemetry = null }) {
             <button
               id="autoclean-flush-btn"
               onClick={handleAutoCleanFlush}
-              disabled={isFlushing}
+              disabled={isFlushing && flushCountdown > 0}
               className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all duration-300 flex items-center space-x-2 shadow-sm ${
-                isFlushing
+                isFlushing && flushCountdown > 0
                   ? 'bg-[#182514] text-white ring-2 ring-[#384828] animate-pulse cursor-wait'
                   : 'bg-[#EAEFE5] text-[#142010] hover:bg-[#DDE5D6] border border-[#BACAB3] active:scale-95 font-black'
               }`}
@@ -338,7 +358,7 @@ function ConsumerView({ telemetry = null }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span>
-                {isFlushing ? `AutoCleaning... (${flushCountdown}s)` : 'AutoClean Flush'}
+                {isFlushing && flushCountdown > 0 ? `AutoCleaning... (${flushCountdown}s)` : 'AutoClean Flush'}
               </span>
             </button>
 
@@ -427,7 +447,7 @@ function ConsumerView({ telemetry = null }) {
           </div>
         </div>
 
-        {isFlushing && (
+        {isFlushing && flushCountdown > 0 && (
           <div className="bg-[#EAEFE5] border border-[#BACAB3] p-4 rounded-2xl space-y-2 animate-pulse">
             <div className="flex items-center justify-between text-xs font-bold text-[#2A3525]">
               <span className="flex items-center space-x-2">
@@ -439,7 +459,7 @@ function ConsumerView({ telemetry = null }) {
             <div className="w-full bg-white h-2 rounded-full overflow-hidden border border-[#BACAB3]">
               <div
                 className="bg-[#6C8360] h-full transition-all duration-1000 ease-linear rounded-full"
-                style={{ width: `${((5 - flushCountdown) / 5) * 100}%` }}
+                style={{ width: `${Math.max(0, Math.min(100, ((5 - flushCountdown) / 5) * 100))}%` }}
               ></div>
             </div>
             <p className="text-xs text-[#1F2D19] font-semibold">

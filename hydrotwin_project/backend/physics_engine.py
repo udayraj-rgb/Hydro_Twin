@@ -53,6 +53,7 @@ class AutonomousEnvironmentSimulator:
         # Physical state variables
         self.accumulated_scale = 0.0
         self.flush_countdown = 0
+        self.flush_cooldown = 0
         self.is_flushing = False
 
         # Memory of manual setpoints when switched to MANUAL
@@ -220,12 +221,15 @@ class AutonomousEnvironmentSimulator:
             d_scale = (inlet_tds * flow_lpm) * 0.000035
             self.accumulated_scale += d_scale
 
+        if self.flush_cooldown > 0:
+            self.flush_cooldown -= 1
+
         # Preliminary CP check to trigger autonomous flush window
         inferred_delta_p = max(0.2, (1.45 * pump_current) - 0.12)
         prelim_cp = (inlet_tds / 1000.0) * (inferred_delta_p / max(flow_lpm, 0.2))
 
-        # Check if flush should initiate (CP > 1.25 or severe hardness)
-        if (prelim_cp > 1.25 or inlet_tds > 1200.0) and self.flush_countdown <= 0:
+        # Check if flush should initiate (acute CP > 1.25 or severe hardness > 1200 ppm)
+        if (prelim_cp > 1.25 or inlet_tds > 1200.0) and self.flush_countdown <= 0 and self.flush_cooldown <= 0:
             self.flush_countdown = 5  # 5-second dynamic washdown window
 
         washdown_factor = 1.0
@@ -237,6 +241,8 @@ class AutonomousEnvironmentSimulator:
             # Flushes away 12% of accumulated scale per active flush tick
             self.accumulated_scale = max(0.0, self.accumulated_scale * 0.88)
             self.flush_countdown -= 1
+            if self.flush_countdown == 0:
+                self.flush_cooldown = 45  # Cooldown refractory period to prevent infinite loop
 
         self.is_flushing = flush_solenoid
 

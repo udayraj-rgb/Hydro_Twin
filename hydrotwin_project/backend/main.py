@@ -170,12 +170,9 @@ async def execute_pipeline_tick() -> Dict[str, Any]:
         current_sensors.mode = sim_state["mode"]
         current_sensors.active_scenario = sim_state["active_scenario"]
 
-    # 2. Evaluate Dynamic Anti-Scaling Flush requirement
-    inferred_delta_p = max(0.2, (1.45 * pump_current) - 0.12)
-    prelim_cp = (inlet_tds / 1000.0) * (inferred_delta_p / max(flow_lpm, 0.2))
-
-    flush_solenoid = bool(sim_flush or prelim_cp > 1.25 or inlet_tds > 1200.0)
-    washdown_factor = 0.82 if flush_solenoid else sim_washdown
+    # 2. Evaluate Dynamic Anti-Scaling Flush state from simulator
+    flush_solenoid = bool(sim_flush)
+    washdown_factor = float(sim_washdown)
 
     # 3. Darcy-Hermia Multi-Stage Hydraulic Decoupling
     phys = physics_engine.compute(

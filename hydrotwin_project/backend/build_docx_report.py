@@ -50,6 +50,28 @@ def create_progress_report_docx():
         shading_xml = f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>'
         cell._tc.get_or_add_tcPr().append(parse_xml(shading_xml))
 
+    # Helper: Add Clickable Hyperlink
+    def add_hyperlink(paragraph, url, text, color="182514", bold=True, underline=True):
+        part = paragraph.part
+        r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+        u_val = 'single' if underline else 'none'
+        b_tag = '<w:b/>' if bold else ''
+        hl_xml = f'''
+        <w:hyperlink {nsdecls("w")} r:id="{r_id}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+            <w:r>
+                <w:rPr>
+                    <w:color w:val="{color}"/>
+                    {b_tag}
+                    <w:u w:val="{u_val}"/>
+                </w:rPr>
+                <w:t>{text}</w:t>
+            </w:r>
+        </w:hyperlink>
+        '''
+        hyperlink = parse_xml(hl_xml)
+        paragraph._p.append(hyperlink)
+        return hyperlink
+
     # Helper: Set Cell Borders
     def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
         tcPr = cell._tc.get_or_add_tcPr()
@@ -171,19 +193,73 @@ def create_progress_report_docx():
             row_cells = table.add_row().cells
             bg_color = HEX_ALT_ROW if (r_idx % 2 == 1) else "FFFFFF"
             for c_idx, val in enumerate(row_data):
-                row_cells[c_idx].text = str(val)
                 row_cells[c_idx].width = col_widths[c_idx]
                 set_cell_background(row_cells[c_idx], bg_color)
                 set_cell_margins(row_cells[c_idx], top=80, bottom=80, left=120, right=120)
-                p = row_cells[c_idx].paragraphs[0]
-                p.paragraph_format.space_before = Pt(2)
-                p.paragraph_format.space_after = Pt(2)
-                for r in p.runs:
-                    r.font.name = "Calibri"
-                    r.font.size = Pt(9)
-                    r.font.color.rgb = TEXT_DARK
+                if str(val).startswith("http"):
+                    row_cells[c_idx].text = ""
+                    p = row_cells[c_idx].paragraphs[0]
+                    p.paragraph_format.space_before = Pt(2)
+                    p.paragraph_format.space_after = Pt(2)
+                    add_hyperlink(p, str(val), str(val), color="384828", bold=True, underline=True)
+                else:
+                    row_cells[c_idx].text = str(val)
+                    p = row_cells[c_idx].paragraphs[0]
+                    p.paragraph_format.space_before = Pt(2)
+                    p.paragraph_format.space_after = Pt(2)
+                    for r in p.runs:
+                        r.font.name = "Calibri"
+                        r.font.size = Pt(9)
+                        r.font.color.rgb = TEXT_DARK
         
         doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    # Helper: Add Evaluator Link Box
+    def add_evaluator_link_box(url="https://hydro-twin-pi.vercel.app/"):
+        table = doc.add_table(rows=1, cols=1)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.autofit = False
+        table.columns[0].width = Inches(6.77)
+        cell = table.cell(0, 0)
+        set_cell_background(cell, "EDF3EC")
+        set_cell_margins(cell, top=140, bottom=140, left=180, right=180)
+        
+        borders_xml = f'''
+        <w:tcBorders {nsdecls("w")}>
+            <w:top w:val="single" w:sz="12" w:space="0" w:color="{HEX_HEADER_BG}"/>
+            <w:left w:val="single" w:sz="28" w:space="0" w:color="{HEX_HEADER_BG}"/>
+            <w:bottom w:val="single" w:sz="12" w:space="0" w:color="{HEX_HEADER_BG}"/>
+            <w:right w:val="single" w:sz="12" w:space="0" w:color="{HEX_HEADER_BG}"/>
+        </w:tcBorders>
+        '''
+        cell._tc.get_or_add_tcPr().append(parse_xml(borders_xml))
+        
+        p = cell.paragraphs[0]
+        p.paragraph_format.space_before = Pt(2)
+        p.paragraph_format.space_after = Pt(3)
+        r_title = p.add_run("LIVE INTERACTIVE PROTOTYPE FOR EVALUATORS & JUDGES\n")
+        r_title.bold = True
+        r_title.font.name = "Calibri"
+        r_title.font.size = Pt(11)
+        r_title.font.color.rgb = MED_OLIVE
+        
+        r_desc = p.add_run("Judges and evaluators can click the link below to experience the live deployed HydroTwin-PHM prototype on Vercel:\nInteractive Cloud URL: ")
+        r_desc.font.name = "Calibri"
+        r_desc.font.size = Pt(10)
+        r_desc.font.color.rgb = TEXT_DARK
+        
+        add_hyperlink(p, url, url, color="1B5E20", bold=True, underline=True)
+        
+        p2 = cell.add_paragraph()
+        p2.paragraph_format.space_before = Pt(4)
+        p2.paragraph_format.space_after = Pt(2)
+        r_guide = p2.add_run("Evaluation Fast-Track: Select 'Alok Mishra (Chief Firmware Architect)' or 'Pooja Verma (Diagnostic Engineer)' from the 1-Click Test Personas panel to test the Virtual HIL Testbed, inject hydraulic faults, test AutoClean, and review live national fleet telemetry.")
+        r_guide.font.name = "Calibri"
+        r_guide.font.size = Pt(9)
+        r_guide.italic = True
+        r_guide.font.color.rgb = MUTED_OLIVE
+        
+        doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
     # -------------------------------------------------------------------------
     # COVER TITLE & METADATA BLOCK
@@ -214,7 +290,8 @@ def create_progress_report_docx():
         ["Team Name", "Team Atomizers", "Document ID", "AQ2026-TRK2-PR02"],
         ["Institution", "VIT Bhopal University (SCOPE)", "Submission Date", "November 4, 2026"],
         ["Challenge Track", "Track 2: Smart Water Purifier", "Prototype Stage", "Functional HIL & Full-Stack"],
-        ["Primary Innovation", "Darcy-Hermia Physical Decoupling", "Target Deployment", "Atomberg IoT Ecosystem"]
+        ["Primary Innovation", "Darcy-Hermia Physical Decoupling", "Target Deployment", "Atomberg IoT Ecosystem"],
+        ["Live Prototype URL", "https://hydro-twin-pi.vercel.app/", "Deployment Platform", "Vercel Production Edge"]
     ]
     format_table(meta_table, meta_widths, meta_headers, meta_data)
 
@@ -229,6 +306,9 @@ def create_progress_report_docx():
         "Domain Focus: Multi-stage Darcy-Hermia hydraulic resistance decoupling, sub-180ms deterministic edge safety interlocks on ESP32 microcontrollers, circular diurnal Fourier harmonic ML demand prediction, and automated Direct-to-Consumer (D2C) replenishment supply chain integration.",
         "EXECUTIVE SUMMARY: "
     )
+
+    # Evaluator Interactive Prototype Banner
+    add_evaluator_link_box("https://hydro-twin-pi.vercel.app/")
 
     # -------------------------------------------------------------------------
     # SECTION 2: PROBLEM STATEMENT & HOW WE ARE SOLVING IT
@@ -375,7 +455,23 @@ def create_progress_report_docx():
     # SECTION 8: VISUAL PROTOTYPE EVIDENCE & SCREENSHOT GALLERY
     # -------------------------------------------------------------------------
     add_h1("8. Visual Prototype Evidence & Screenshot Gallery")
-    add_body("Below are authentic screenshots from the active HydroTwin-PHM prototype, demonstrating all core functional layers:")
+    p_proto = doc.add_paragraph()
+    p_proto.paragraph_format.space_before = Pt(2)
+    p_proto.paragraph_format.space_after = Pt(6)
+    r_proto_lbl = p_proto.add_run("Live Cloud Prototype: ")
+    r_proto_lbl.bold = True
+    r_proto_lbl.font.name = "Calibri"
+    r_proto_lbl.font.size = Pt(10)
+    r_proto_lbl.font.color.rgb = DARK_OLIVE
+    r_proto_txt = p_proto.add_run("Judges can test the fully operational deployment at ")
+    r_proto_txt.font.name = "Calibri"
+    r_proto_txt.font.size = Pt(10)
+    r_proto_txt.font.color.rgb = TEXT_DARK
+    add_hyperlink(p_proto, "https://hydro-twin-pi.vercel.app/", "https://hydro-twin-pi.vercel.app/", color="1B5E20", bold=True, underline=True)
+    r_proto_end = p_proto.add_run(". Below are authentic screenshots from the active HydroTwin-PHM prototype, demonstrating all core functional layers:")
+    r_proto_end.font.name = "Calibri"
+    r_proto_end.font.size = Pt(10)
+    r_proto_end.font.color.rgb = TEXT_DARK
 
     img_dir = r"C:\Users\UDAYRAJ\.gemini\antigravity\brain\18a18b04-7f23-406d-8528-e29ad2b4ae71\.user_uploaded"
     from PIL import Image
@@ -431,11 +527,12 @@ def create_progress_report_docx():
     sign_p = doc.add_paragraph()
     sign_p.paragraph_format.space_before = Pt(14)
     sign_p.paragraph_format.space_after = Pt(4)
-    r_sign = sign_p.add_run("Submitted with pride by Team Atomizers\nSchool of Computing Science and Engineering (SCOPE), VIT Bhopal University\nAtomQuest 2026 — Track 2: Water Purifier")
+    r_sign = sign_p.add_run("Submitted with pride by Team Atomizers\nSchool of Computing Science and Engineering (SCOPE), VIT Bhopal University\nAtomQuest 2026 — Track 2: Water Purifier\nLive Interactive Prototype: ")
     r_sign.bold = True
     r_sign.font.name = "Calibri"
     r_sign.font.size = Pt(10)
     r_sign.font.color.rgb = DARK_OLIVE
+    add_hyperlink(sign_p, "https://hydro-twin-pi.vercel.app/", "https://hydro-twin-pi.vercel.app/", color="1B5E20", bold=True, underline=True)
 
     out_paths = [
         r"D:\Atomberg\HydroTwin_PHM_Progress_Report_Round2.docx",
